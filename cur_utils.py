@@ -171,9 +171,9 @@ def remove_helpers(objects):
     for obj in objects:
         action = obj.animation_data.action
 
-        # animsliders = bpy.context.scene.animsliders
-        # aclones = animsliders.clone_data.clones
-        # arefe = animsliders.reference
+        # animaide = bpy.context.scene.animaide
+        # aclones = animaide.clone_data.clones
+        # arefe = animaide.reference
         # arefe.fcurve.data_path = ''
         # arefe.fcurve.index = -1
 
@@ -407,7 +407,7 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
     :param factor: rate of transition, value from -1 to 1
     :param clone_selected_keys: If True use only the selected keys
     """
-    animsliders = bpy.context.scene.animsliders
+    animaide = bpy.context.scene.animaide
     adapted_factor = ((factor + 1) / 2)     # take the -1 to 1 range and converts it to a 0 to 1 range
 
     add_clone(objects, selected_keys=clone_selected_keys)
@@ -430,17 +430,17 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
             if 'reference' in fcurve.data_path:
                 continue    # so it doesn't create a reference out of a reference
 
-            if animsliders.reference.fcurve.index > -1:
+            if animaide.reference.fcurve.index > -1:
                 print('reference already exist')
-                index = animsliders.reference.fcurve.index
+                index = animaide.reference.fcurve.index
                 reference = action.fcurves[index]   # get the reference already exist
             else:
-                reference = refe.add_curve(fcurve, animsliders.reference.interpol)     # creates a new reference
+                reference = refe.add_curve(fcurve, animaide.reference.interpol)     # creates a new reference
 
-            aclone = animsliders.clone_data.clones[aclone_index]   # finds the new created animsliders clone
+            aclone = animaide.clone_data.clones[aclone_index]   # finds the new created animaide clone
             aclone_index += 1
 
-            clone = action.fcurves[aclone.fcurve.index]     # uses the animsliders clone index to find the new clone
+            clone = action.fcurves[aclone.fcurve.index]     # uses the animaide clone index to find the new clone
 
             selected_keys = key_utils.get_selected(fcurve)
 
@@ -508,8 +508,8 @@ def remove_clone(objects):
     for obj in objects:
         action = obj.animation_data.action
 
-        animsliders = bpy.context.scene.animsliders
-        aclones = animsliders.clone_data.clones
+        animaide = bpy.context.scene.animaide
+        aclones = animaide.clone_data.clones
         clones_n = len(aclones)
         blender_n = len(action.fcurves) - clones_n
 
@@ -533,8 +533,8 @@ def move_clone(objects):
     for obj in objects:
         action = obj.animation_data.action
 
-        animsliders = bpy.context.scene.animsliders
-        aclone_data = animsliders.clone_data
+        animaide = bpy.context.scene.animaide
+        aclone_data = animaide.clone_data
         aclones = aclone_data.clones
         move_factor = aclone_data.move_factor
         for aclone in aclones:

@@ -7,7 +7,7 @@ from bpy.types import Operator
 
 
 class AAT_OT_sliders(Operator):
-    bl_idname = "animsliders.sliders"
+    bl_idname = "animaide.sliders"
     bl_label = "sliders"
 
     slope: FloatProperty(default=2.0)
@@ -31,9 +31,9 @@ class AAT_OT_sliders(Operator):
         return objects != []
 
     def __init__(self):
-        self.animsliders = bpy.context.scene.animsliders
-        self.slots = self.animsliders.slots
-        self.item = self.animsliders.item
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
         self.init_mouse_x = None
 
     def __del__(self):
@@ -241,9 +241,9 @@ class AAT_OT_sliders(Operator):
     def time_offset(self, fcurves):
 
         # factor = (self.factor/2) + 0.5
-        animsliders = bpy.context.scene.animsliders
-        cycle_before = animsliders.clone.cycle_before
-        cycle_after = animsliders.clone.cycle_after
+        animaide = bpy.context.scene.animaide
+        cycle_before = animaide.clone.cycle_before
+        cycle_after = animaide.clone.cycle_after
 
         clone_name = '%s.%d.clone' % (self.fcurve.data_path, self.fcurve.array_index)
         clone = cur_utils.duplicate_from_data(fcurves,
@@ -262,7 +262,7 @@ class AAT_OT_sliders(Operator):
     def noise(self, fcurves, fcurve_index):
 
         # factor = (self.factor/2) + 0.5
-        # animsliders = bpy.context.scene.animsliders
+        # animaide = bpy.context.scene.animaide
 
         clone_name = '%s.%d.clone' % (self.fcurve.data_path, self.fcurve.array_index)
         clone = cur_utils.duplicate_from_data(fcurves,
@@ -302,12 +302,12 @@ class AAT_OT_sliders(Operator):
 
     def execute(self, context):
 
-        animsliders = context.scene.animsliders
+        animaide = context.scene.animaide
 
         if self.is_collection:
-            slider = animsliders.slots[self.slot_index]
+            slider = animaide.slider_slots[self.slot_index]
         else:
-            slider = animsliders.item
+            slider = animaide.slider
 
         if self.op_context == 'EXEC_DEFAULT':
             key_utils.get_globals(left_frame=slider.left_ref_frame,
@@ -410,7 +410,7 @@ class AAT_OT_sliders(Operator):
 
                 self.fcurve.update()
 
-#        message = "Factor: %f03" % animsliders.sliders.factor
+#        message = "Factor: %f03" % animaide.sliders.factor
 #        self.report({'INFO'}, "Factor:" + message)
 
         return {'FINISHED'}
@@ -434,9 +434,9 @@ class AAT_OT_sliders(Operator):
         elif event.type == 'LEFTMOUSE':  # Confirm
             key_utils.get_globals()
             if self.slot_index == -1:
-                self.animsliders.item.modal_switch = False
-                self.animsliders.item.factor = 0.0
-                self.animsliders.item.factor_overshoot = 0.0
+                self.animaide.slider.modal_switch = False
+                self.animaide.slider.factor = 0.0
+                self.animaide.slider.factor_overshoot = 0.0
             else:
                 self.slots[self.slot_index].modal_switch = False
                 self.slots[self.slot_index].factor = 0.0
@@ -446,9 +446,9 @@ class AAT_OT_sliders(Operator):
         if event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
             key_utils.reset_original()
             if self.slot_index == -1:
-                self.animsliders.item.modal_switch = False
-                self.animsliders.item.factor = 0.0
-                self.animsliders.item.factor_overshoot = 0.0
+                self.animaide.slider.modal_switch = False
+                self.animaide.slider.factor = 0.0
+                self.animaide.slider.factor_overshoot = 0.0
             else:
                 self.slots[self.slot_index].modal_switch = False
                 self.slots[self.slot_index].factor = 0.0
@@ -460,7 +460,7 @@ class AAT_OT_sliders(Operator):
     def invoke(self, context, event):
 
         if self.slot_index == -1:
-            slider = self.animsliders.item
+            slider = self.animaide.slider
         else:
             slider = self.slots[self.slot_index]
 
@@ -474,7 +474,6 @@ class AAT_OT_sliders(Operator):
 
         key_utils.get_globals(left_frame=slider.left_ref_frame,
                               right_frame=slider.right_ref_frame)
-        # key_utils.get_ref_frame_globals(slider.left_ref_frame, slider.right_ref_frame)
 
         self.execute(context)
         context.window_manager.modal_handler_add(self)
@@ -484,8 +483,8 @@ class AAT_OT_sliders(Operator):
 ################  TOOLS  ###############
 
 
-class AAT_OT_add(Operator):
-    bl_idname = 'animsliders.add'
+class AAT_OT_add_slider(Operator):
+    bl_idname = 'animaide.add_slider'
     bl_label = "add_slider"
     bl_options = {'REGISTER'}
 
@@ -495,16 +494,16 @@ class AAT_OT_add(Operator):
 
     def execute(self, context):
 
-        animsliders = context.scene.animsliders
-        slots = animsliders.slots
+        animaide = context.scene.animaide
+        slots = animaide.slider_slots
         slot = slots.add()
         slot.index = len(slots) - 1
 
         return {'FINISHED'}
 
 
-class AAT_OT_remove(Operator):
-    bl_idname = 'animsliders.remove'
+class AAT_OT_remove_slider(Operator):
+    bl_idname = 'animaide.remove_slider'
     bl_label = "remove_slider"
     bl_options = {'REGISTER'}
 
@@ -513,8 +512,8 @@ class AAT_OT_remove(Operator):
         return True
 
     def execute(self, context):
-        animsliders = context.scene.animsliders
-        slots = animsliders.slots
+        animaide = context.scene.animaide
+        slots = animaide.slider_slots
         # if len(slots) > 1:
         index = len(slots) - 1
         slots.remove(index)
@@ -524,7 +523,7 @@ class AAT_OT_remove(Operator):
 
 
 class AAT_OT_get_ref_frame(Operator):
-    bl_idname = 'animsliders.get_ref_frame'
+    bl_idname = 'animaide.get_ref_frame'
     bl_label = "get_ref_frames"
     bl_options = {'REGISTER'}
 
@@ -538,12 +537,12 @@ class AAT_OT_get_ref_frame(Operator):
 
     def execute(self, context):
 
-        animsliders = context.scene.animsliders
+        animaide = context.scene.animaide
 
         if self.is_collection:
-            slider = animsliders.slots[self.slot_index]
+            slider = animaide.slider_slots[self.slot_index]
         else:
-            slider = animsliders.item
+            slider = animaide.slider
 
         current_frame = bpy.context.scene.frame_current
 
@@ -578,7 +577,7 @@ class AAT_OT_get_ref_frame(Operator):
 
 
 class AAT_OT_settings(Operator):
-    bl_idname = "animsliders.settings"
+    bl_idname = "animaide.settings"
     bl_label = "Sliders Settings"
 
     slot_index: IntProperty()
@@ -592,11 +591,11 @@ class AAT_OT_settings(Operator):
         return wm.invoke_popup(self, width=200)
 
     def draw(self, context):
-        animsliders = context.scene.animsliders
+        animaide = context.scene.animaide
         if self.is_collection:
-            slider = animsliders.slots[self.slot_index]
+            slider = animaide.slider_slots[self.slot_index]
         else:
-            slider = animsliders.item
+            slider = animaide.slider
 
         layout = self.layout
         col = layout.column(align=False)
@@ -607,7 +606,7 @@ class AAT_OT_settings(Operator):
 
 
 class AAT_OT_clone(Operator):
-    bl_idname = 'animsliders.fcurve_clone'
+    bl_idname = 'animaide.fcurve_clone'
     bl_label = "Clone Fcurve"
     bl_options = {'REGISTER'}
     # cycle_before: StringProperty()
@@ -618,9 +617,9 @@ class AAT_OT_clone(Operator):
         return True
 
     def execute(self, context):
-        animsliders = context.scene.animsliders
-        cycle_before = animsliders.clone.cycle_before
-        cycle_after = animsliders.clone.cycle_after
+        animaide = context.scene.animaide
+        cycle_before = animaide.clone.cycle_before
+        cycle_after = animaide.clone.cycle_after
 
         objects = context.selected_objects
 
@@ -630,7 +629,7 @@ class AAT_OT_clone(Operator):
 
 
 class AAT_OT_clone_remove(Operator):
-    bl_idname = 'animsliders.remove_clone'
+    bl_idname = 'animaide.remove_clone'
     bl_label = "Remove Clone"
     bl_options = {'REGISTER'}
 
@@ -650,7 +649,7 @@ class AAT_OT_clone_remove(Operator):
 
 
 class AAT_OT_move_key(Operator):
-    bl_idname = 'animsliders.move_key'
+    bl_idname = 'animaide.move_key'
     bl_label = "Move Key"
     bl_options = {'REGISTER'}
     amount: FloatProperty(default=1.0)
@@ -676,7 +675,7 @@ class AAT_OT_move_key(Operator):
 
 
 class AAT_OT_modifier(Operator):
-    bl_idname = 'animsliders.fcurve_modifier'
+    bl_idname = 'animaide.fcurve_modifier'
     bl_label = "Modifier"
     bl_options = {'REGISTER'}
 

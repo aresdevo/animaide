@@ -56,9 +56,9 @@ def update_clone(self, context):
      for internal use
     """
     objects = context.selected_objects
-    animsliders = bpy.context.scene.animsliders
-    cycle_before = animsliders.clone_data.cycle_before
-    cycle_after = animsliders.clone_data.cycle_after
+    animaide = bpy.context.scene.animaide
+    cycle_before = animaide.clone_data.cycle_before
+    cycle_after = animaide.clone_data.cycle_after
 
     cur_utils.add_clone(objects, cycle_before, cycle_after)
 
@@ -209,10 +209,12 @@ class AnimSlider(PropertyGroup):
     # )
 
 
-class AnimSliders(PropertyGroup):
+class AnimAide(PropertyGroup):
     clone: PointerProperty(type=AnimAideClone)
-    item: PointerProperty(type=AnimSlider)
-    slots: CollectionProperty(type=AnimSlider)
+    # item: PointerProperty(type=AnimSlider)
+    # slots: CollectionProperty(type=AnimSlider)
+    slider: PointerProperty(type=AnimSlider)
+    slider_slots: CollectionProperty(type=AnimSlider)
 
 
 class myPreferences(AddonPreferences):
@@ -244,8 +246,8 @@ def addon_pref():
 
 
 def set_props():
-    bpy.types.Scene.animsliders = PointerProperty(type=AnimSliders)
+    bpy.types.Scene.animaide = PointerProperty(type=AnimAide)
 
 def del_props():
-    del bpy.types.Scene.animsliders
+    del bpy.types.Scene.animaide
 

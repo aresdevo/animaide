@@ -209,8 +209,8 @@ def set_interpolation(objects, interpolation='BEZIER', easing='AUTO', back=2.0, 
 
 
 def select_handle(key, left=None, right=None, control_point=None):
-    animsliders = bpy.context.scene.animsliders
-    key_helpers = animsliders.key_helpers
+    animaide = bpy.context.scene.animaide
+    key_helpers = animaide.key_helpers
 
     if left is not None:
         key.select_left_handle = left
@@ -228,8 +228,8 @@ def select_handle(key, left=None, right=None, control_point=None):
 
 
 def handles(objects, act_on='ALL', left=None, right=None, control_point=None, handle_type=None):
-    animsliders = bpy.context.scene.animsliders
-    key_helpers = animsliders.key_helpers
+    animaide = bpy.context.scene.animaide
+    key_helpers = animaide.key_helpers
 
     for obj in objects:
         action = obj.animation_data.action

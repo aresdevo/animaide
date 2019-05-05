@@ -20,9 +20,9 @@ def step_button(row, slot, factor, icon='',
     col.operator_context = operator_context
 
     if icon == '':
-        step = col.operator('animsliders.sliders', text=text, emboss=emboss)
+        step = col.operator('animaide.sliders', text=text, emboss=emboss)
     else:
-        step = col.operator('animsliders.sliders', text=text, icon=icon, emboss=emboss)
+        step = col.operator('animaide.sliders', text=text, icon=icon, emboss=emboss)
 
     # if slot.overshoot:
     #     min_value = -2.0
@@ -57,7 +57,7 @@ def slider_box(layout, slot, index=0, is_collection=True):
     else:
         slider_num = '%s' % (slot.index + 2)
 
-    # animsliders = bpy.context.scene.animsliders
+    # animaide = bpy.context.scene.animaide
 
     box = layout.box()
     row = box.row(align=True)
@@ -72,7 +72,7 @@ def slider_box(layout, slot, index=0, is_collection=True):
     col.prop_menu_enum(slot, 'selector', text=props.names[slot.selector])
 
     col = row.column(align=False)
-    setting = col.operator('animsliders.settings', text='', icon='SETTINGS', emboss=False)
+    setting = col.operator('animaide.settings', text='', icon='SETTINGS', emboss=False)
     setting.slot_index = slot.index
     setting.is_collection = is_collection
 
@@ -136,7 +136,7 @@ def slider_box(layout, slot, index=0, is_collection=True):
         right_text = str(slot.right_ref_frame)
 
         col = row.column(align=True)
-        left_ref_frame = col.operator("animsliders.get_ref_frame",
+        left_ref_frame = col.operator("animaide.get_ref_frame",
                                       text=left_text, emboss=True)
         left_ref_frame.slot_index = index
         left_ref_frame.side = 'L'
@@ -153,7 +153,7 @@ def slider_box(layout, slot, index=0, is_collection=True):
             col.label(text='')
 
         col = row.column(align=True)
-        right_ref_frame = col.operator("animsliders.get_ref_frame",
+        right_ref_frame = col.operator("animaide.get_ref_frame",
                                        text=right_text, emboss=True)
         right_ref_frame.slot_index = index
         right_ref_frame.side = 'R'
@@ -179,17 +179,17 @@ class AAT_PT_sliders(Panel):
     bl_space_type = 'GRAPH_EDITOR'
 
     def draw(self, context):
-        animsliders = context.scene.animsliders
-        slots = animsliders.slots
-        item = animsliders.item
+        animaide = context.scene.animaide
+        slots = animaide.slider_slots
+        item = animaide.slider
 
         if key_utils.global_values == {}:
             key_utils.get_globals()
 
         layout = self.layout
         row = layout.row(align=True)
-        row.operator("animsliders.add", text='', icon='ADD')
-        row.operator("animsliders.remove", text='', icon='REMOVE')
+        row.operator("animaide.add_slider", text='', icon='ADD')
+        row.operator("animaide.remove_slider", text='', icon='REMOVE')
 
         slider_box(layout, item, is_collection=False)
 
@@ -207,7 +207,7 @@ class AAT_PT_sliders(Panel):
             index += 1
 
         # row = layout.row(align=True)
-        # row.template_list("AA_UL_sliders", "", animsliders, "slider_slots", animsliders, "slider_i")
+        # row.template_list("AA_UL_sliders", "", animaide, "slider_slots", animaide, "slider_i")
 
 
 class AAT_PT_clone(Panel):
@@ -218,13 +218,13 @@ class AAT_PT_clone(Panel):
     bl_category = 'AnimAide'
 
     def draw(self, context):
-        clone = context.scene.animsliders.clone
+        clone = context.scene.animaide.clone
 
         layout = self.layout
         row = layout.row(align=True)
 
-        row.operator("animsliders.fcurve_clone", text="Add", icon='NODE_COMPOSITING')
-        row.operator("animsliders.remove_clone", text="Remove", icon='CANCEL')
+        row.operator("animaide.fcurve_clone", text="Add", icon='NODE_COMPOSITING')
+        row.operator("animaide.remove_clone", text="Remove", icon='CANCEL')
 
         row = layout.row()
         # row.alignment = 'RIGHT'
