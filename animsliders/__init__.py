@@ -41,6 +41,7 @@ from . import utils, key_utils, cur_utils, props, ops, ui
 
 classes = (
     # props.AnimAideKeys,
+    # props.myPreferences,
     props.AnimAideFCurves,
     props.AnimAideClone,
     props.AnimAideCloneData,

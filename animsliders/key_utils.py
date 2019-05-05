@@ -2,9 +2,13 @@ import bpy
 from . import utils, cur_utils
 
 
-selected_keys_global = {}
-original_keys_info = {}
-ref_frames_global = {}
+global_values = {}
+
+# selected_keys_global = {}
+# original_keys_info = {}
+# all_keys = {}
+# ref_frames_global = {}
+# smooth_keys_info = {}
 # left_neighbor_global = {}
 # right_neighbor_global = {}
 
@@ -353,7 +357,7 @@ def get_selected(fcurve):
     return keyframe_indexes
 
 
-def get_selected_global(selected=True, original=True):
+def get_globals(selected=True, original=True, left_frame=None, right_frame=None):
     """
     :return reversable list of complex keys that contains (index, key) on a tuple of the selected keys:
     """
@@ -369,9 +373,9 @@ def get_selected_global(selected=True, original=True):
         fcurves = obj.animation_data.action.fcurves
 
         curves = {}
-        original_curves = {}
 
         for fcurve_index, fcurve in fcurves.items():
+            curve_items = {}
 
             if fcurve.select is False:
                 continue
@@ -384,56 +388,62 @@ def get_selected_global(selected=True, original=True):
 
             keyframes = []
             values = {}
+            every_key = []
 
             keys = fcurve.keyframe_points
 
             for key_index, key in keys.items():
                 info = {}
+                info['x'] = key.co.x
+                info['y'] = key.co.y
+                values[key_index] = info
+                every_key.append(key_index)
+
                 if key.select_control_point:
-                    info['x'] = key.co.x
-                    info['y'] = key.co.y
-                    values[key_index] = info
                     keyframes.append(key_index)
 
-            # if not keyframes:
-            #     index = on_current_frame(fcurve)
-            #     info = {}
-            #     if index is not None:
-            #         info['x'] = keys[index].co.x
-            #         info['y'] = keys[index].co.y
-            #         values[index] = info
-            #         keyframes.append(index)
+            prevkey_value = None
 
-            curves[fcurve_index] = keyframes
-            original_curves[fcurve_index] = values
+            for key_index in keyframes:
+                key = fcurve.keyframe_points[key_index]
 
-        if selected:
-            selected_keys_global[obj.name] = curves
-        if original:
-            original_keys_info[obj.name] = original_curves
+                if key_index - 1 not in keyframes:
+                    prevkey_value = 'book end'
+
+                if key_index + 1 not in keyframes:
+                    nextkey_value = 'book end'
+                else:
+                    nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
+
+                if prevkey_value == 'book end' or nextkey_value == 'book end':
+                    values[key_index]['sy'] = 'book end'
+                    prevkey_value = key.co.y
+                else:
+                    smooth = (prevkey_value + key.co.y + nextkey_value)/3
+                    values[key_index]['sy'] = smooth
+                    prevkey_value = smooth
+
+            if selected:
+                curve_items['selected_keys'] = keyframes
+            if original:
+                curve_items['original_values'] = values
+                curve_items['every_key'] = every_key
+            if left_frame is not None or left_frame is not None:
+                frames = {}
+                frames['left_y'] = fcurve.evaluate(left_frame)
+                frames['right_y'] = fcurve.evaluate(right_frame)
+                curve_items['ref_frames'] = frames
+
+            curves[fcurve_index] = curve_items
+
+        global_values[obj.name] = curves
 
     return
 
 
 def get_ref_frame_globals(left_ref_frame, right_ref_frame):
 
-    animsliders = bpy.context.scene.animsliders
-    slots = animsliders.slots
-    # left_ref_frame = slots[slot_index].left_ref_frame
-    # right_ref_frame = slots[slot_index].right_ref_frame
-
     objects = bpy.context.selected_objects
-
-    # if side == 'L':
-    #     identifier = 'left_y'
-    #     global_var = left_neighbor_global
-    #     # slider.left_neighbor = ref_frame
-    # elif side == 'R':
-    #     identifier = 'right_y'
-    #     global_var = right_neighbor_global
-    #     # slider.right_neighbor = ref_frame
-    # else:
-    #     return
 
     for obj in objects:
         anim = obj.animation_data
@@ -444,6 +454,7 @@ def get_ref_frame_globals(left_ref_frame, right_ref_frame):
         fcurves = obj.animation_data.action.fcurves
 
         curves = {}
+        ref_frames = {}
 
         for fcurve_index, fcurve in fcurves.items():
             frames = {}
@@ -460,10 +471,10 @@ def get_ref_frame_globals(left_ref_frame, right_ref_frame):
             frames['left_y'] = fcurve.evaluate(left_ref_frame)
             frames['right_y'] = fcurve.evaluate(right_ref_frame)
 
-            curves[fcurve_index] = frames
+            curves[fcurve_index]['ref_frames'] = frames
 
         if curves != {}:
-            ref_frames_global[obj.name] = curves
+            global_values[obj.name] = curves
 
 
 def reset_original():
@@ -489,8 +500,8 @@ def reset_original():
             if fcurve.hide is True:
                 continue
 
-            selected_keys = selected_keys_global[obj.name][fcurve_index]
-            original_keys = original_keys_info[obj.name][fcurve_index]
+            selected_keys = global_values[obj.name][fcurve_index]['selected_keys']
+            original_values = global_values[obj.name][fcurve_index]['original_values']
 
             if not selected_keys:
                 index = on_current_frame(fcurve)
@@ -500,7 +511,7 @@ def reset_original():
 
             for index in selected_keys:
                 k = fcurve.keyframe_points[index]
-                k.co.y = original_keys[index]['y']
+                k.co.y = original_values[index]['y']
 
             fcurve.update()
 

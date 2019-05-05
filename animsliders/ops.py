@@ -17,8 +17,9 @@ class AS_OT_sliders(Operator):
     is_collection: BoolProperty()
     op_context: StringProperty(default='INVOKE_DEFAULT')
     fcurve = None
+    global_fcurve = None
     selected_keys = None
-    original_keys = None
+    original_values = None
     left_neighbor = None
     right_neighbor = None
     min_value = None
@@ -102,13 +103,13 @@ class AS_OT_sliders(Operator):
             k = self.fcurve.keyframe_points[index]
 
             if self.factor < 0:
-                delta = self.left_neighbor.co.y - self.original_keys[index]['y']
+                delta = self.left_neighbor.co.y - self.original_values[index]['y']
             else:
-                delta = self.right_neighbor.co.y - self.original_keys[index]['y']
+                delta = self.right_neighbor.co.y - self.original_values[index]['y']
 
             clamped_factor = utils.clamp(abs(self.factor), 0, self.max_value)
 
-            k.co.y = self.original_keys[index]['y'] + delta * clamped_factor
+            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
 
     def blend_frame(self, left_y_ref, right_y_ref):
 
@@ -116,13 +117,13 @@ class AS_OT_sliders(Operator):
             k = self.fcurve.keyframe_points[index]
 
             if self.factor < 0:
-                delta = left_y_ref - self.original_keys[index]['y']
+                delta = left_y_ref - self.original_values[index]['y']
             else:
-                delta = right_y_ref - self.original_keys[index]['y']
+                delta = right_y_ref - self.original_values[index]['y']
 
             clamped_factor = utils.clamp(abs(self.factor), 0, self.max_value)
 
-            k.co.y = self.original_keys[index]['y'] + delta * clamped_factor
+            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
 
     def blend_ease(self):
 
@@ -172,10 +173,10 @@ class AS_OT_sliders(Operator):
 
             clamped_factor = utils.clamp(abs(self.factor), 0, self.max_value)
 
-            delta = (self.left_neighbor.co.y + local_y * ease_y.real) - self.original_keys[index]['y']
+            delta = (self.left_neighbor.co.y + local_y * ease_y.real) - self.original_values[index]['y']
 
-            # k.co.y = original_keys[index]['y'] + delta * blend.real
-            k.co.y = self.original_keys[index]['y'] + delta * clamped_factor
+            # k.co.y = original_values[index]['y'] + delta * blend.real
+            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
 
     def blend_offset(self):
 
@@ -185,13 +186,13 @@ class AS_OT_sliders(Operator):
         last_key_index = self.selected_keys[-1]
 
         if clamped_factor > 0:
-            delta = self.right_neighbor.co.y - self.original_keys[last_key_index]['y']
+            delta = self.right_neighbor.co.y - self.original_values[last_key_index]['y']
         else:
-            delta = self.original_keys[first_key_index]['y'] - self.left_neighbor.co.y
+            delta = self.original_values[first_key_index]['y'] - self.left_neighbor.co.y
 
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
-            k.co.y = self.original_keys[index]['y'] + delta * clamped_factor
+            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
 
     def tween(self):
 
@@ -212,29 +213,88 @@ class AS_OT_sliders(Operator):
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
             average_y = key_utils.linear_y(self.left_neighbor, self.right_neighbor, k)
-            delta = self.original_keys[index]['y'] - average_y
+            delta = self.original_values[index]['y'] - average_y
 
-            k.co.y = self.original_keys[index]['y'] + delta * clamped_factor * 2
+            k.co.y = self.original_values[index]['y'] + delta * clamped_factor * 2
+
+    def smooth(self):
+
+        # factor = (self.factor/2) + 0.5
+
+        clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+
+        for index in self.selected_keys:
+            k = self.fcurve.keyframe_points[index]
+            smooth_y = self.original_values[index]['sy']
+
+            if smooth_y == 'book end':
+                delta = 0
+            else:
+                delta = self.original_values[index]['y'] - smooth_y
+
+            k.co.y = self.original_values[index]['y'] - delta * clamped_factor
+
+    def time_offset(self, fcurves):
+
+        # factor = (self.factor/2) + 0.5
+        animsliders = bpy.context.scene.animsliders
+        cycle_before = animsliders.clone_data.cycle_before
+        cycle_after = animsliders.clone_data.cycle_after
+
+        clone_name = '%s.%d.clone' % (self.fcurve.data_path, self.fcurve.array_index)
+        clone = cur_utils.duplicate_from_data(fcurves,
+                                              self.global_fcurve,
+                                              clone_name,
+                                              before=cycle_before,
+                                              after=cycle_after)
+
+        clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+
+        for index in self.selected_keys:
+            k = self.fcurve.keyframe_points[index]
+            k.co.y = clone.evaluate(k.co.x - 20 * clamped_factor)
+        fcurves.remove(clone)
+
+    def noise(self, fcurves, fcurve_index):
+
+        # factor = (self.factor/2) + 0.5
+        # animsliders = bpy.context.scene.animsliders
+
+        clone_name = '%s.%d.clone' % (self.fcurve.data_path, self.fcurve.array_index)
+        clone = cur_utils.duplicate_from_data(fcurves,
+                                              self.global_fcurve,
+                                              clone_name)
+
+        cur_utils.add_noise(clone, strength=1, scale=0.5, phase=fcurve_index + self.left_neighbor.co.y)
+
+        clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+
+        for index in self.selected_keys:
+            k = self.fcurve.keyframe_points[index]
+            delta = clone.evaluate(k.co.x) - self.original_values[index]['y']
+            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
+
+        fcurves.remove(clone)
 
     def scale(self, scale_type):
 
         clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
         y = 0
-        for key in self.original_keys.keys():
-            y = y + self.original_keys[key]['y']
-        y_average = y / len(self.original_keys)
+        for index in self.selected_keys:
+            y = y + self.original_values[index]['y']
+        y_average = y / len(self.selected_keys)
 
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
             if scale_type == 'L':
-                delta = self.original_keys[index]['y'] - self.left_neighbor.co.y
+                delta = self.original_values[index]['y'] - self.left_neighbor.co.y
             elif scale_type == 'R':
-                delta = self.right_neighbor.co.y - self.original_keys[index]['y']
+                delta = self.right_neighbor.co.y - self.original_values[index]['y']
             else:
-                delta = self.original_keys[index]['y'] - y_average
+                delta = self.original_values[index]['y'] - y_average
 
-            k.co.y = self.original_keys[index]['y'] + delta * clamped_factor
+            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
 
     def execute(self, context):
 
@@ -246,8 +306,9 @@ class AS_OT_sliders(Operator):
             slider = animsliders.item
 
         if self.op_context == 'EXEC_DEFAULT':
-            key_utils.get_selected_global(original=False)
-            key_utils.get_ref_frame_globals(slider.left_ref_frame, slider.right_ref_frame)
+            key_utils.get_globals(left_frame=slider.left_ref_frame,
+                                  right_frame=slider.right_ref_frame)
+            # key_utils.get_ref_frame_globals(slider.left_ref_frame, slider.right_ref_frame)
 
         slider.factor = self.factor
         slider.factor_overshoot = self.factor
@@ -279,8 +340,11 @@ class AS_OT_sliders(Operator):
                 if self.fcurve.group.name == cur_utils.group_name:
                     continue  # we don't want to select keys on reference fcurves
 
-                self.selected_keys = key_utils.selected_keys_global[obj.name][fcurve_index]
-                self.original_keys = key_utils.original_keys_info[obj.name][fcurve_index]
+                # print('global values: ', key_utils.global_values)
+
+                self.global_fcurve = key_utils.global_values[obj.name][fcurve_index]
+                self.selected_keys = self.global_fcurve['selected_keys']
+                self.original_values = self.global_fcurve['original_values']
 
                 # if not self.selected_keys:
                 #     continue
@@ -304,8 +368,8 @@ class AS_OT_sliders(Operator):
                     self.blend_neighbor()
 
                 if self.slider_type == 'BLEND_FRAME':
-                    left_y_ref = key_utils.ref_frames_global[obj.name][fcurve_index]['left_y']
-                    right_y_ref = key_utils.ref_frames_global[obj.name][fcurve_index]['right_y']
+                    left_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['left_y']
+                    right_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['right_y']
                     self.blend_frame(left_y_ref, right_y_ref)
 
                 if self.slider_type == 'BLEND_EASE':
@@ -328,6 +392,15 @@ class AS_OT_sliders(Operator):
 
                 if self.slider_type == 'SCALE_AVERAGE':
                     self.scale('')
+
+                if self.slider_type == 'SMOOTH':
+                    self.smooth()
+
+                if self.slider_type == 'TIME_OFFSET':
+                    self.time_offset(fcurves)
+
+                if self.slider_type == 'NOISE':
+                    self.noise(fcurves, fcurve_index)
 
                 self.fcurve.update()
 
@@ -353,7 +426,7 @@ class AS_OT_sliders(Operator):
             self.execute(context)
 
         elif event.type == 'LEFTMOUSE':  # Confirm
-            key_utils.get_selected_global()
+            key_utils.get_globals()
             if self.slot_index == -1:
                 self.animsliders.item.modal_switch = False
                 self.animsliders.item.factor = 0.0
@@ -393,8 +466,9 @@ class AS_OT_sliders(Operator):
         self.factor = 0.0
         self.init_mouse_x = event.mouse_x
 
-        key_utils.get_selected_global()
-        key_utils.get_ref_frame_globals(slider.left_ref_frame, slider.right_ref_frame)
+        key_utils.get_globals(left_frame=slider.left_ref_frame,
+                              right_frame=slider.right_ref_frame)
+        # key_utils.get_ref_frame_globals(slider.left_ref_frame, slider.right_ref_frame)
 
         self.execute(context)
         context.window_manager.modal_handler_add(self)
@@ -544,7 +618,7 @@ class AS_OT_clone(Operator):
 
         objects = context.selected_objects
 
-        cur_utils.create_clone(objects, cycle_before, cycle_after)
+        cur_utils.add_clone(objects, cycle_before, cycle_after)
 
         return {'FINISHED'}
 

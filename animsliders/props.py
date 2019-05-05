@@ -4,7 +4,7 @@ from . import key_utils, cur_utils
 
 from bpy.props import StringProperty, BoolProperty, EnumProperty, \
     IntProperty, FloatProperty, PointerProperty, CollectionProperty
-from bpy.types import PropertyGroup
+from bpy.types import PropertyGroup, AddonPreferences
 
 
 icons = {'EASE': 'IPO_EASE_IN_OUT',
@@ -18,6 +18,7 @@ icons = {'EASE': 'IPO_EASE_IN_OUT',
          'SCALE_LEFT': 'IMPORT',
          'SCALE_RIGHT': 'EXPORT',
          'SMOOTH': 'SMOOTHCURVE',
+         'NOISE': 'RNDCURVE',
          'TIME_OFFSET': 'CENTER_ONLY',
          'TWEEN': 'DRIVER_DISTANCE'}
 
@@ -33,6 +34,7 @@ names = {'EASE': 'Ease',
          'SCALE_LEFT': 'Scale Left',
          'SCALE_RIGHT': 'Scale Right',
          'SMOOTH': 'Smooth',
+         'NOISE': 'Noise',
          'TIME_OFFSET': 'Time Offset',
          'TWEEN': 'Tween'}
 
@@ -58,7 +60,7 @@ def update_clone(self, context):
     cycle_before = animsliders.clone_data.cycle_before
     cycle_after = animsliders.clone_data.cycle_after
 
-    cur_utils.create_clone(objects, cycle_before, cycle_after)
+    cur_utils.add_clone(objects, cycle_before, cycle_after)
 
     print("In update func...")
     return
@@ -77,7 +79,7 @@ def update_selector(self, context):
     """
      for internal use
     """
-    key_utils.get_selected_global()
+    key_utils.get_globals()
     self.overshoot = False
     self.modal_switch = False
 
@@ -161,8 +163,9 @@ class AnimSlider(PropertyGroup):
                ('SCALE_LEFT', names['SCALE_LEFT'], '', icons['SCALE_LEFT'], 9),
                ('SCALE_RIGHT', names['SCALE_RIGHT'], '', icons['SCALE_RIGHT'], 10),
                ('SMOOTH', names['SMOOTH'], '', icons['SMOOTH'], 11),
-               ('TIME_OFFSET', names['TIME_OFFSET'], '', icons['TIME_OFFSET'], 12),
-               ('TWEEN', names['TWEEN'], '', icons['TWEEN'], 13)],
+               ('NOISE', names['NOISE'], '', icons['NOISE'], 12),
+               ('TIME_OFFSET', names['TIME_OFFSET'], '', icons['TIME_OFFSET'], 13),
+               ('TWEEN', names['TWEEN'], '', icons['TWEEN'], 14)],
         name="Ease Slider Selector",
         default='EASE',
         update=update_selector
@@ -217,6 +220,34 @@ class AnimSliders(PropertyGroup):
     clone_data: PointerProperty(type=AnimAideCloneData)
     item: PointerProperty(type=AnimSlider)
     slots: CollectionProperty(type=AnimSlider)
+
+
+class myPreferences(AddonPreferences):
+    # this must match the addon name, use '__package__'
+    # when defining this in a submodule of a python package.
+    bl_idname = __package__
+
+    view_3d: BoolProperty(
+        name="3D View",
+        default=True,
+    )
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Choose the area where the sliders will be:")
+        layout.prop(self, "view_3d", text="Side panel in the '3D View' instead of the 'Graph Editor'")
+
+
+def addon_pref():
+    global space_type
+
+    preferences = bpy.context.preferences
+    pref = preferences.addons[__package__].preferences
+
+    if pref.view_3d:
+        space_type = 'VIEW_3D'
+    else:
+        space_type = 'GRAPH_EDITOR'
 
 
 def set_props():

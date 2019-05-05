@@ -1,6 +1,6 @@
 import bpy
 
-from . import key_utils, cur_utils
+from . import key_utils
 
 
 group_name = 'helper_curves'
@@ -171,8 +171,8 @@ def remove_helpers(objects):
     for obj in objects:
         action = obj.animation_data.action
 
-        animsliders = bpy.context.scene.animsliders
-        aclones = animsliders.clone_data.clones
+        # animsliders = bpy.context.scene.animsliders
+        # aclones = animsliders.clone_data.clones
         # arefe = animsliders.reference
         # arefe.fcurve.data_path = ''
         # arefe.fcurve.index = -1
@@ -180,7 +180,7 @@ def remove_helpers(objects):
         for fcurve in action.fcurves:     # delete the first of the clones left
             if fcurve.group.name == group_name:
                 action.fcurves.remove(fcurve)
-                aclones.remove(0)
+                # aclones.remove(0)
 
 
 def get_slope(fcurve):
@@ -209,7 +209,7 @@ def add_cycle(fcurve, before='MIRROR', after='MIRROR'):
     cycle.mode_after = after
 
 
-def add_noise(fcurve):
+def add_noise(fcurve, strength=0.4, scale=1, phase=0):
     """
 
     :param fcurve:
@@ -217,14 +217,15 @@ def add_noise(fcurve):
     """
     noise = fcurve.modifiers.new('NOISE')
 
-    noise.strength = 5
-    noise.scale = 3
+    noise.strength = strength
+    noise.scale = scale
+    noise.phase = phase
     # fcurve.convert_to_samples(0, 100)
     # fcurve.convert_to_keyframes(0, 100)
     # fcurve.modifiers.remove(noise)
 
 
-def duplicate(fcurve, new_data_path, selected_keys=True, lock=False):
+def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=False):
     """
 
     :param fcurve:
@@ -241,12 +242,16 @@ def duplicate(fcurve, new_data_path, selected_keys=True, lock=False):
     else:
         selected_keys = fcurve.keyframe_points.items()
 
-    dup = action.fcurves.new(data_path=new_data_path, index=index, action_group=group_name)
+    clone_name = '%s.%d.clone' % (fcurve.data_path, fcurve.array_index)
+
+    dup = action.fcurves.new(data_path=clone_name, index=index, action_group=group_name)
     dup.keyframe_points.add(len(selected_keys))
     dup.color_mode = 'CUSTOM'
     dup.color = (0, 0, 0)
 
     dup.lock = lock
+    dup.select = False
+
     action.groups[group_name].lock = lock
     action.groups[group_name].color_set = 'THEME10'
 
@@ -256,6 +261,50 @@ def duplicate(fcurve, new_data_path, selected_keys=True, lock=False):
         dup.keyframe_points[i].co = key.co
 
         i += 1
+
+    add_cycle(dup, before=before, after=after)
+
+    dup.update()
+
+    return dup
+
+
+def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', after='NONE', lock=False):
+    """
+
+    :param fcurve:
+    :param new_data_path:
+    :param selected_keys:
+    :param lock:
+    :return:
+    """
+
+    index = len(fcurves)
+    every_key = global_fcurve['every_key']
+    original_values = global_fcurve['original_values']
+
+    dup = fcurves.new(data_path=new_data_path, index=index, action_group=group_name)
+    dup.keyframe_points.add(len(every_key))
+    dup.color_mode = 'CUSTOM'
+    dup.color = (0, 0, 0)
+
+    dup.lock = lock
+    dup.select = False
+
+    action = fcurves.id_data
+    action.groups[group_name].lock = lock
+    action.groups[group_name].color_set = 'THEME10'
+
+    i = 0
+
+    for index in every_key:
+        original_key = original_values[index]
+        dup.keyframe_points[i].co.x = original_key['x']
+        dup.keyframe_points[i].co.y = original_key['y']
+
+        i += 1
+
+    add_cycle(dup, before=before, after=after)
 
     dup.update()
 
@@ -361,7 +410,7 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
     animsliders = bpy.context.scene.animsliders
     adapted_factor = ((factor + 1) / 2)     # take the -1 to 1 range and converts it to a 0 to 1 range
 
-    create_clone(objects, selected_keys=clone_selected_keys)
+    add_clone(objects, selected_keys=clone_selected_keys)
 
     for obj in objects:
         action = obj.animation_data.action
@@ -422,10 +471,7 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
     # remove_clones(objects)
 
 
-def create_clone(objects,
-                 cycle_before='NONE',
-                 cycle_after="NONE",
-                 selected_keys=False):
+def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=False):
     """
 
     :param objects:
@@ -438,23 +484,9 @@ def create_clone(objects,
     for obj in objects:
         fcurves = obj.animation_data.action.fcurves
 
-        animsliders = bpy.context.scene.animsliders
-        aclones = animsliders.clone_data.clones
-        clones = []
-        print('amount of curves: ', len(fcurves))
-
         for fcurve_index, fcurve in fcurves.items():
             if fcurve.group.name == group_name:
                 continue  # we don't want to add to the list the helper curves we have created
-
-            clone = None
-
-            for aclone in aclones:
-                if aclone.original_fcurve.index == fcurve_index:
-                    clone = fcurves[aclone.fcurve.index]
-                    cycle = clone.modifiers[0]
-                    cycle.mode_before = cycle_before
-                    cycle.mode_after = cycle_after
 
             if fcurve.hide is True:
                 continue
@@ -462,44 +494,28 @@ def create_clone(objects,
             if fcurve.select is False:
                 continue
 
-            if clone is None:
-                clone = add_clone_curve(fcurve,
-                                        cycle_before,
-                                        cycle_after,
-                                        selected_keys=selected_keys)
-                clones.append(clone)
-                print('clone:', clone.data_path)
+            duplicate(fcurve, selected_keys=selected_keys, before=cycle_before, after=cycle_after)
 
             fcurve.update()
 
-        return clones
 
-
-def add_clone_curve(fcurve, before='NONE', after='NONE', selected_keys=False):
+def add_clone_from_globals(fcurves, cycle_before='NONE', cycle_after="NONE"):
     """
 
-    :param fcurve:
-    :param before:
-    :param after:
+    :param objects:
+    :param cycle_before:
+    :param cycle_after:
     :param selected_keys:
     :return:
     """
-    animsliders = bpy.context.scene.animsliders
 
-    clone_name = '%s.%d.clone' % (fcurve.data_path, fcurve.array_index)
-    clone = cur_utils.duplicate(fcurve, clone_name, selected_keys=selected_keys)
-    aclone = animsliders.clone_data.clones.add()
-    aclone.fcurve.data_path = clone.data_path
-    aclone.fcurve.index = clone.array_index
-    aclone.original_fcurve.data_path = fcurve.data_path
-    aclone.original_fcurve.index = fcurve.array_index
+    # for obj_name, fcurves_data in key_utils.global_values.items():
+    #     fcurves = bpy.data.objects[obj_name].animation_data.action.fcurves
 
-    cur_utils.add_cycle(clone, before=before, after=after)
-
-    clone.lock = True
-    clone.select = False
-    clone.update()
-    return clone
+    for fcurve_index, keys_data in fcurves_data.itmes():
+        fcurve = fcurves[fcurve_index]['original_values']
+        clone_name = '%s.%d.clone' % (fcurve.data_path, fcurve.array_index)
+        duplicate_from_data(fcurves, keys_data, clone_name, before=cycle_before, after=cycle_after)
 
 
 def remove_clone(objects):
