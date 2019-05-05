@@ -42,22 +42,22 @@ from . import utils, key_utils, cur_utils, props, ops, ui
 classes = (
     # props.AnimAideKeys,
     # props.myPreferences,
-    props.AnimAideFCurves,
+    # props.AnimAideFCurves,
     props.AnimAideClone,
     # props.AnimAideCloneData,
     props.AnimSlider,
     props.AnimSliders,
-    ops.AS_OT_add,
-    ops.AS_OT_remove,
-    ops.AS_OT_settings,
-    ops.AS_OT_get_ref_frame,
-    ops.AS_OT_sliders,
-    ops.AS_OT_clone,
-    ops.AS_OT_clone_remove,
-    # ops.AS_OT_move_key,
-    # ops.AS_OT_modifier,
-    ui.AS_PT_sliders,
-    ui.AS_PT_clone
+    ops.AAT_OT_add,
+    ops.AAT_OT_remove,
+    ops.AAT_OT_settings,
+    ops.AAT_OT_get_ref_frame,
+    ops.AAT_OT_sliders,
+    ops.AAT_OT_clone,
+    ops.AAT_OT_clone_remove,
+    # ops.AAT_OT_move_key,
+    # ops.AAT_OT_modifier,
+    ui.AAT_PT_sliders,
+    ui.AAT_PT_clone
 )
 
 # register

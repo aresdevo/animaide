@@ -6,7 +6,7 @@ from bpy.props import StringProperty, EnumProperty, BoolProperty, \
 from bpy.types import Operator
 
 
-class AS_OT_sliders(Operator):
+class AAT_OT_sliders(Operator):
     bl_idname = "animsliders.sliders"
     bl_label = "sliders"
 
@@ -484,7 +484,7 @@ class AS_OT_sliders(Operator):
 ################  TOOLS  ###############
 
 
-class AS_OT_add(Operator):
+class AAT_OT_add(Operator):
     bl_idname = 'animsliders.add'
     bl_label = "add_slider"
     bl_options = {'REGISTER'}
@@ -503,7 +503,7 @@ class AS_OT_add(Operator):
         return {'FINISHED'}
 
 
-class AS_OT_remove(Operator):
+class AAT_OT_remove(Operator):
     bl_idname = 'animsliders.remove'
     bl_label = "remove_slider"
     bl_options = {'REGISTER'}
@@ -523,7 +523,7 @@ class AS_OT_remove(Operator):
         return {'FINISHED'}
 
 
-class AS_OT_get_ref_frame(Operator):
+class AAT_OT_get_ref_frame(Operator):
     bl_idname = 'animsliders.get_ref_frame'
     bl_label = "get_ref_frames"
     bl_options = {'REGISTER'}
@@ -577,7 +577,7 @@ class AS_OT_get_ref_frame(Operator):
         return {'FINISHED'}
 
 
-class AS_OT_settings(Operator):
+class AAT_OT_settings(Operator):
     bl_idname = "animsliders.settings"
     bl_label = "Sliders Settings"
 
@@ -606,7 +606,7 @@ class AS_OT_settings(Operator):
         col.prop(slider, 'overshoot', text='Overshoot', toggle=True)
 
 
-class AS_OT_clone(Operator):
+class AAT_OT_clone(Operator):
     bl_idname = 'animsliders.fcurve_clone'
     bl_label = "Clone Fcurve"
     bl_options = {'REGISTER'}
@@ -629,7 +629,7 @@ class AS_OT_clone(Operator):
         return {'FINISHED'}
 
 
-class AS_OT_clone_remove(Operator):
+class AAT_OT_clone_remove(Operator):
     bl_idname = 'animsliders.remove_clone'
     bl_label = "Remove Clone"
     bl_options = {'REGISTER'}
@@ -649,7 +649,7 @@ class AS_OT_clone_remove(Operator):
         return {'FINISHED'}
 
 
-class AS_OT_move_key(Operator):
+class AAT_OT_move_key(Operator):
     bl_idname = 'animsliders.move_key'
     bl_label = "Move Key"
     bl_options = {'REGISTER'}
@@ -675,7 +675,7 @@ class AS_OT_move_key(Operator):
         return {'FINISHED'}
 
 
-class AS_OT_modifier(Operator):
+class AAT_OT_modifier(Operator):
     bl_idname = 'animsliders.fcurve_modifier'
     bl_label = "Modifier"
     bl_options = {'REGISTER'}

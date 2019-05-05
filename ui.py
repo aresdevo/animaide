@@ -171,7 +171,7 @@ def slider_box(layout, slot, index=0, is_collection=True):
     #     row.label(text='')
 
 
-class AS_PT_sliders(Panel):
+class AAT_PT_sliders(Panel):
     bl_idname = 'AA_PT_slider'
     bl_label = "Slider"
     bl_region_type = 'UI'
@@ -210,7 +210,7 @@ class AS_PT_sliders(Panel):
         # row.template_list("AA_UL_sliders", "", animsliders, "slider_slots", animsliders, "slider_i")
 
 
-class AS_PT_clone(Panel):
+class AAT_PT_clone(Panel):
     bl_idname = 'AA_PT_clone'
     bl_label = "Clone"
     bl_space_type = 'GRAPH_EDITOR'
