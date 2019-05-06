@@ -1,6 +1,6 @@
 import bpy
 from . import props, key_utils
-from bpy.types import Panel
+from bpy.types import Panel, Menu
 
 # def step_button(row, slot, factor, icon='',
 #                 text='', emboss=True, active=True,
@@ -189,6 +189,10 @@ class AAT_PT_sliders(Panel):
 
         layout = self.layout
         row = layout.row(align=True)
+        pie = row.operator('wm.call_menu_pie')
+        pie.name = "AAT_MT_pie_menu"
+
+        row = layout.row(align=True)
         row.operator("animaide.add_slider", text='', icon='ADD')
         row.operator("animaide.remove_slider", text='', icon='REMOVE')
 
@@ -236,6 +240,47 @@ class AAT_PT_clone(Panel):
         # row.alignment = 'RIGHT'
         row.label(text='Cycle After')
         row.prop(clone, 'cycle_after', text='')
+
+
+class AAT_MT_pie_menu(Menu):
+    bl_idname = "AAT_MT_pie_menu"
+    bl_label = "Pie Menu"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        col = pie.column()
+        col.operator("animaide.ease")
+
+        col = pie.column(align=True)
+        col.operator("animaide.ease_in_out")
+
+        col = pie.column(align=True)
+        col.operator("animaide.blend_ease")
+
+        col = pie.column(align=True)
+        col.operator("animaide.blend_neighbor")
+
+        col = pie.column(align=True)
+        col.operator("animaide.blend_offset")
+
+        col = pie.column(align=True)
+        col.operator("animaide.push_pull")
+
+        col = pie.column(align=True)
+        col.operator("animaide.smooth")
+
+        col = pie.column(align=True)
+        col.operator("animaide.noise")
+
+        col = pie.column(align=True)
+        col.operator("animaide.time_offset")
+
+        col = pie.column(align=True)
+        col.operator("animaide.tween")
+
+
 
 
 

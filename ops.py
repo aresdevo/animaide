@@ -678,7 +678,7 @@ def slider_invoke(self, context, event):
 
 class AAT_OT_sliders(Operator):
     bl_idname = "animaide.sliders"
-    bl_label = "sliders"
+    bl_label = "Sliders"
 
     slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)

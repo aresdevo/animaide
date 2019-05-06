@@ -23,12 +23,12 @@ Created by Ares Deveaux
 
 # Addon Info
 bl_info = {
-    "name": "AnimSliders",
+    "name": "AnimAide",
     "description": "",
     "author": "Ares Deveaux",
     "version": (0, 0, 1),
     "blender": (2, 80, 0),
-    "location": "Graph Editor > Properties window",
+    "location": "Graph Editor > Side Panel",
     "warning": "This addon is still in development.",
     "wiki_url": "",
     "category": "Animation"}
@@ -71,6 +71,7 @@ classes = (
     # ops.AAT_OT_move_key,
     # ops.AAT_OT_modifier,
     ui.AAT_PT_sliders,
+    ui.AAT_MT_pie_menu
     # ui.AAT_PT_clone
 )
 
@@ -86,27 +87,28 @@ def register():
 
     props.set_props()
 
-    # # handle the keymap
-    # wm = bpy.context.window_manager
-    # # Note that in background mode (no GUI available), keyconfigs are not available either, so we have to check this
-    # # to avoid nasty errors in background case.
-    # kc = wm.keyconfigs.addon
-    # if kc:
-    #     km = wm.keyconfigs.addon.keymaps.new(name='Slider', space_type='GRAPH_EDITOR')
-    #     kmi = km.keymap_items.new(ops.AAT_OT_sliders.bl_idname, 'ONE', 'PRESS')
-    #     # kmi.properties.total = 4
-    #     addon_keymapseymaps.append((km, kmi))
+    wm = bpy.context.window_manager
+
+    if wm.keyconfigs.addon:
+        # Object Modes
+        km = wm.keyconfigs.addon.keymaps.new(name='AnimAide')
+        # kmi = km.keymap_items.new('wm.call_menu_pie', 'ONE', 'PRESS')
+        # kmi.properties.name = "AAT_MT_pie_menu"
+        kmi = km.keymap_items.new('animaide.ease', 'ONE', 'PRESS')
+        kmi.properties.name = "AAT_MT_pie_menu"
+        addon_keymaps.append((km, kmi))
 
 
 def unregister():
-    # Note: when unregistering, it's usually good practice to do it in reverse order you registered.
-    # Can avoid strange issues like keymap still referring to operators already unregistered...
-    # handle the keymap
-    # for km, kmi in addon_keymaps:
-    #     km.keymap_items.remove(kmi)
-    # addon_keymaps.clear()
 
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
     props.del_props()
+
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+    if kc:
+        for km, kmi in addon_keymaps:
+            km.keymap_items.remove(kmi)
+    addon_keymaps.clear()
