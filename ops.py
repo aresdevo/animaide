@@ -1,12 +1,15 @@
 import bpy
 
-from . import utils, key_utils, cur_utils
+from . import utils, key_utils, cur_utils, slider_tools
 from bpy.props import StringProperty, EnumProperty, BoolProperty, \
     IntProperty, FloatProperty
 from bpy.types import Operator
 
 
-class AAT_OT_sliders(Operator):
+class AAT_OT_sliders_everything(Operator):
+    '''
+    Slider
+    '''
     bl_idname = "animaide.sliders"
     bl_label = "sliders"
 
@@ -14,8 +17,9 @@ class AAT_OT_sliders(Operator):
     factor: FloatProperty(default=0.0)
     slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    is_collection: BoolProperty()
+    # is_collection: BoolProperty()
     op_context: StringProperty(default='INVOKE_DEFAULT')
+
     fcurve = None
     global_fcurve = None
     selected_keys = None
@@ -47,6 +51,7 @@ class AAT_OT_sliders(Operator):
         local_x = self.right_neighbor['x'] - self.left_neighbor['x']
 
         for index in self.selected_keys:
+
             k = self.fcurve.keyframe_points[index]
             x = k.co.x - self.left_neighbor['x']
             try:
@@ -81,6 +86,7 @@ class AAT_OT_sliders(Operator):
             yshift = -1
 
         for index in self.selected_keys:
+
             k = self.fcurve.keyframe_points[index]
             x = k.co.x - self.left_neighbor['x']
             try:
@@ -100,6 +106,7 @@ class AAT_OT_sliders(Operator):
     def blend_neighbor(self):
 
         for index in self.selected_keys:
+
             k = self.fcurve.keyframe_points[index]
 
             if self.factor < 0:
@@ -114,6 +121,7 @@ class AAT_OT_sliders(Operator):
     def blend_frame(self, left_y_ref, right_y_ref):
 
         for index in self.selected_keys:
+
             k = self.fcurve.keyframe_points[index]
 
             if self.factor < 0:
@@ -131,6 +139,7 @@ class AAT_OT_sliders(Operator):
         local_x = self.right_neighbor['x'] - self.left_neighbor['x']
 
         for index in self.selected_keys:
+
             k = self.fcurve.keyframe_points[index]
             x = k.co.x - self.left_neighbor['x']
 
@@ -185,6 +194,9 @@ class AAT_OT_sliders(Operator):
         first_key_index = self.selected_keys[0]
         last_key_index = self.selected_keys[-1]
 
+        if first_key_index is None or last_key_index is None:
+            return
+
         if clamped_factor > 0:
             delta = self.right_neighbor['y'] - self.original_values[last_key_index]['y']
         else:
@@ -224,6 +236,7 @@ class AAT_OT_sliders(Operator):
         clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
         for index in self.selected_keys:
+
             k = self.fcurve.keyframe_points[index]
 
             if 'sy' not in self.original_values[index]:
@@ -257,6 +270,7 @@ class AAT_OT_sliders(Operator):
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
             k.co.y = clone.evaluate(k.co.x - 20 * clamped_factor)
+
         fcurves.remove(clone)
 
     def noise(self, fcurves, fcurve_index):
@@ -304,10 +318,15 @@ class AAT_OT_sliders(Operator):
 
         animaide = context.scene.animaide
 
-        if self.is_collection:
-            slider = animaide.slider_slots[self.slot_index]
-        else:
+        # if self.is_collection:
+        #     slider = animaide.slider_slots[self.slot_index]
+        # else:
+        #     slider = animaide.slider
+
+        if self.slot_index == -1:
             slider = animaide.slider
+        else:
+            slider = animaide.slider_slots[self.slot_index]
 
         if self.op_context == 'EXEC_DEFAULT':
             key_utils.get_globals(left_frame=slider.left_ref_frame,
@@ -348,6 +367,10 @@ class AAT_OT_sliders(Operator):
 
                 self.global_fcurve = key_utils.global_values[obj.name][fcurve_index]
                 self.selected_keys = self.global_fcurve['selected_keys']
+
+                if self.selected_keys[0] is None:
+                    return {'FINISHED'}
+
                 self.original_values = self.global_fcurve['original_values']
                 self.left_neighbor = self.global_fcurve['left_neighbor']
                 self.right_neighbor = self.global_fcurve['right_neighbor']
@@ -355,11 +378,11 @@ class AAT_OT_sliders(Operator):
                 # if not self.selected_keys:
                 #     continue
 
-                if not self.selected_keys:
-                    index = key_utils.on_current_frame(self.fcurve)
-                    if index is None:
-                        continue
-                    self.selected_keys = [index]
+                # if not self.selected_keys:
+                #     index = key_utils.on_current_frame(self.fcurve)
+                #     self.selected_keys = [index]
+                #     if index is None:
+                #         continue
 
                 # self.left_neighbor, self.right_neighbor = key_utils.get_selected_neigbors(self.fcurve,
                 #                                                                           self.selected_keys)
@@ -478,6 +501,748 @@ class AAT_OT_sliders(Operator):
         self.execute(context)
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
+
+
+def slider_looper(self, context):
+    animaide = context.scene.animaide
+
+    if self.slot_index == -1:
+        slider = animaide.slider
+    else:
+        slider = animaide.slider_slots[self.slot_index]
+
+    if self.op_context == 'EXEC_DEFAULT':
+        key_utils.get_globals(left_frame=slider.left_ref_frame,
+                              right_frame=slider.right_ref_frame)
+
+    # slider.factor = self.factor
+    # slider.factor_overshoot = self.factor
+
+    slider_tools.min_value = slider.min_value
+    slider_tools.max_value = slider.max_value
+
+    objects = context.selected_objects
+
+    for obj in objects:
+        anim = obj.animation_data
+        if anim is None:
+            continue
+        if anim.action.fcurves is None:
+            continue
+        fcurves = obj.animation_data.action.fcurves
+
+        for fcurve_index, slider_tools.fcurve in fcurves.items():
+
+            if slider_tools.fcurve.select is False:
+                continue
+
+            if slider_tools.fcurve.lock is True:
+                continue
+
+            if slider_tools.fcurve.hide is True:
+                continue
+
+            if slider_tools.fcurve.group.name == cur_utils.group_name:
+                continue  # we don't want to select keys on reference fcurves
+
+            slider_tools.global_fcurve = key_utils.global_values[obj.name][fcurve_index]
+            slider_tools.selected_keys = slider_tools.global_fcurve['selected_keys']
+
+            if slider_tools.selected_keys[0] is None:
+                return {'FINISHED'}
+
+            slider_tools.original_values = slider_tools.global_fcurve['original_values']
+            slider_tools.left_neighbor = slider_tools.global_fcurve['left_neighbor']
+            slider_tools.right_neighbor = slider_tools.global_fcurve['right_neighbor']
+
+            if self.slider_type == 'EASE':
+                slider_tools.ease(self.factor, self.slope)
+
+            if self.slider_type == 'EASE_IN_OUT':
+                slider_tools.ease_in_out(self.factor, self.slope)
+
+            if self.slider_type == 'BLEND_NEIGHBOR':
+                slider_tools.blend_neighbor(self.factor)
+
+            if self.slider_type == 'BLEND_FRAME':
+                left_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['left_y']
+                right_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['right_y']
+                slider_tools.blend_frame(self.factor, left_y_ref, right_y_ref)
+
+            if self.slider_type == 'BLEND_EASE':
+                slider_tools.blend_ease(self.factor, self.slope)
+
+            if self.slider_type == 'BLEND_OFFSET':
+                slider_tools.blend_offset(self.factor)
+
+            if self.slider_type == 'TWEEN':
+                slider_tools.tween(self.factor)
+
+            if self.slider_type == 'PUSH_PULL':
+                slider_tools.push_pull(self.factor)
+
+            if self.slider_type == 'SCALE_LEFT':
+                slider_tools.scale(self.factor, 'L')
+
+            if self.slider_type == 'SCALE_RIGHT':
+                slider_tools.scale(self.factor, 'R')
+
+            if self.slider_type == 'SCALE_AVERAGE':
+                slider_tools.scale(self.factor, '')
+
+            if self.slider_type == 'SMOOTH':
+                slider_tools.smooth(self.factor)
+
+            if self.slider_type == 'TIME_OFFSET':
+                slider_tools.time_offset(self.factor, fcurves)
+
+            if self.slider_type == 'NOISE':
+                slider_tools.noise(self.factor, fcurves, fcurve_index)
+
+            slider_tools.fcurve.update()
+
+    #        message = "Factor: %f03" % animaide.sliders.factor
+    #        self.report({'INFO'}, "Factor:" + message)
+
+    return {'FINISHED'}
+
+
+def slider_modal(self, context, event):
+    if event.type == 'MOUSEMOVE':  # Apply
+
+        slider_from_zero = (event.mouse_x - self.init_mouse_x) / 200
+        self.factor = slider_from_zero
+
+        if self.slot_index == -1:
+            self.item.factor = slider_from_zero
+            self.item.factor_overshoot = slider_from_zero
+        else:
+            self.slots[self.slot_index].factor = slider_from_zero
+            self.slots[self.slot_index].factor_overshoot = slider_from_zero
+
+        self.execute(context)
+
+    elif event.type == 'LEFTMOUSE':  # Confirm
+        key_utils.get_globals()
+        if self.slot_index == -1:
+            self.animaide.slider.modal_switch = False
+            self.animaide.slider.factor = 0.0
+            self.animaide.slider.factor_overshoot = 0.0
+        else:
+            self.slots[self.slot_index].modal_switch = False
+            self.slots[self.slot_index].factor = 0.0
+            self.slots[self.slot_index].factor_overshoot = 0.0
+        return {'FINISHED'}
+
+    if event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
+        key_utils.reset_original()
+        if self.slot_index == -1:
+            self.animaide.slider.modal_switch = False
+            self.animaide.slider.factor = 0.0
+            self.animaide.slider.factor_overshoot = 0.0
+        else:
+            self.slots[self.slot_index].modal_switch = False
+            self.slots[self.slot_index].factor = 0.0
+            self.slots[self.slot_index].factor_overshoot = 0.0
+        return {'CANCELLED'}
+
+    return {'RUNNING_MODAL'}
+
+
+def slider_invoke(self, context, event):
+
+    # self.animaide.slider.selector = self.slider_type
+
+    if self.slot_index == -1:
+        slider = self.animaide.slider
+        slider.selector = self.slider_type
+    else:
+        slider = self.slots[self.slot_index]
+
+    slider.modal_switch = True
+    slider.factor = 0.0
+    slider.factor_overshoot = 0.0
+    self.slope = slider.slope
+
+    self.factor = 0.0
+    self.init_mouse_x = event.mouse_x
+
+    key_utils.get_globals(left_frame=slider.left_ref_frame,
+                          right_frame=slider.right_ref_frame)
+
+    self.execute(context)
+    context.window_manager.modal_handler_add(self)
+
+    return {'RUNNING_MODAL'}
+
+
+class AAT_OT_sliders(Operator):
+    bl_idname = "animaide.sliders"
+    bl_label = "sliders"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_ease(Operator):
+    bl_idname = "animaide.ease"
+    bl_label = "Ease"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'EASE'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_ease_in_out(Operator):
+    bl_idname = "animaide.ease_in_out"
+    bl_label = "Ease In Out"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'EASE_IN_OUT'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_blend_neighbor(Operator):
+    bl_idname = "animaide.blend_neighbor"
+    bl_label = "Blend Neighbor"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'BLEND_NEIGHBOR'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_blend_frame(Operator):
+    bl_idname = "animaide.blend_frame"
+    bl_label = "Blend Frame"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'BLEND_FRAME'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_blend_ease(Operator):
+    bl_idname = "animaide.blend_ease"
+    bl_label = "Blend Ease"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'BLEND_EASE'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_blend_offset(Operator):
+    bl_idname = "animaide.blend_offset"
+    bl_label = "Blend Offset"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'BLEND_OFFSET'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_tween(Operator):
+    bl_idname = "animaide.tween"
+    bl_label = "Tween"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'TWEEN'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_push_pull(Operator):
+    bl_idname = "animaide.push_pull"
+    bl_label = "Push Pull"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'PUSH_PULL'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_smooth(Operator):
+    bl_idname = "animaide.smooth"
+    bl_label = "Smooth"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'SMOOTH'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_time_offset(Operator):
+    bl_idname = "animaide.time_offset"
+    bl_label = "Time Offset"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'TIME_OFFSET'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_noise(Operator):
+    bl_idname = "animaide.noise"
+    bl_label = "Noise"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'NOISE'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_scale_left(Operator):
+    bl_idname = "animaide.scale_left"
+    bl_label = "Scale Left"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'SCALE_LEFT'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_scale_right(Operator):
+    bl_idname = "animaide.scale_right"
+    bl_label = "Scale Right"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'SCALE_RIGHT'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
+
+
+class AAT_OT_scale_average(Operator):
+    bl_idname = "animaide.scale_average"
+    bl_label = "Scale Average"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'SCALE_AVERAGE'
+
+    @classmethod
+    def poll(cls, context):
+        objects = context.selected_objects
+        return objects != []
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        bpy.context.area.tag_redraw()
+
+    def execute(self, context):
+
+        return slider_looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_invoke(self, context, event)
 
 
 ################  TOOLS  ###############
@@ -700,6 +1465,7 @@ class AAT_OT_modifier(Operator):
                 curve.convert_to_keyframes(0, 100)
                 curve.modifiers.remove(noise)
         return {'FINISHED'}
+
 
 
 

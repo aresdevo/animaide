@@ -2,46 +2,37 @@ import bpy
 from . import props, key_utils
 from bpy.types import Panel
 
-
+# def step_button(row, slot, factor, icon='',
+#                 text='', emboss=True, active=True,
+#                 operator_context='EXEC_DEFAULT', is_collection=True)
 def step_button(row, slot, factor, icon='',
                 text='', emboss=True, active=True,
-                operator_context='EXEC_DEFAULT', is_collection=True):
-    # if key_utils.original_keys_info == {}:
-    #     key_utils.get_selected_global(selected=False)
-    # if slot.selector == 'BLEND_FRAME':
-    #     left_ref_frame = self.slots[self.slot_index].left_ref_frame
-    #     right_ref_frame = self.slots[self.slot_index].right_ref_frame
-    #     key_utils.get_ref_frame_globals(slot.index)
-    # key_utils.get_selected_global(original=False)
+                operator_context='EXEC_DEFAULT'):
 
     col = row.column(align=True)
     col.active = active
 
     col.operator_context = operator_context
 
-    if icon == '':
-        step = col.operator('animaide.sliders', text=text, emboss=emboss)
-    else:
-        step = col.operator('animaide.sliders', text=text, icon=icon, emboss=emboss)
-
-    # if slot.overshoot:
-    #     min_value = -2.0
-    #     max_value = 2.0
+    # if icon == '':
+    #     step = col.operator('animaide.sliders', text=text, emboss=emboss)
     # else:
-    #     min_value = -1.0
-    #     max_value = 1.0
+    #     step = col.operator('animaide.sliders', text=text, icon=icon, emboss=emboss)
 
-    # step.min_value = min_value
-    # step.max_value = max_value
+    if icon == '':
+        step = col.operator('animaide.%s' % str(slot.selector).lower(), text=text, emboss=emboss)
+    else:
+        step = col.operator('animaide.%s' % str(slot.selector).lower(), text=text, icon=icon, emboss=emboss)
+
     step.factor = factor
     step.slope = slot.slope
-    step.slider_type = slot.selector
+    # step.slider_type = slot.selector
     step.slot_index = slot.index
-    step.is_collection = is_collection
+    # step.is_collection = is_collection
     step.op_context = operator_context
 
-
-def slider_box(layout, slot, index=0, is_collection=True):
+# def slider_box(layout, slot, index=0, is_collection=True):
+def slider_box(layout, slot, index=0):
     if slot.overshoot == False:
         slider_length = 'factor'
         # factor = slot.factor
@@ -52,21 +43,21 @@ def slider_box(layout, slot, index=0, is_collection=True):
 
     # -------- Options ---------
 
-    if slot.index == -1:
-        slider_num = '1'
-    else:
-        slider_num = '%s' % (slot.index + 2)
+    # if slot.index == -1:
+    #     slider_num = '1'
+    # else:
+    #     slider_num = '%s' % (slot.index + 2)
 
     # animaide = bpy.context.scene.animaide
 
     box = layout.box()
     row = box.row(align=True)
 
-    col = row.column(align=True)
-    col.alignment = 'LEFT'
-    col.active = False
-    col.scale_x = 0.8
-    col.label(text=slider_num)
+    # col = row.column(align=True)
+    # col.alignment = 'LEFT'
+    # col.active = False
+    # col.scale_x = 0.8
+    # col.label(text=slider_num)
 
     col = row.column(align=False)
     col.prop_menu_enum(slot, 'selector', text=props.names[slot.selector])
@@ -74,7 +65,7 @@ def slider_box(layout, slot, index=0, is_collection=True):
     col = row.column(align=False)
     setting = col.operator('animaide.settings', text='', icon='SETTINGS', emboss=False)
     setting.slot_index = slot.index
-    setting.is_collection = is_collection
+    # setting.is_collection = is_collection
 
     # -------- Slider -----------
 
@@ -87,31 +78,41 @@ def slider_box(layout, slot, index=0, is_collection=True):
 
         if slot.overshoot == True:
             for f in [-2, -1.5]:
-                step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
+                # step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
+                step_button(row, slot, factor=f, text=' ', icon='')
 
+        # step_button(row, slot, factor=-1, text='',
+        #             icon='CHECKBOX_DEHLT', emboss=False, active=True, is_collection=is_collection)
         step_button(row, slot, factor=-1, text='',
-                    icon='CHECKBOX_DEHLT', emboss=False, active=True, is_collection=is_collection)
+                    icon='CHECKBOX_DEHLT', emboss=False, active=True)
 
         for f in [-0.75, -0.5, -0.25]:
-            step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
+            # step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
+            step_button(row, slot, factor=f, text=' ', icon='')
 
+        # step_button(row, slot, factor=0, text='', icon='ANTIALIASED',
+        #             emboss=False, operator_context='INVOKE_DEFAULT',
+        #             active=True, is_collection=is_collection)
         step_button(row, slot, factor=0, text='', icon='ANTIALIASED',
                     emboss=False, operator_context='INVOKE_DEFAULT',
-                    active=True, is_collection=is_collection)
+                    active=True)
 
         for f in [0.25, 0.5, 0.75]:
-            step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
+            # step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
+            step_button(row, slot, factor=f, text=' ', icon='')
 
+        # step_button(row, slot, factor=1, text='',
+        #             icon='CHECKBOX_DEHLT', emboss=False, active=True, is_collection=is_collection)
         step_button(row, slot, factor=1, text='',
-                    icon='CHECKBOX_DEHLT', emboss=False, active=True, is_collection=is_collection)
+                    icon='CHECKBOX_DEHLT', emboss=False, active=True)
 
         if slot.overshoot == True:
             for f in [1.5, 2]:
-                step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
+                # step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
+                step_button(row, slot, factor=f, text=' ', icon='')
 
     else:
-        if slot.modal_switch == True:
-            row.prop(slot, slider_length, text='', slider=True)
+        row.prop(slot, slider_length, text='', slider=True)
 
     row.operator_context = 'INVOKE_DEFAULT'
 
@@ -140,7 +141,7 @@ def slider_box(layout, slot, index=0, is_collection=True):
                                       text=left_text, emboss=True)
         left_ref_frame.slot_index = index
         left_ref_frame.side = 'L'
-        left_ref_frame.is_collection = is_collection
+        # left_ref_frame.is_collection = is_collection
 
         if slot.modal_switch == False:
             col = row.column(align=True)
@@ -157,7 +158,7 @@ def slider_box(layout, slot, index=0, is_collection=True):
                                        text=right_text, emboss=True)
         right_ref_frame.slot_index = index
         right_ref_frame.side = 'R'
-        right_ref_frame.is_collection = is_collection
+        # right_ref_frame.is_collection = is_collection
 
     # elif slot.modal_switch == False:
     #     row.active = False
@@ -191,7 +192,8 @@ class AAT_PT_sliders(Panel):
         row.operator("animaide.add_slider", text='', icon='ADD')
         row.operator("animaide.remove_slider", text='', icon='REMOVE')
 
-        slider_box(layout, item, is_collection=False)
+        # slider_box(layout, item, is_collection=False)
+        slider_box(layout, item)
 
         if len(slots) == 0:
             box = layout.box()

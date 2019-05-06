@@ -423,7 +423,12 @@ def get_globals(selected=True, original=True, left_frame=None, right_frame=None)
                     values[key_index]['sy'] = smooth
                     prevkey_value = smooth
 
-            left_neighbor, right_neighbor = get_selected_neigbors(fcurve, keyframes)
+            if not keyframes:
+                index = on_current_frame(fcurve)
+                left_neighbor, right_neighbor = get_frame_neighbors(fcurve, frame=None, clamped=False)
+                keyframes = [index]
+            else:
+                left_neighbor, right_neighbor = get_selected_neigbors(fcurve, keyframes)
 
             if selected:
                 curve_items['selected_keys'] = keyframes
@@ -436,6 +441,7 @@ def get_globals(selected=True, original=True, left_frame=None, right_frame=None)
             if original:
                 curve_items['original_values'] = values
                 curve_items['every_key'] = every_key
+
             if left_frame is not None or left_frame is not None:
                 frames = {'left_y': fcurve.evaluate(left_frame),
                           'right_y': fcurve.evaluate(right_frame)}
@@ -677,6 +683,8 @@ def get_selected_neigbors(fcurve, keyframes):
     right_neighbor = None
     every_key = fcurve.keyframe_points
     first_index = keyframes[0]
+    if keyframes[0] is None:
+        return left_neighbor, right_neighbor
     i = len(keyframes) - 1
     last_index = keyframes[i]
 

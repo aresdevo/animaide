@@ -52,17 +52,33 @@ classes = (
     ops.AAT_OT_settings,
     ops.AAT_OT_get_ref_frame,
     ops.AAT_OT_sliders,
-    ops.AAT_OT_clone,
-    ops.AAT_OT_clone_remove,
+    ops.AAT_OT_ease,
+    ops.AAT_OT_ease_in_out,
+    ops.AAT_OT_blend_neighbor,
+    ops.AAT_OT_blend_frame,
+    ops.AAT_OT_blend_ease,
+    ops.AAT_OT_blend_offset,
+    ops.AAT_OT_tween,
+    ops.AAT_OT_push_pull,
+    ops.AAT_OT_smooth,
+    ops.AAT_OT_noise,
+    ops.AAT_OT_time_offset,
+    ops.AAT_OT_scale_average,
+    ops.AAT_OT_scale_left,
+    ops.AAT_OT_scale_right,
+    # ops.AAT_OT_clone,
+    # ops.AAT_OT_clone_remove,
     # ops.AAT_OT_move_key,
     # ops.AAT_OT_modifier,
     ui.AAT_PT_sliders,
-    ui.AAT_PT_clone
+    # ui.AAT_PT_clone
 )
 
 # register
 ##################################
 
+# store keymaps here to access after registration
+addon_keymaps = []
 
 def register():
     for cls in classes:
@@ -70,8 +86,26 @@ def register():
 
     props.set_props()
 
+    # # handle the keymap
+    # wm = bpy.context.window_manager
+    # # Note that in background mode (no GUI available), keyconfigs are not available either, so we have to check this
+    # # to avoid nasty errors in background case.
+    # kc = wm.keyconfigs.addon
+    # if kc:
+    #     km = wm.keyconfigs.addon.keymaps.new(name='Slider', space_type='GRAPH_EDITOR')
+    #     kmi = km.keymap_items.new(ops.AAT_OT_sliders.bl_idname, 'ONE', 'PRESS')
+    #     # kmi.properties.total = 4
+    #     addon_keymapseymaps.append((km, kmi))
+
 
 def unregister():
+    # Note: when unregistering, it's usually good practice to do it in reverse order you registered.
+    # Can avoid strange issues like keymap still referring to operators already unregistered...
+    # handle the keymap
+    # for km, kmi in addon_keymaps:
+    #     km.keymap_items.remove(kmi)
+    # addon_keymaps.clear()
+
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
