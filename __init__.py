@@ -54,24 +54,25 @@ classes = (
     ops.AAT_OT_sliders,
     ops.AAT_OT_ease,
     ops.AAT_OT_ease_in_out,
+    ops.AAT_OT_blend_ease,
     ops.AAT_OT_blend_neighbor,
     ops.AAT_OT_blend_frame,
-    ops.AAT_OT_blend_ease,
     ops.AAT_OT_blend_offset,
-    ops.AAT_OT_tween,
     ops.AAT_OT_push_pull,
-    ops.AAT_OT_smooth,
-    ops.AAT_OT_noise,
-    ops.AAT_OT_time_offset,
     ops.AAT_OT_scale_average,
     ops.AAT_OT_scale_left,
     ops.AAT_OT_scale_right,
+    ops.AAT_OT_smooth,
+    ops.AAT_OT_noise,
+    ops.AAT_OT_time_offset,
+    ops.AAT_OT_tween,
     # ops.AAT_OT_clone,
     # ops.AAT_OT_clone_remove,
     # ops.AAT_OT_move_key,
     # ops.AAT_OT_modifier,
     ui.AAT_PT_sliders,
-    ui.AAT_MT_pie_menu
+    ui.AAT_MT_pie_menu_a,
+    ui.AAT_MT_pie_menu_b,
     # ui.AAT_PT_clone
 )
 
@@ -79,7 +80,77 @@ classes = (
 ##################################
 
 # store keymaps here to access after registration
+
+
 addon_keymaps = []
+
+
+def register_keymaps():
+    wm = bpy.context.window_manager
+
+    if wm.keyconfigs.addon:
+        km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
+
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'ONE', 'PRESS', alt=True)
+        kmi.properties.name = 'AAT_MT_pie_menu_a'
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'TWO', 'PRESS', alt=True)
+        kmi.properties.name = 'AAT_MT_pie_menu_b'
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.ease', 'ONE', 'PRESS')
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.tween', 'ONE', 'PRESS', shift=True)
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.ease_in_out', 'TWO', 'PRESS')
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.blend_ease', 'TWO', 'PRESS', shift=True)
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.blend_neighbor', 'THREE', 'PRESS')
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.blend_frame', 'THREE', 'PRESS', shift=True)
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.push_pull', 'FOUR', 'PRESS')
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.scale_average', 'FOUR', 'PRESS', shift=True)
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.scale_left', 'FIVE', 'PRESS')
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.scale_right', 'FIVE', 'PRESS', shift=True)
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.smooth', 'SIX', 'PRESS')
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.noise', 'SIX', 'PRESS', shift=True)
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.time_offset', 'SEVEN', 'PRESS')
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new('animaide.blend_offset', 'SEVEN', 'PRESS', shift=True)
+        addon_keymaps.append((km, kmi))
+
+
+def unregister_keymaps():
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+    if kc:
+        for km, kmi in addon_keymaps:
+            km.keymap_items.remove(kmi)
+
+    addon_keymaps.clear()
+
 
 def register():
     for cls in classes:
@@ -87,16 +158,7 @@ def register():
 
     props.set_props()
 
-    wm = bpy.context.window_manager
-
-    if wm.keyconfigs.addon:
-        # Object Modes
-        km = wm.keyconfigs.addon.keymaps.new(name='AnimAide')
-        # kmi = km.keymap_items.new('wm.call_menu_pie', 'ONE', 'PRESS')
-        # kmi.properties.name = "AAT_MT_pie_menu"
-        kmi = km.keymap_items.new('animaide.ease', 'ONE', 'PRESS')
-        kmi.properties.name = "AAT_MT_pie_menu"
-        addon_keymaps.append((km, kmi))
+    register_keymaps()
 
 
 def unregister():
@@ -106,9 +168,4 @@ def unregister():
 
     props.del_props()
 
-    wm = bpy.context.window_manager
-    kc = wm.keyconfigs.addon
-    if kc:
-        for km, kmi in addon_keymaps:
-            km.keymap_items.remove(kmi)
-    addon_keymaps.clear()
+    unregister_keymaps()

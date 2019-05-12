@@ -32,7 +32,7 @@ def step_button(row, slot, factor, icon='',
     step.op_context = operator_context
 
 # def slider_box(layout, slot, index=0, is_collection=True):
-def slider_box(layout, slot, index=0):
+def slider_box(layout, slot, index=-1):
     if slot.overshoot == False:
         slider_length = 'factor'
         # factor = slot.factor
@@ -60,12 +60,11 @@ def slider_box(layout, slot, index=0):
     # col.label(text=slider_num)
 
     col = row.column(align=False)
-    col.prop_menu_enum(slot, 'selector', text=props.names[slot.selector])
+    col.prop_menu_enum(slot, 'selector', text=props.names[slot.selector], icon=props.icons[slot.selector])
 
     col = row.column(align=False)
     setting = col.operator('animaide.settings', text='', icon='SETTINGS', emboss=False)
     setting.slot_index = slot.index
-    # setting.is_collection = is_collection
 
     # -------- Slider -----------
 
@@ -151,6 +150,8 @@ def slider_box(layout, slot, index=0):
             col.label(text='')
         else:
             col = row.column(align=True)
+            col.scale_x = 0.85
+            col.alignment = 'CENTER'
             col.label(text='')
 
         col = row.column(align=True)
@@ -182,22 +183,18 @@ class AAT_PT_sliders(Panel):
     def draw(self, context):
         animaide = context.scene.animaide
         slots = animaide.slider_slots
-        item = animaide.slider
+        slider = animaide.slider
 
         if key_utils.global_values == {}:
             key_utils.get_globals()
 
         layout = self.layout
-        row = layout.row(align=True)
-        pie = row.operator('wm.call_menu_pie')
-        pie.name = "AAT_MT_pie_menu"
+
+        slider_box(layout, slider)
 
         row = layout.row(align=True)
         row.operator("animaide.add_slider", text='', icon='ADD')
         row.operator("animaide.remove_slider", text='', icon='REMOVE')
-
-        # slider_box(layout, item, is_collection=False)
-        slider_box(layout, item)
 
         if len(slots) == 0:
             box = layout.box()
@@ -242,9 +239,9 @@ class AAT_PT_clone(Panel):
         row.prop(clone, 'cycle_after', text='')
 
 
-class AAT_MT_pie_menu(Menu):
-    bl_idname = "AAT_MT_pie_menu"
-    bl_label = "Pie Menu"
+class AAT_MT_pie_menu_a(Menu):
+    bl_idname = "AAT_MT_pie_menu_a"
+    bl_label = "Sliders A"
 
     def draw(self, context):
         layout = self.layout
@@ -254,31 +251,56 @@ class AAT_MT_pie_menu(Menu):
         col.operator("animaide.ease")
 
         col = pie.column(align=True)
-        col.operator("animaide.ease_in_out")
+        col.operator("animaide.tween")
 
         col = pie.column(align=True)
         col.operator("animaide.blend_ease")
 
         col = pie.column(align=True)
+        col.operator("animaide.ease_in_out")
+
+        col = pie.column(align=True)
         col.operator("animaide.blend_neighbor")
 
         col = pie.column(align=True)
-        col.operator("animaide.blend_offset")
+        col.operator("animaide.scale_average")
 
         col = pie.column(align=True)
         col.operator("animaide.push_pull")
 
         col = pie.column(align=True)
-        col.operator("animaide.smooth")
+        col.operator("animaide.blend_frame")
+
+
+class AAT_MT_pie_menu_b(Menu):
+    bl_idname = "AAT_MT_pie_menu_b"
+    bl_label = "Sliders B"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        col = pie.column()
+        col.operator("animaide.scale_left")
+
+        col = pie.column(align=True)
+        col.operator("animaide.scale_right")
 
         col = pie.column(align=True)
         col.operator("animaide.noise")
 
         col = pie.column(align=True)
+        col.operator("animaide.smooth")
+
+        col = pie.column(align=True)
+
+        col = pie.column(align=True)
+        col.operator("animaide.blend_offset")
+
+        col = pie.column(align=True)
         col.operator("animaide.time_offset")
 
         col = pie.column(align=True)
-        col.operator("animaide.tween")
 
 
 

@@ -1,8 +1,8 @@
 import bpy
 
+import random as rd
 
 from . import utils, key_utils, cur_utils
-
 
 fcurve = None
 global_fcurve = None
@@ -203,6 +203,8 @@ def push_pull(factor):
     for index in selected_keys:
         k = fcurve.keyframe_points[index]
         average_y = key_utils.linear_y(left_neighbor, right_neighbor, k)
+        if average_y is None:
+            continue
         delta = original_values[index]['y'] - average_y
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor * 2
@@ -264,7 +266,7 @@ def noise(factor, fcurves, fcurve_index):
                                           global_fcurve,
                                           clone_name)
 
-    cur_utils.add_noise(clone, strength=1, scale=0.5, phase=fcurve_index * left_neighbor['y'])
+    cur_utils.add_noise(clone, strength=1, scale=0.2, phase=rd.uniform(0, 1))
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -274,6 +276,37 @@ def noise(factor, fcurves, fcurve_index):
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
     fcurves.remove(clone)
+
+
+def noise_random(factor, fcurves, range=1):
+
+    # factor = (self.factor/2) + 0.5
+    # animaide = bpy.context.scene.animaide
+
+    # clone_name = '%s.%d.clone' % (fcurve.data_path, fcurve.array_index)
+    # clone = cur_utils.duplicate_from_data(fcurves,
+    #                                       global_fcurve,
+    #                                       clone_name)
+
+    # cur_utils.add_noise(clone, strength=1, scale=0.5, phase=fcurve_index * left_neighbor['y'])
+
+    clamped_factor = utils.clamp(factor, min_value, max_value)
+
+    noise = []
+    half_range = range/2
+    for index in selected_keys:
+        k = fcurve.keyframe_points[index]
+        random_y = rd.uniform(k.co.y - half_range, k.co.y + half_range)
+        noise.append(random_y)
+
+    n = 0
+    for index in selected_keys:
+        k = fcurve.keyframe_points[index]
+        delta = noise[n] - original_values[index]['y']
+        k.co.y = original_values[index]['y'] + delta * clamped_factor
+        n += 1
+
+    # fcurves.remove(clone)
 
 
 def scale(factor, scale_type):

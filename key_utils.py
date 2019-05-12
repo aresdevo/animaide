@@ -519,10 +519,12 @@ def reset_original():
             if not selected_keys:
                 index = on_current_frame(fcurve)
                 if index is None:
-                    return
+                    continue
                 selected_keys = [index]
 
             for index in selected_keys:
+                if index is None:
+                    continue
                 k = fcurve.keyframe_points[index]
                 k.co.y = original_values[index]['y']
 
@@ -689,14 +691,14 @@ def get_selected_neigbors(fcurve, keyframes):
     last_index = keyframes[i]
 
     if first_index == 0:
-        print('no more keys to the left')
+        # print('no more keys to the left')
         left_neighbor = every_key[first_index]
 
     elif first_index > 0:
         left_neighbor = every_key[first_index - 1]
 
     if last_index == len(fcurve.keyframe_points) - 1:
-        print('no more keys to the right')
+        # print('no more keys to the right')
         right_neighbor = every_key[last_index]
 
     elif last_index < len(fcurve.keyframe_points) - 1:
@@ -778,6 +780,8 @@ def set_direction(factor, left_key, right_key):
 def linear_y(left_neighbor, right_neighbor, key):
     big_adjacent = right_neighbor['x'] - left_neighbor['x']
     big_oposite = right_neighbor['y'] - left_neighbor['y']
+    if big_adjacent == 0:
+        return
     tangent = big_oposite/big_adjacent
 
     adjacent = key.co.x - left_neighbor['x']

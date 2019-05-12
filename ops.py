@@ -225,6 +225,8 @@ class AAT_OT_sliders_everything(Operator):
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
             average_y = key_utils.linear_y(self.left_neighbor, self.right_neighbor, k)
+            if average_y == 0:
+                continue
             delta = self.original_values[index]['y'] - average_y
 
             k.co.y = self.original_values[index]['y'] + delta * clamped_factor * 2
@@ -525,6 +527,13 @@ def slider_looper(self, context):
 
     for obj in objects:
         anim = obj.animation_data
+
+        if obj.type == 'ARMATURE' and obj.mode == 'POSE':
+            channel_groups = [bone.name for bone in bpy.context.selected_pose_bones]
+            # print('channel groups: ', channel_groups)
+        else:
+            channel_groups = anim.action.groups
+
         if anim is None:
             continue
         if anim.action.fcurves is None:
@@ -532,6 +541,11 @@ def slider_looper(self, context):
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, slider_tools.fcurve in fcurves.items():
+            # print('---')
+            # print('channel groups: ', channel_groups)
+            # print('fcurve group: ', slider_tools.fcurve.group.name)
+            # print('not in group: ', slider_tools.fcurve.group.name not in channel_groups)
+            # print('---')
 
             if slider_tools.fcurve.select is False:
                 continue
@@ -540,6 +554,9 @@ def slider_looper(self, context):
                 continue
 
             if slider_tools.fcurve.hide is True:
+                continue
+
+            if slider_tools.fcurve.group.name not in channel_groups:
                 continue
 
             if slider_tools.fcurve.group.name == cur_utils.group_name:
@@ -623,6 +640,8 @@ def slider_modal(self, context, event):
         self.execute(context)
 
     elif event.type == 'LEFTMOUSE':  # Confirm
+        if context.area.type == 'GRAPH_EDITOR':
+            context.area.tag_redraw()
         key_utils.get_globals()
         if self.slot_index == -1:
             self.animaide.slider.modal_switch = False
@@ -635,6 +654,8 @@ def slider_modal(self, context, event):
         return {'FINISHED'}
 
     if event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
+        if context.area.type == 'GRAPH_EDITOR':
+            context.area.tag_redraw()
         key_utils.reset_original()
         if self.slot_index == -1:
             self.animaide.slider.modal_switch = False
@@ -655,7 +676,9 @@ def slider_invoke(self, context, event):
 
     if self.slot_index == -1:
         slider = self.animaide.slider
+        overshoot = slider.overshoot
         slider.selector = self.slider_type
+        slider.overshoot = overshoot
     else:
         slider = self.slots[self.slot_index]
 
@@ -676,6 +699,13 @@ def slider_invoke(self, context, event):
     return {'RUNNING_MODAL'}
 
 
+def slider_poll(context):
+    objects = context.selected_objects
+    # space = context.area.spaces.active.type
+    area = context.area.type
+    return objects != [] and area == 'GRAPH_EDITOR'
+
+
 class AAT_OT_sliders(Operator):
     bl_idname = "animaide.sliders"
     bl_label = "Sliders"
@@ -688,8 +718,7 @@ class AAT_OT_sliders(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -698,7 +727,7 @@ class AAT_OT_sliders(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -714,6 +743,15 @@ class AAT_OT_sliders(Operator):
 
 
 class AAT_OT_ease(Operator):
+    ''' EASE
+
+Transition selected keys - or current key - from the neighboring
+ones with a "S" shape manner (ease-in and ease-out simultaneously).
+It doesn't take into consideration the current key values.
+
+shortcut:   1
+pie_menu-1:  (alt-1)'''
+
     bl_idname = "animaide.ease"
     bl_label = "Ease"
 
@@ -726,8 +764,7 @@ class AAT_OT_ease(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -736,7 +773,7 @@ class AAT_OT_ease(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -752,6 +789,15 @@ class AAT_OT_ease(Operator):
 
 
 class AAT_OT_ease_in_out(Operator):
+    ''' EASE-IN-OUT
+
+Transition selected keys - or current key - from the neighboring
+ones with a "C" shape manner (ease-in or ease-out). It doesn't
+take into consideration the current key values.
+
+shortcut:   2
+pie_menu-1:  (alt-1)'''
+
     bl_idname = "animaide.ease_in_out"
     bl_label = "Ease In Out"
 
@@ -764,8 +810,7 @@ class AAT_OT_ease_in_out(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -774,7 +819,7 @@ class AAT_OT_ease_in_out(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -790,6 +835,14 @@ class AAT_OT_ease_in_out(Operator):
 
 
 class AAT_OT_blend_neighbor(Operator):
+    ''' BLEND NEIGHBOR
+
+Blend selected keys - or current key - to the value of the neighboring
+left and right keys.
+
+shortcut:   3
+pie_menu-1: (alt-1)'''
+
     bl_idname = "animaide.blend_neighbor"
     bl_label = "Blend Neighbor"
 
@@ -802,8 +855,7 @@ class AAT_OT_blend_neighbor(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -812,7 +864,7 @@ class AAT_OT_blend_neighbor(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -828,6 +880,14 @@ class AAT_OT_blend_neighbor(Operator):
 
 
 class AAT_OT_blend_frame(Operator):
+    ''' BLEND FRAME
+
+Blend selected keys - or current key - to the value of the chosen
+left and right frames.
+
+shortcut:   shift-3
+pie_menu-1: (alt-1)'''
+
     bl_idname = "animaide.blend_frame"
     bl_label = "Blend Frame"
 
@@ -840,8 +900,7 @@ class AAT_OT_blend_frame(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -850,7 +909,7 @@ class AAT_OT_blend_frame(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -866,6 +925,14 @@ class AAT_OT_blend_frame(Operator):
 
 
 class AAT_OT_blend_ease(Operator):
+    ''' BLEND EASE
+
+Blend selected keys - or current key - to the ease-in or ease-out
+curve using the neighboring keys.
+
+shortcut:   shift-2
+pie_menu-1: (alt-1)'''
+
     bl_idname = "animaide.blend_ease"
     bl_label = "Blend Ease"
 
@@ -878,8 +945,7 @@ class AAT_OT_blend_ease(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -888,7 +954,7 @@ class AAT_OT_blend_ease(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -904,6 +970,14 @@ class AAT_OT_blend_ease(Operator):
 
 
 class AAT_OT_blend_offset(Operator):
+    ''' BLEND OFFSET
+
+Blend selected keys - or current key - to the
+value of the chosen left and right frames.
+
+shortcut:   shift-7
+pie_menu-2: (alt-2)'''
+
     bl_idname = "animaide.blend_offset"
     bl_label = "Blend Offset"
 
@@ -916,8 +990,7 @@ class AAT_OT_blend_offset(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -926,7 +999,7 @@ class AAT_OT_blend_offset(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -942,6 +1015,15 @@ class AAT_OT_blend_offset(Operator):
 
 
 class AAT_OT_tween(Operator):
+    ''' TWEEN
+
+Set lineal relative value of the selected keys - or current key -
+in relationship to the neighboring ones. It doesn't take into
+consideration the current key values.
+
+shortcut:   shift-1
+pie_menu-1: (alt-1)'''
+
     bl_idname = "animaide.tween"
     bl_label = "Tween"
 
@@ -954,8 +1036,7 @@ class AAT_OT_tween(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -964,7 +1045,7 @@ class AAT_OT_tween(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -980,6 +1061,14 @@ class AAT_OT_tween(Operator):
 
 
 class AAT_OT_push_pull(Operator):
+    ''' PUSH-PULL
+
+Exagerates or decreases the value of the selected keys
+- or current key -
+
+shortcut:   4
+pie_menu-1: (alt-1)'''
+
     bl_idname = "animaide.push_pull"
     bl_label = "Push Pull"
 
@@ -992,8 +1081,7 @@ class AAT_OT_push_pull(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1002,7 +1090,7 @@ class AAT_OT_push_pull(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -1018,6 +1106,13 @@ class AAT_OT_push_pull(Operator):
 
 
 class AAT_OT_smooth(Operator):
+    ''' SMOOTH
+
+Averages values of selected keys creating
+a smoother fcurve
+
+shortcut:   6
+pie_menu-2: (alt-2)'''
     bl_idname = "animaide.smooth"
     bl_label = "Smooth"
 
@@ -1030,8 +1125,7 @@ class AAT_OT_smooth(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1040,7 +1134,7 @@ class AAT_OT_smooth(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -1056,6 +1150,13 @@ class AAT_OT_smooth(Operator):
 
 
 class AAT_OT_time_offset(Operator):
+    ''' TIME OFFSET
+
+Shift the value of selected keys - or current key -
+to the ones of the left or right in the seme fcurve
+
+shortcut:   7
+pie_menu-2: (alt-2)'''
     bl_idname = "animaide.time_offset"
     bl_label = "Time Offset"
 
@@ -1068,8 +1169,7 @@ class AAT_OT_time_offset(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1078,7 +1178,7 @@ class AAT_OT_time_offset(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -1094,6 +1194,12 @@ class AAT_OT_time_offset(Operator):
 
 
 class AAT_OT_noise(Operator):
+    ''' NOISE
+
+Set random values to the selected keys - or current key -
+
+shortcut:   shift-6
+pie_menu-2: (alt-2)'''
     bl_idname = "animaide.noise"
     bl_label = "Noise"
 
@@ -1106,8 +1212,7 @@ class AAT_OT_noise(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1116,7 +1221,7 @@ class AAT_OT_noise(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -1132,6 +1237,13 @@ class AAT_OT_noise(Operator):
 
 
 class AAT_OT_scale_left(Operator):
+    ''' SCALE LEFT
+
+Increase or decrease the value of selected keys - or current key -
+in relationship to the left neighboring one.
+
+shortcut:   5
+pie_menu-2: (alt-2)'''
     bl_idname = "animaide.scale_left"
     bl_label = "Scale Left"
 
@@ -1144,8 +1256,7 @@ class AAT_OT_scale_left(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1154,7 +1265,7 @@ class AAT_OT_scale_left(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -1170,6 +1281,13 @@ class AAT_OT_scale_left(Operator):
 
 
 class AAT_OT_scale_right(Operator):
+    ''' SCALE RIGHT
+
+Increase or decrease the value of selected keys - or current key -
+in relationship to the right neighboring one.
+
+shortcut:   shift-5
+pie_menu-2: (alt-2)'''
     bl_idname = "animaide.scale_right"
     bl_label = "Scale Right"
 
@@ -1182,8 +1300,7 @@ class AAT_OT_scale_right(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1192,7 +1309,7 @@ class AAT_OT_scale_right(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -1208,6 +1325,14 @@ class AAT_OT_scale_right(Operator):
 
 
 class AAT_OT_scale_average(Operator):
+    ''' SCALE AVERAGE
+
+Increase or decrease the value of selected keys - or current key -
+in relationship to the average point of those affected.
+
+shortcut:   shift-4
+pie_menu-1: (alt-1)'''
+
     bl_idname = "animaide.scale_average"
     bl_label = "Scale Average"
 
@@ -1220,8 +1345,7 @@ class AAT_OT_scale_average(Operator):
 
     @classmethod
     def poll(cls, context):
-        objects = context.selected_objects
-        return objects != []
+        return slider_poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1230,7 +1354,7 @@ class AAT_OT_scale_average(Operator):
         self.init_mouse_x = None
 
     def __del__(self):
-        bpy.context.area.tag_redraw()
+        pass
 
     def execute(self, context):
 
@@ -1249,6 +1373,10 @@ class AAT_OT_scale_average(Operator):
 
 
 class AAT_OT_add_slider(Operator):
+    ''' ADD EXTRA SLIDER
+
+Add aditional slider to the panel'''
+
     bl_idname = 'animaide.add_slider'
     bl_label = "add_slider"
     bl_options = {'REGISTER'}
@@ -1268,6 +1396,10 @@ class AAT_OT_add_slider(Operator):
 
 
 class AAT_OT_remove_slider(Operator):
+    ''' REMOVE SLIDERS
+
+Removes last slider of the list'''
+
     bl_idname = 'animaide.remove_slider'
     bl_label = "remove_slider"
     bl_options = {'REGISTER'}
@@ -1288,13 +1420,19 @@ class AAT_OT_remove_slider(Operator):
 
 
 class AAT_OT_get_ref_frame(Operator):
+    ''' SET REFERENCE FRAME
+
+Sets a refernce frame that will be use by the BLEND FRAME
+slider. The one at the left sets the left reference, and the
+one on the right sets the right reference'''
+
     bl_idname = 'animaide.get_ref_frame'
     bl_label = "get_ref_frames"
     bl_options = {'REGISTER'}
 
-    slot_index: IntProperty()
+    slot_index: IntProperty(default=-1)
     side: StringProperty()
-    is_collection: BoolProperty()
+    # is_collection: BoolProperty()
 
     @classmethod
     def poll(cls, context):
@@ -1304,17 +1442,26 @@ class AAT_OT_get_ref_frame(Operator):
 
         animaide = context.scene.animaide
 
-        if self.is_collection:
-            slider = animaide.slider_slots[self.slot_index]
-        else:
+        # if self.slot_index == -1:
+        #     slider_num = '1'
+        # else:
+        #     slider_num = '%s' % (self.slot_index + 2)
+        #
+        # if self.is_collection:
+
+        if self.slot_index == -1:
             slider = animaide.slider
+            slider_num = 1
+        else:
+            slider = animaide.slider_slots[self.slot_index]
+            slider_num = self.slot_index + 2
 
         current_frame = bpy.context.scene.frame_current
 
-        if self.is_collection:
-            slider_num = self.slot_index + 2
-        else:
-            slider_num = 1
+        # if self.is_collection:
+        #     slider_num = self.slot_index + 2
+        # else:
+        #     slider_num = 1
 
         if self.side == 'L':
             slider.left_ref_frame = current_frame
@@ -1342,11 +1489,14 @@ class AAT_OT_get_ref_frame(Operator):
 
 
 class AAT_OT_settings(Operator):
+    ''' SLIDER SETTING
+
+Options related to the current tool on the slider'''
+
     bl_idname = "animaide.settings"
     bl_label = "Sliders Settings"
 
     slot_index: IntProperty()
-    is_collection: BoolProperty()
 
     def execute(self, context):
         return {'FINISHED'}
@@ -1357,15 +1507,14 @@ class AAT_OT_settings(Operator):
 
     def draw(self, context):
         animaide = context.scene.animaide
-        if self.is_collection:
-            slider = animaide.slider_slots[self.slot_index]
-        else:
+        if self.slot_index < 0:
             slider = animaide.slider
+        else:
+            slider = animaide.slider_slots[self.slot_index]
 
         layout = self.layout
         col = layout.column(align=False)
         col.label(text='Settings')
-        # col.alignment = 'CENTER'
         col.prop(slider, 'slope', text='Slope', slider=False)
         col.prop(slider, 'overshoot', text='Overshoot', toggle=True)
 
