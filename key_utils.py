@@ -357,7 +357,7 @@ def get_selected(fcurve):
     return keyframe_indexes
 
 
-def get_globals(selected=True, original=True, left_frame=None, right_frame=None):
+def get_sliders_globals(selected=True, original=True, left_frame=None, right_frame=None):
     """
     :return reversable list of complex keys that contains (index, key) on a tuple of the selected keys:
     """
@@ -488,6 +488,33 @@ def get_ref_frame_globals(left_ref_frame, right_ref_frame):
 
         if curves != {}:
             global_values[obj.name] = curves
+
+
+def get_magnet_globals(object):
+
+    anim = object.animation_data
+    if anim is None:
+        return
+    if anim.action.fcurves is None:
+        return
+
+    fcurves = object.animation_data.action.fcurves
+
+    curves = {}
+
+    for fcurve_index, fcurve in fcurves.items():
+
+        if fcurve.lock is True:
+            continue
+
+        cur_frame = bpy.context.scene.frame_current
+        cur_frame_y = fcurve.evaluate(cur_frame)
+
+        values = {'x': cur_frame, 'y': cur_frame_y}
+
+        curves[fcurve_index]['current_frame'] = values
+
+    global_values[object.name] = curves
 
 
 def reset_original():

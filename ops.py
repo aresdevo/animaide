@@ -331,8 +331,8 @@ class AAT_OT_sliders_everything(Operator):
             slider = animaide.slider_slots[self.slot_index]
 
         if self.op_context == 'EXEC_DEFAULT':
-            key_utils.get_globals(left_frame=slider.left_ref_frame,
-                                  right_frame=slider.right_ref_frame)
+            key_utils.get_sliders_globals(left_frame=slider.left_ref_frame,
+                                          right_frame=slider.right_ref_frame)
             # key_utils.get_ref_frame_globals(slider.left_ref_frame, slider.right_ref_frame)
 
         slider.factor = self.factor
@@ -457,7 +457,7 @@ class AAT_OT_sliders_everything(Operator):
             self.execute(context)
 
         elif event.type == 'LEFTMOUSE':  # Confirm
-            key_utils.get_globals()
+            key_utils.get_sliders_globals()
             if self.slot_index == -1:
                 self.animaide.slider.modal_switch = False
                 self.animaide.slider.factor = 0.0
@@ -497,8 +497,8 @@ class AAT_OT_sliders_everything(Operator):
         self.factor = 0.0
         self.init_mouse_x = event.mouse_x
 
-        key_utils.get_globals(left_frame=slider.left_ref_frame,
-                              right_frame=slider.right_ref_frame)
+        key_utils.get_sliders_globals(left_frame=slider.left_ref_frame,
+                                      right_frame=slider.right_ref_frame)
 
         self.execute(context)
         context.window_manager.modal_handler_add(self)
@@ -514,8 +514,8 @@ def slider_looper(self, context):
         slider = animaide.slider_slots[self.slot_index]
 
     if self.op_context == 'EXEC_DEFAULT':
-        key_utils.get_globals(left_frame=slider.left_ref_frame,
-                              right_frame=slider.right_ref_frame)
+        key_utils.get_sliders_globals(left_frame=slider.left_ref_frame,
+                                      right_frame=slider.right_ref_frame)
 
     # slider.factor = self.factor
     # slider.factor_overshoot = self.factor
@@ -642,7 +642,7 @@ def slider_modal(self, context, event):
     elif event.type == 'LEFTMOUSE':  # Confirm
         if context.area.type == 'GRAPH_EDITOR':
             context.area.tag_redraw()
-        key_utils.get_globals()
+        key_utils.get_sliders_globals()
         if self.slot_index == -1:
             self.animaide.slider.modal_switch = False
             self.animaide.slider.factor = 0.0
@@ -690,8 +690,8 @@ def slider_invoke(self, context, event):
     self.factor = 0.0
     self.init_mouse_x = event.mouse_x
 
-    key_utils.get_globals(left_frame=slider.left_ref_frame,
-                          right_frame=slider.right_ref_frame)
+    key_utils.get_sliders_globals(left_frame=slider.left_ref_frame,
+                                  right_frame=slider.right_ref_frame)
 
     self.execute(context)
     context.window_manager.modal_handler_add(self)
@@ -704,6 +704,14 @@ def slider_poll(context):
     # space = context.area.spaces.active.type
     area = context.area.type
     return objects != [] and area == 'GRAPH_EDITOR'
+
+
+def magnet_poll(context):
+    obj = context.object
+    anim = obj.animation_data
+    # space = context.area.spaces.active.type
+    area = context.area.type
+    return obj is not None and area == 'GRAPH_EDITOR' and anim is not None
 
 
 class AAT_OT_sliders(Operator):
@@ -740,6 +748,166 @@ class AAT_OT_sliders(Operator):
     def invoke(self, context, event):
 
         return slider_invoke(self, context, event)
+
+
+class AAT_OT_create_magnet(Operator):
+    ''' ACTIVATES THE MAGNET
+
+Adds a magnet to the current object. It will adjust the keys in
+the magnet's range when the current object is manipulated
+in the 3D View. This tool desables auto-key. It is easier to see
+with "Normalize" on'''
+
+    bl_idname = "animaide.create_magnet"
+    bl_label = "Create Magnet"
+    bl_options = {'REGISTER'}
+
+    l_margin: IntProperty(default=0, max=0)
+    l_blend: IntProperty(default=0, max=0)
+    r_margin: IntProperty(default=0, min=0)
+    r_blend: IntProperty(default=0, min=0)
+
+    interp: EnumProperty(
+        items=[('LINEAR', ' ', 'Linear', 'IPO_LINEAR', 1),
+               ('SINE', ' ', 'Sine', 'IPO_SINE', 2),
+               ('CUBIC', ' ', 'Cubic', 'IPO_CUBIC', 3),
+               ('QUART', ' ', 'Quart', 'IPO_QUART', 4),
+               ('QUINT', ' ', 'Quint', 'IPO_QUINT', 5)],
+        name="Interpolation",
+        default='SINE'
+    )
+
+    easing: EnumProperty(
+        items=[('EASE_IN', 'ease in', '', 'IPO_EASE_IN', 1),
+               ('EASE_IN_OUT', 'ease in-out', '', 'IPO_EASE_IN_OUT', 2),
+               ('EASE_OUT', 'ease out', '', 'IPO_EASE_OUT', 3)],
+        name="Easing",
+        default='EASE_IN_OUT'
+    )
+
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+
+    @classmethod
+    def poll(cls, context):
+        return magnet_poll(context)
+
+    # def __init__(self):
+    #     pass
+    #
+    # def __del__(self):
+    #     pass
+
+    def execute(self, context):
+
+        obj = context.object
+
+        anim = obj.animation_data
+
+        if anim is None:
+            return
+
+        if anim.action is None:
+            return
+
+        # key_utils.get_magnet_globals(obj)
+
+        cur_utils.add_magnet(anim.action,
+                             self.l_margin,
+                             self.l_blend,
+                             self.r_margin,
+                             self.r_blend,
+                             self.interp,
+                             self.easing)
+
+        context.scene.tool_settings.use_keyframe_insert_auto = False
+
+        bpy.app.handlers.depsgraph_update_pre.append(cur_utils.magnet_shape_handlers)
+
+        bpy.app.handlers.depsgraph_update_pre.append(cur_utils.magnet_handlers)
+
+        return {'FINISHED'}
+
+    # def modal(self, context, event):
+    #
+    #     return slider_modal(self, context, event)
+    #
+    # def invoke(self, context, event):
+    #
+    #     return slider_invoke(self, context, event)
+
+
+class AAT_OT_delete_magnet(Operator):
+    ''' DEACTIVATES THE MAGNET
+
+Removes the magnet from the current object'''
+
+    bl_idname = "animaide.delete_magnet"
+    bl_label = "Delete Magnet"
+    bl_options = {'REGISTER'}
+
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+
+    @classmethod
+    def poll(cls, context):
+        return magnet_poll(context)
+
+    # def __init__(self):
+    #     pass
+    #
+    # def __del__(self):
+    #     pass
+
+    def execute(self, context):
+        # animaide = context.scene.animaide
+        #
+        # obj = context.object
+        #
+        # anim = obj.animation_data
+        #
+        # if anim is None:
+        #     return
+        #
+        # if anim.action.fcurves is None:
+        #     return
+        #
+        # # channel_groups = anim.action.groups
+        #
+        # fcurves = obj.animation_data.action.fcurves
+        #
+        # for fcurve_index, fcurve in fcurves.items():
+        #
+        #     if fcurve.lock:
+        #         continue
+        #
+        #     if fcurve.group.name == cur_utils.group_name:
+        #         continue  # we don't want to select keys on reference fcurves
+        #
+        #     magnet_index = animaide.magnet.index
+        #
+        #     print('magnet index', magnet_index)
+        #
+        #     magnet = fcurves[magnet_index]
+        #
+        #     cur_utils.use_magnet(obj, fcurve, magnet)
+
+        bpy.app.handlers.depsgraph_update_pre.remove(cur_utils.magnet_shape_handlers)
+
+        bpy.app.handlers.depsgraph_update_pre.remove(cur_utils.magnet_handlers)
+
+        obj = context.object
+        fcurves = obj.animation_data.action.fcurves
+
+        cur_utils.remove_magnet(fcurves)
+
+        return {'FINISHED'}
+
+    # def modal(self, context, event):
+    #
+    #     return slider_modal(self, context, event)
+    #
+    # def invoke(self, context, event):
+    #
+    #     return slider_invoke(self, context, event)
 
 
 class AAT_OT_ease(Operator):
@@ -1469,7 +1637,10 @@ one on the right sets the right reference'''
         if self.side == 'R':
             slider.right_ref_frame = current_frame
 
-        utils.add_marker(slider_num, self.side, current_frame)
+        if slider.use_markers:
+            utils.add_marker(slider_num, self.side, current_frame)
+        else:
+            utils.remove_marker(slider_num)
 
         # key_utils.get_ref_frame_globals(slider.left_neighbor, slider.right_neighbor)
 
@@ -1488,22 +1659,26 @@ one on the right sets the right reference'''
         return {'FINISHED'}
 
 
-class AAT_OT_settings(Operator):
+class AAT_OT_sliders_settings(Operator):
     ''' SLIDER SETTING
 
 Options related to the current tool on the slider'''
 
-    bl_idname = "animaide.settings"
+    bl_idname = "animaide.sliders_settings"
     bl_label = "Sliders Settings"
 
     slot_index: IntProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return slider_poll(context)
 
     def execute(self, context):
         return {'FINISHED'}
 
     def invoke(self, context, event):
         wm = context.window_manager
-        return wm.invoke_popup(self, width=200)
+        return wm.invoke_popup(self, width=150)
 
     def draw(self, context):
         animaide = context.scene.animaide
@@ -1517,6 +1692,40 @@ Options related to the current tool on the slider'''
         col.label(text='Settings')
         col.prop(slider, 'slope', text='Slope', slider=False)
         col.prop(slider, 'overshoot', text='Overshoot', toggle=True)
+        col.prop(slider, 'use_markers', text='Use Markers', toggle=True)
+
+
+class AAT_OT_magnet_settings(Operator):
+    ''' MAGNET SETTING
+
+Options related to the magnet'''
+
+    bl_idname = "animaide.magnet_settings"
+    bl_label = "Magnet Settings"
+
+    slot_index: IntProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return magnet_poll(context)
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_popup(self, width=150)
+
+    def draw(self, context):
+        animaide = context.object.animaide
+
+        layout = self.layout
+
+        row = layout.row(align=False)
+        row.prop(animaide.magnet, 'easing', text='', icon_only=False)
+        row = layout.row(align=False)
+        row.prop(animaide.magnet, 'interp', text=' ', expand=True)
+        # row.prop(animaide.magnet, 'interp', text='', icon_only=False)
 
 
 class AAT_OT_clone(Operator):

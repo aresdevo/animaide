@@ -60,10 +60,11 @@ def slider_box(layout, slot, index=-1):
     # col.label(text=slider_num)
 
     col = row.column(align=False)
-    col.prop_menu_enum(slot, 'selector', text=props.names[slot.selector], icon=props.icons[slot.selector])
+    # col.prop_menu_enum(slot, 'selector', text=props.names[slot.selector], icon=props.icons[slot.selector])
+    col.prop(slot, 'selector', text='')
 
     col = row.column(align=False)
-    setting = col.operator('animaide.settings', text='', icon='SETTINGS', emboss=False)
+    setting = col.operator('animaide.sliders_settings', text='', icon='SETTINGS', emboss=False)
     setting.slot_index = slot.index
 
     # -------- Slider -----------
@@ -77,37 +78,26 @@ def slider_box(layout, slot, index=-1):
 
         if slot.overshoot == True:
             for f in [-2, -1.5]:
-                # step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
                 step_button(row, slot, factor=f, text=' ', icon='')
 
-        # step_button(row, slot, factor=-1, text='',
-        #             icon='CHECKBOX_DEHLT', emboss=False, active=True, is_collection=is_collection)
         step_button(row, slot, factor=-1, text='',
                     icon='CHECKBOX_DEHLT', emboss=False, active=True)
 
         for f in [-0.75, -0.5, -0.25]:
-            # step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
             step_button(row, slot, factor=f, text=' ', icon='')
 
-        # step_button(row, slot, factor=0, text='', icon='ANTIALIASED',
-        #             emboss=False, operator_context='INVOKE_DEFAULT',
-        #             active=True, is_collection=is_collection)
         step_button(row, slot, factor=0, text='', icon='ANTIALIASED',
                     emboss=False, operator_context='INVOKE_DEFAULT',
                     active=True)
 
         for f in [0.25, 0.5, 0.75]:
-            # step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
             step_button(row, slot, factor=f, text=' ', icon='')
 
-        # step_button(row, slot, factor=1, text='',
-        #             icon='CHECKBOX_DEHLT', emboss=False, active=True, is_collection=is_collection)
         step_button(row, slot, factor=1, text='',
                     icon='CHECKBOX_DEHLT', emboss=False, active=True)
 
         if slot.overshoot == True:
             for f in [1.5, 2]:
-                # step_button(row, slot, factor=f, text=' ', icon='', is_collection=is_collection)
                 step_button(row, slot, factor=f, text=' ', icon='')
 
     else:
@@ -186,21 +176,25 @@ class AAT_PT_sliders(Panel):
         slider = animaide.slider
 
         if key_utils.global_values == {}:
-            key_utils.get_globals()
+            key_utils.get_sliders_globals()
 
         layout = self.layout
+
+        # row = layout.row(align=True)
+        # row.label(text='Main Slider')
 
         slider_box(layout, slider)
 
         row = layout.row(align=True)
         row.operator("animaide.add_slider", text='', icon='ADD')
         row.operator("animaide.remove_slider", text='', icon='REMOVE')
+        # row.label(text='Extra Sliders')
 
         if len(slots) == 0:
             box = layout.box()
             row = box.row(align=True)
             row.alignment = 'CENTER'
-            row.label(text='You can add more sliders', translate=False)
+            row.label(text='Extra sliders', translate=False)
 
         index = 0
         for slot in slots:
@@ -213,30 +207,50 @@ class AAT_PT_sliders(Panel):
         # row.template_list("AA_UL_sliders", "", animaide, "slider_slots", animaide, "slider_i")
 
 
-class AAT_PT_clone(Panel):
-    bl_idname = 'AA_PT_clone'
-    bl_label = "Clone"
+class AAT_PT_magnet(Panel):
+    bl_idname = 'AAT_PT_magnet'
+    bl_label = "Magnet"
     bl_space_type = 'GRAPH_EDITOR'
     bl_region_type = 'UI'
     bl_category = 'AnimAide'
 
     def draw(self, context):
-        clone = context.scene.animaide.clone
+        animaide = context.object.animaide
 
         layout = self.layout
+
         row = layout.row(align=True)
 
-        row.operator("animaide.fcurve_clone", text="Add", icon='NODE_COMPOSITING')
-        row.operator("animaide.remove_clone", text="Remove", icon='CANCEL')
+        if animaide.magnet.index == -1:
+            magnet = row.operator("animaide.create_magnet", text="Activate")
+            magnet.l_margin = animaide.magnet.l_margin
+            magnet.l_blend = animaide.magnet.l_blend
+            magnet.r_margin = animaide.magnet.r_margin
+            magnet.r_blend = animaide.magnet.r_blend
+            magnet.interp = animaide.magnet.interp
+            magnet.easing = animaide.magnet.easing
+            row.operator('animaide.magnet_settings', text='', icon='SETTINGS', emboss=True)
+        else:
+            row.operator("animaide.delete_magnet", text="Deactivate")
+            row.operator('animaide.magnet_settings', text='', icon='SETTINGS', emboss=True)
 
-        row = layout.row()
-        # row.alignment = 'RIGHT'
-        row.label(text='Cycle Before')
-        row.prop(clone, 'cycle_before', text='')
-        row = layout.row()
-        # row.alignment = 'RIGHT'
-        row.label(text='Cycle After')
-        row.prop(clone, 'cycle_after', text='')
+            col = layout.column_flow(columns=2, align=False)
+            col.label(text='Margins')
+            row = col.row(align=True)
+            row.prop(animaide.magnet, 'l_margin', text='', slider=False)
+            row.prop(animaide.magnet, 'r_margin', text='', slider=False)
+
+            col = layout.column_flow(columns=2, align=False)
+            col.label(text='Blends')
+            row = col.row(align=True)
+            row.prop(animaide.magnet, 'l_blend', text='', slider=False)
+            row.prop(animaide.magnet, 'r_blend', text='', slider=False)
+
+            # row = layout.row(align=False)
+            # row.alignment = 'RIGHT'
+            # row.prop(animaide.magnet, 'easing', text='', icon_only=False)
+            # # row.prop(animaide.magnet, 'interp', expand=True)
+            # row.prop(animaide.magnet, 'interp', text='', icon_only=True)
 
 
 class AAT_MT_pie_menu_a(Menu):

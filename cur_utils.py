@@ -470,6 +470,200 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
             refe.remove(action, reference)
     # remove_clones(objects)
 
+def magnet_handlers(dummy):
+    context = bpy.context
+
+    # context.scene.tool_settings.use_keyframe_insert_auto = False
+
+    obj = context.object
+
+    animaide = obj.animaide
+
+    anim = obj.animation_data
+
+    if anim is None:
+        return
+
+    if anim.action.fcurves is None:
+        return
+
+    fcurves = obj.animation_data.action.fcurves
+
+    for fcurve_index, fcurve in fcurves.items():
+
+        if fcurve.lock:
+            continue
+
+        if fcurve.group.name == group_name:
+            continue  # we don't want to select keys on reference fcurves
+
+        magnet_index = animaide.magnet.index
+
+        magnet = fcurves[magnet_index]
+
+        use_magnet(obj, fcurve, magnet)
+
+    return
+
+
+def magnet_shape_handlers(dummy):
+    context = bpy.context
+
+    obj = context.object
+
+    animaide = obj.animaide
+
+    anim = obj.animation_data
+
+    if anim is None:
+        return
+
+    if anim.action is None:
+        return
+
+    # key_utils.get_magnet_globals(obj)
+
+    magnet_index = animaide.magnet.index
+
+    magnet = anim.action.fcurves[magnet_index]
+
+    modify_magnet(magnet,
+                  magnet.keyframe_points,
+                  animaide.magnet.l_margin,
+                  animaide.magnet.l_blend,
+                  animaide.magnet.r_margin,
+                  animaide.magnet.r_blend,
+                  animaide.magnet.interp,
+                  animaide.magnet.easing)
+
+    return {'FINISHED'}
+
+
+def use_magnet(obj, fcurve, magnet):
+    """
+
+    :param objects:
+    :param interpolation:
+    :param go_to:
+    :return:
+    """
+
+    if fcurve.lock is True:
+        return
+
+    if fcurve.group.name == group_name:
+        return  # we don't want to select keys on reference fcurves
+
+    delta_y = get_magnet_delta(obj, fcurve)
+
+    for k in fcurve.keyframe_points:
+        k.co.y = k.co.y + (delta_y * magnet.evaluate(k.co.x))
+
+    fcurve.update()
+
+    return
+
+
+def get_magnet_delta(obj, fcurve):
+    cur_frame = bpy.context.scene.frame_current
+
+    source = fcurve.evaluate(cur_frame)
+
+    # global_fcurve = key_utils.global_values[obj.name][fcurve_index]
+    # source = global_fcurve['current_frame']
+
+    prop = obj.path_resolve(fcurve.data_path)
+
+    target = prop[fcurve.array_index]
+
+    return target - source
+
+
+def remove_magnet(fcurves):
+    animaide = bpy.context.object.animaide
+
+    magnet_index = animaide.magnet.index
+
+    if magnet_index != -1:
+
+        magnet = fcurves[magnet_index]
+
+        fcurves.remove(magnet)
+
+        animaide.magnet.index = -1
+
+
+def add_magnet(action, l_margin=0, l_blend=0, r_margin=0, r_blend=0, interp='BEZIER', easing='EASE_IN_OUT'):
+    """
+
+    :param fcurve:
+    :param interpolation:
+    :return:
+    """
+
+    animaide = bpy.context.object.animaide
+
+    if animaide.magnet.index == -1:
+        animaide.magnet.index = len(action.fcurves)
+        magnet = action.fcurves.new(data_path='reference', index=animaide.magnet.index, action_group=group_name)
+        magnet.color_mode = 'CUSTOM'
+        magnet.color = (1, 1, 1)
+
+        keys = magnet.keyframe_points
+        keys.add(4)
+    else:
+        magnet = action.fcurves[animaide.magnet.index]
+        keys = magnet.keyframe_points
+
+    modify_magnet(magnet, keys, l_margin, l_blend, r_margin, r_blend, interp, easing)
+
+    return magnet
+
+
+def modify_magnet(magnet, keys, l_margin=0, l_blend=0, r_margin=0, r_blend=0, interp='BEZIER', easing='EASE_IN_OUT'):
+    cur_frame = bpy.context.scene.frame_current
+
+    if l_margin > -0.5:
+        l_margin = -0.5
+
+    if r_margin < 0.5:
+        r_margin = 0.5
+
+    if l_blend > -0.5:
+        l_blend = -0.5
+
+    if r_blend < 0.5:
+        r_blend = 0.5
+
+    keys[0].co.x = float(cur_frame) + l_margin + l_blend
+    keys[0].co.y = 0
+    keys[1].co.x = float(cur_frame) + l_margin
+    keys[1].co.y = 1
+    keys[2].co.x = float(cur_frame) + r_margin
+    keys[2].co.y = 1
+    keys[3].co.x = float(cur_frame) + r_margin + r_blend
+    keys[3].co.y = 0
+
+    easing_b = easing
+
+    if easing == 'EASE_IN':
+        easing_b = 'EASE_OUT'
+
+    if easing == 'EASE_OUT':
+        easing_b = 'EASE_IN'
+
+    keys[0].interpolation = interp
+    keys[0].easing = easing_b
+    keys[1].interpolation = 'LINEAR'
+    keys[1].easing = 'EASE_IN_OUT'
+    keys[2].interpolation = interp
+    keys[2].easing = easing
+
+    magnet.lock = True
+    magnet.select = True
+
+    magnet.update()
+
 
 def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=False):
     """

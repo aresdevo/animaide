@@ -26,7 +26,7 @@ bl_info = {
     "name": "AnimAide",
     "description": "",
     "author": "Ares Deveaux",
-    "version": (0, 0, 1),
+    "version": (0, 1, 0),
     "blender": (2, 80, 0),
     "location": "Graph Editor > Side Panel",
     "warning": "This addon is still in development.",
@@ -37,19 +37,17 @@ bl_info = {
 #################################
 from . import utils, key_utils, cur_utils, props, ops, ui
 
-# test
-
 classes = (
-    # props.AnimAideKeys,
     # props.myPreferences,
-    # props.AnimAideFCurves,
+    props.AnimAideMagnet,
     props.AnimAideClone,
-    # props.AnimAideCloneData,
     props.AnimSlider,
-    props.AnimAide,
+    props.AnimAideScene,
+    props.AnimAideObject,
     ops.AAT_OT_add_slider,
     ops.AAT_OT_remove_slider,
-    ops.AAT_OT_settings,
+    ops.AAT_OT_sliders_settings,
+    ops.AAT_OT_magnet_settings,
     ops.AAT_OT_get_ref_frame,
     ops.AAT_OT_sliders,
     ops.AAT_OT_ease,
@@ -66,14 +64,16 @@ classes = (
     ops.AAT_OT_noise,
     ops.AAT_OT_time_offset,
     ops.AAT_OT_tween,
-    # ops.AAT_OT_clone,
-    # ops.AAT_OT_clone_remove,
+    ops.AAT_OT_clone,
+    ops.AAT_OT_clone_remove,
+    ops.AAT_OT_create_magnet,
+    ops.AAT_OT_delete_magnet,
     # ops.AAT_OT_move_key,
     # ops.AAT_OT_modifier,
+    ui.AAT_PT_magnet,
     ui.AAT_PT_sliders,
     ui.AAT_MT_pie_menu_a,
-    ui.AAT_MT_pie_menu_b,
-    # ui.AAT_PT_clone
+    ui.AAT_MT_pie_menu_b
 )
 
 # register
@@ -160,6 +160,8 @@ def register():
 
     register_keymaps()
 
+    # bpy.app.handlers.depsgraph_update_pre.append(cur_utils.magnet_handlers)
+
 
 def unregister():
 
@@ -169,3 +171,5 @@ def unregister():
     props.del_props()
 
     unregister_keymaps()
+
+    # bpy.app.handlers.depsgraph_update_pre.remove(cur_utils.magnet_handlers)
