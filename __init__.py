@@ -43,9 +43,11 @@ classes = (
     props.AnimAideClone,
     props.AnimSlider,
     props.AnimAideScene,
-    props.AnimAideObject,
+    # props.AnimAideObject,
     ops.AAT_OT_add_slider,
     ops.AAT_OT_remove_slider,
+    ops.AAT_OT_anim_transform_on,
+    ops.AAT_OT_anim_transform_off,
     ops.AAT_OT_sliders_settings,
     ops.AAT_OT_magnet_settings,
     ops.AAT_OT_get_ref_frame,
@@ -160,8 +162,6 @@ def register():
 
     register_keymaps()
 
-    # bpy.app.handlers.depsgraph_update_pre.append(cur_utils.magnet_handlers)
-
 
 def unregister():
 
@@ -172,4 +172,3 @@ def unregister():
 
     unregister_keymaps()
 
-    # bpy.app.handlers.depsgraph_update_pre.remove(cur_utils.magnet_handlers)

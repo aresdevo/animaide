@@ -261,7 +261,8 @@ def noise(factor, fcurves, fcurve_index):
     # factor = (self.factor/2) + 0.5
     # animaide = bpy.context.scene.animaide
 
-    clone_name = '%s.%d.clone' % (fcurve.data_path, fcurve.array_index)
+    # clone_name = '%s.%d.clone' % (fcurve.data_path, fcurve.array_index)
+    clone_name = 'animaide'
     clone = cur_utils.duplicate_from_data(fcurves,
                                           global_fcurve,
                                           clone_name)

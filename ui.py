@@ -209,48 +209,56 @@ class AAT_PT_sliders(Panel):
 
 class AAT_PT_magnet(Panel):
     bl_idname = 'AAT_PT_magnet'
-    bl_label = "Magnet"
+    bl_label = "Anim Transform"
     bl_space_type = 'GRAPH_EDITOR'
+    # bl_space_type = props.space_type_pref()
     bl_region_type = 'UI'
     bl_category = 'AnimAide'
 
     def draw(self, context):
-        animaide = context.object.animaide
+        animaide = context.scene.animaide
 
         layout = self.layout
 
         row = layout.row(align=True)
 
-        if animaide.magnet.index == -1:
-            magnet = row.operator("animaide.create_magnet", text="Activate")
-            magnet.l_margin = animaide.magnet.l_margin
-            magnet.l_blend = animaide.magnet.l_blend
-            magnet.r_margin = animaide.magnet.r_margin
-            magnet.r_blend = animaide.magnet.r_blend
-            magnet.interp = animaide.magnet.interp
-            magnet.easing = animaide.magnet.easing
-            row.operator('animaide.magnet_settings', text='', icon='SETTINGS', emboss=True)
+        if animaide.magnet.anim_transform_active is False:
+            row.operator("animaide.anim_transform_on", text='Activate')
         else:
-            row.operator("animaide.delete_magnet", text="Deactivate")
-            row.operator('animaide.magnet_settings', text='', icon='SETTINGS', emboss=True)
+            row.operator("animaide.anim_transform_off", text="Dectivate")
 
-            col = layout.column_flow(columns=2, align=False)
-            col.label(text='Margins')
-            row = col.row(align=True)
-            row.prop(animaide.magnet, 'l_margin', text='', slider=False)
-            row.prop(animaide.magnet, 'r_margin', text='', slider=False)
+            row = layout.row(align=True)
 
-            col = layout.column_flow(columns=2, align=False)
-            col.label(text='Blends')
-            row = col.row(align=True)
-            row.prop(animaide.magnet, 'l_blend', text='', slider=False)
-            row.prop(animaide.magnet, 'r_blend', text='', slider=False)
+            if animaide.magnet.in_use is False:
+                magnet = row.operator("animaide.create_magnet", text="Add Mask")
+                # magnet.l_margin = animaide.magnet.l_margin
+                # magnet.l_blend = animaide.magnet.l_blend
+                # magnet.r_margin = animaide.magnet.r_margin
+                # magnet.r_blend = animaide.magnet.r_blend
+                # magnet.interp = animaide.magnet.interp
+                # magnet.easing = animaide.magnet.easing
+                row.operator('animaide.magnet_settings', text='', icon='SETTINGS', emboss=True)
+            else:
+                row.operator("animaide.delete_magnet", text="Remove Mask")
+                row.operator('animaide.magnet_settings', text='', icon='SETTINGS', emboss=True)
 
-            # row = layout.row(align=False)
-            # row.alignment = 'RIGHT'
-            # row.prop(animaide.magnet, 'easing', text='', icon_only=False)
-            # # row.prop(animaide.magnet, 'interp', expand=True)
-            # row.prop(animaide.magnet, 'interp', text='', icon_only=True)
+                col = layout.column_flow(columns=2, align=False)
+                col.label(text='Margins')
+                row = col.row(align=True)
+                row.prop(animaide.magnet, 'l_margin', text='', slider=False)
+                row.prop(animaide.magnet, 'r_margin', text='', slider=False)
+
+                col = layout.column_flow(columns=2, align=False)
+                col.label(text='Blends')
+                row = col.row(align=True)
+                row.prop(animaide.magnet, 'l_blend', text='', slider=False)
+                row.prop(animaide.magnet, 'r_blend', text='', slider=False)
+
+                # row = layout.row(align=False)
+                # row.alignment = 'RIGHT'
+                # row.prop(animaide.magnet, 'easing', text='', icon_only=False)
+                # # row.prop(animaide.magnet, 'interp', expand=True)
+                # row.prop(animaide.magnet, 'interp', text='', icon_only=True)
 
 
 class AAT_MT_pie_menu_a(Menu):

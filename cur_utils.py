@@ -1,9 +1,9 @@
 import bpy
 
-from . import key_utils
+from . import key_utils, utils
 
 
-group_name = 'helper_curves'
+group_name = 'animaide'
 
 
 def animation_transfrom(objects):
@@ -470,38 +470,39 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
             refe.remove(action, reference)
     # remove_clones(objects)
 
+
 def magnet_handlers(dummy):
+
     context = bpy.context
 
-    # context.scene.tool_settings.use_keyframe_insert_auto = False
+    context.scene.tool_settings.use_keyframe_insert_auto = False
 
-    obj = context.object
+    selected_objects = context.selected_objects
 
-    animaide = obj.animaide
+    for obj in selected_objects:
 
-    anim = obj.animation_data
+        # obj = context.object
+        obj_anim = obj.animation_data
 
-    if anim is None:
-        return
+        if obj_anim is None:
+            return
 
-    if anim.action.fcurves is None:
-        return
+        if obj_anim.action.fcurves is None:
+            return
 
-    fcurves = obj.animation_data.action.fcurves
+        fcurves = obj_anim.action.fcurves
 
-    for fcurve_index, fcurve in fcurves.items():
+        for fcurve in fcurves:
 
-        if fcurve.lock:
-            continue
+            # if fcurve.lock:
+            #     continue
+            #
+            # if fcurve.group.name == group_name:
+            #     continue  # we don't want to select keys on reference fcurves
 
-        if fcurve.group.name == group_name:
-            continue  # we don't want to select keys on reference fcurves
+            # magnet_index = animaide.magnet.index
 
-        magnet_index = animaide.magnet.index
-
-        magnet = fcurves[magnet_index]
-
-        use_magnet(obj, fcurve, magnet)
+            use_magnet(obj, fcurve)
 
     return
 
@@ -509,11 +510,13 @@ def magnet_handlers(dummy):
 def magnet_shape_handlers(dummy):
     context = bpy.context
 
-    obj = context.object
+    # obj = context.object
+    # animaide = obj.animaide
+    # anim = obj.animation_data
 
-    animaide = obj.animaide
-
-    anim = obj.animation_data
+    scene = bpy.context.scene
+    animaide = scene.animaide
+    anim = scene.animation_data
 
     if anim is None:
         return
@@ -523,9 +526,9 @@ def magnet_shape_handlers(dummy):
 
     # key_utils.get_magnet_globals(obj)
 
-    magnet_index = animaide.magnet.index
+    # magnet_index = animaide.magnet.index
 
-    magnet = anim.action.fcurves[magnet_index]
+    magnet = anim.action.fcurves[0]
 
     modify_magnet(magnet,
                   magnet.keyframe_points,
@@ -536,10 +539,10 @@ def magnet_shape_handlers(dummy):
                   animaide.magnet.interp,
                   animaide.magnet.easing)
 
-    return {'FINISHED'}
+    return
 
 
-def use_magnet(obj, fcurve, magnet):
+def use_magnet(obj, fcurve):
     """
 
     :param objects:
@@ -547,6 +550,9 @@ def use_magnet(obj, fcurve, magnet):
     :param go_to:
     :return:
     """
+    scene = bpy.context.scene
+    scene_anim = scene.animation_data
+    magnet = None
 
     if fcurve.lock is True:
         return
@@ -554,10 +560,20 @@ def use_magnet(obj, fcurve, magnet):
     if fcurve.group.name == group_name:
         return  # we don't want to select keys on reference fcurves
 
+    if scene_anim is not None:
+        if scene_anim.action == bpy.data.actions['animaide']:
+            magnet = scene_anim.action.fcurves[0]
+
     delta_y = get_magnet_delta(obj, fcurve)
 
     for k in fcurve.keyframe_points:
-        k.co.y = k.co.y + (delta_y * magnet.evaluate(k.co.x))
+
+        if magnet is None:
+            factor = 1
+        else:
+            factor = magnet.evaluate(k.co.x)
+
+        k.co.y = k.co.y + (delta_y * factor)
 
     fcurve.update()
 
@@ -579,55 +595,134 @@ def get_magnet_delta(obj, fcurve):
     return target - source
 
 
-def remove_magnet(fcurves):
-    animaide = bpy.context.object.animaide
+def remove_magnet():
+    scene = bpy.context.scene
+    animaide = scene.animaide
 
-    magnet_index = animaide.magnet.index
+    if animaide.magnet.in_use is False:
+        return
 
-    if magnet_index != -1:
+    if scene.animation_data is None:
+        return
 
-        magnet = fcurves[magnet_index]
+    if scene.animation_data.action is None:
+        return
 
-        fcurves.remove(magnet)
+    if 'animaide' not in bpy.data.actions.keys():
+        return
 
-        animaide.magnet.index = -1
+    if scene.animation_data.action is bpy.data.actions['animaide']:
+
+        fcurves = scene.animation_data.action.fcurves
+
+        fcurves.remove(fcurves[0])
+
+        scene.animation_data.action = None
+
+        scene.animation_data_clear()
+
+        # magnet = fcurves[magnet_index]
+
+        # fcurves.remove(magnet)
+
+        animaide.magnet.in_use = False
+
+        names = ['.M.', '.B.']
+
+        markers = bpy.context.scene.timeline_markers
+
+        for marker in markers:
+            if marker.name in names:
+            # if markers.is_animaide:
+                markers.remove(markers[marker.name])
 
 
-def add_magnet(action, l_margin=0, l_blend=0, r_margin=0, r_blend=0, interp='BEZIER', easing='EASE_IN_OUT'):
+def set_animaide_action():
+    scene = bpy.context.scene
+
+    if 'animaide' not in bpy.data.actions:
+        action = bpy.data.actions.new('animaide')
+    else:
+        action = bpy.data.actions['animaide']
+
+    anim_data = scene.animation_data
+
+    if anim_data is None:
+        anim_data = scene.animation_data_create()
+
+    anim_data.action = action
+
+    return action
+
+
+def add_animaide_fcurve(action_group, color=(1, 1, 1)):
+    action = bpy.data.actions['animaide']
+
+    fcurve = action.fcurves.new(data_path='animaide', index=0, action_group=action_group)
+    fcurve.color_mode = 'CUSTOM'
+    fcurve.color = color
+
+    return fcurve
+
+
+def add_magnet(l_margin=0, l_blend=0, r_margin=0, r_blend=0, interp='BEZIER', easing='EASE_IN_OUT'):
     """
 
     :param fcurve:
     :param interpolation:
     :return:
     """
+    animaide = bpy.context.scene.animaide
 
-    animaide = bpy.context.object.animaide
+    action = set_animaide_action()
 
-    if animaide.magnet.index == -1:
-        animaide.magnet.index = len(action.fcurves)
-        magnet = action.fcurves.new(data_path='reference', index=animaide.magnet.index, action_group=group_name)
-        magnet.color_mode = 'CUSTOM'
-        magnet.color = (1, 1, 1)
-
+    if action.fcurves.items() == []:
+        magnet = add_animaide_fcurve(action_group='Magnet')
         keys = magnet.keyframe_points
         keys.add(4)
     else:
-        magnet = action.fcurves[animaide.magnet.index]
+        action = bpy.data.actions['animaide']
+        magnet = action.fcurves[0]
         keys = magnet.keyframe_points
 
+    items = ({'side': 'L', 'names': ('B', 'M')}, {'side': 'R', 'names': ('M', 'B')})
+    names = (('.B.', '.M.'), ('.M.', '.B.'))
+    n = 0
+
+    if animaide.magnet.use_markers:
+        # for item in items:
+        #     for name in item['names']:
+        for group in names:
+            for name in group:
+                marker = utils.add_marker(name_a=name,
+                                          name_b='',
+                                          side='',
+                                          frame=n,
+                                          overwrite_name=False)
+                n += 1
+
     modify_magnet(magnet, keys, l_margin, l_blend, r_margin, r_blend, interp, easing)
+
+    animaide.magnet.in_use = True
 
     return magnet
 
 
 def modify_magnet(magnet, keys, l_margin=0, l_blend=0, r_margin=0, r_blend=0, interp='BEZIER', easing='EASE_IN_OUT'):
-    cur_frame = bpy.context.scene.frame_current
+    # cur_frame = bpy.context.scene.frame_current
 
-    if l_margin > -0.5:
-        l_margin = -0.5
+    always_l = l_margin
+    always_r = r_margin
 
-    if r_margin < 0.5:
-        r_margin = 0.5
+    if l_margin == r_margin:
+        always_l = l_margin - 0.5
+        always_r = r_margin + 0.5
+        l_blend = l_blend + 0.5
+        r_blend = r_blend - 0.5
+
+    if l_margin > r_margin:
+        always_l = r_margin
+        always_r = l_margin
 
     if l_blend > -0.5:
         l_blend = -0.5
@@ -635,14 +730,20 @@ def modify_magnet(magnet, keys, l_margin=0, l_blend=0, r_margin=0, r_blend=0, in
     if r_blend < 0.5:
         r_blend = 0.5
 
-    keys[0].co.x = float(cur_frame) + l_margin + l_blend
+    keys[0].co.x = always_l + l_blend
     keys[0].co.y = 0
-    keys[1].co.x = float(cur_frame) + l_margin
+    keys[1].co.x = always_l
     keys[1].co.y = 1
-    keys[2].co.x = float(cur_frame) + r_margin
+    keys[2].co.x = always_r
     keys[2].co.y = 1
-    keys[3].co.x = float(cur_frame) + r_margin + r_blend
+    keys[3].co.x = always_r + r_blend
     keys[3].co.y = 0
+
+    animaide = bpy.context.scene.animaide
+    if animaide.magnet.use_markers:
+        markers = bpy.context.scene.timeline_markers
+        for n in range(4):
+            markers[n].frame = keys[n].co.x
 
     easing_b = easing
 
@@ -653,11 +754,11 @@ def modify_magnet(magnet, keys, l_margin=0, l_blend=0, r_margin=0, r_blend=0, in
         easing_b = 'EASE_IN'
 
     keys[0].interpolation = interp
-    keys[0].easing = easing_b
+    keys[0].easing = easing
     keys[1].interpolation = 'LINEAR'
     keys[1].easing = 'EASE_IN_OUT'
     keys[2].interpolation = interp
-    keys[2].easing = easing
+    keys[2].easing = easing_b
 
     magnet.lock = True
     magnet.select = True

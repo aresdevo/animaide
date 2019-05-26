@@ -1,6 +1,6 @@
 import bpy
 
-from . import key_utils, cur_utils
+from . import key_utils, cur_utils, utils
 
 from bpy.props import StringProperty, BoolProperty, EnumProperty, \
     IntProperty, FloatProperty, PointerProperty, CollectionProperty
@@ -97,16 +97,46 @@ def update_selector(self, context):
 #     # original_keys_info: PointerProperty(type=AnimAideKeys)
 
 
+def toggle_markers(self, context):
+    anim = context.scene.animation_data
+    fcurves = anim.action.fcurves
+    markers = bpy.context.scene.timeline_markers
+
+    names = ['LB', 'LM', 'RM', 'RB']
+
+    if self.use_markers:
+        for n in range(4):
+            key = fcurves[0].keyframe_points[n]
+            utils.add_marker(name_a=names[n][1:],
+                             name_b='',
+                             side=names[n][:1],
+                             frame=key.co.x)
+    else:
+        for marker in markers:
+            if marker.name in names:
+                markers.remove(markers[marker.name])
+
+    return
+
+
 class AnimAideMagnet(PropertyGroup):
 
-    index: IntProperty(default=-1)
+    # index: IntProperty(default=-1)
 
-    l_margin: IntProperty(default=0, max=0,
-                          description="Left limit for the magnet's effect")
+    anim_transform_active: BoolProperty()
+
+    use_markers: BoolProperty(default=True,
+                              description='Let you choose to use markers for the reference frames',
+                              update=toggle_markers)
+
+    in_use: BoolProperty()
+
+    l_margin: IntProperty(default=0,
+                          description="Margin for the magnet's effect")
     l_blend: IntProperty(default=0, max=0,
                          description="Fade value for the left margin")
-    r_margin: IntProperty(default=0, min=0,
-                          description="Right limit for the magnet's effect")
+    r_margin: IntProperty(default=0,
+                          description="Margin for the magnet's effect")
     r_blend: IntProperty(default=0, min=0,
                          description="Fade value for the right margin")
 
@@ -255,8 +285,8 @@ class AnimAideScene(PropertyGroup):
     slider_slots: CollectionProperty(type=AnimSlider)
 
 
-class AnimAideObject(PropertyGroup):
-    magnet: PointerProperty(type=AnimAideMagnet)
+# class AnimAideObject(PropertyGroup):
+#     magnet: PointerProperty(type=AnimAideMagnet)
 
 
 class myPreferences(AddonPreferences):
@@ -287,8 +317,7 @@ class myPreferences(AddonPreferences):
         layout.prop(self, "view_3d", text="Side panel in the '3D View' instead of the 'Graph Editor'")
 
 
-def addon_pref():
-    global space_type
+def space_type_pref():
 
     preferences = bpy.context.preferences
     pref = preferences.addons[__package__].preferences
@@ -298,10 +327,12 @@ def addon_pref():
     else:
         space_type = 'GRAPH_EDITOR'
 
+    return space_type
+
 
 def set_props():
     bpy.types.Scene.animaide = PointerProperty(type=AnimAideScene)
-    bpy.types.Object.animaide = PointerProperty(type=AnimAideObject)
+    # bpy.types.Object.animaide = PointerProperty(type=AnimAideObject)
 
 def del_props():
     del bpy.types.Scene.animaide

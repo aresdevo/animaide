@@ -97,21 +97,28 @@ def toggle(to_toggle, value_a, value_b):
         return value_a
 
 
-def add_marker(slider_num, side, frame):
-    if side == 'L':
-        name = 'LF%s' % slider_num
-    elif side == 'R':
-        name = 'RF%s' % slider_num
+def add_marker(name_a='marker', name_b='0', side='L', frame=0, overwrite_name=True):
+    if side in ['L', 'R']:
+        name = '%s%s%s' % (side, name_a, name_b)
     else:
-        return
+        name = '%s%s' % (name_a, name_b)
 
     markers = bpy.context.scene.timeline_markers
     # if markers.keys != []:
-    if name in markers.keys():
-        markers.remove(markers[name])
+    if overwrite_name:
+        if name in markers.keys():
+            markers.remove(markers[name])
     marker = markers.new(name=name, frame=frame)
     # marker.select = False
     return marker
+
+
+def modify_marker(marker, name='SAME', frame='SAME'):
+    if name != 'SAME':
+        marker.name = name
+
+    if frame != 'SAME':
+        marker.frame = frame
 
 
 def remove_marker(slider_num):
