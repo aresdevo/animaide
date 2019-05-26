@@ -84,19 +84,6 @@ def update_selector(self, context):
     self.modal_switch = False
 
 
-# class AnimAideKeys(PropertyGroup):
-#     # index: IntProperty(default=-1)
-#     x: IntProperty()
-#     y: FloatProperty()
-# 
-# 
-# class AnimAideFCurves(PropertyGroup):
-#     data_path: StringProperty()
-#     parent_obj: StringProperty()
-#     index: IntProperty(default=-1)
-#     # original_keys_info: PointerProperty(type=AnimAideKeys)
-
-
 def toggle_markers(self, context):
     anim = context.scene.animation_data
     fcurves = anim.action.fcurves
@@ -119,25 +106,23 @@ def toggle_markers(self, context):
     return
 
 
-class AnimAideMagnet(PropertyGroup):
+class AnimAideAnimTransform(PropertyGroup):
 
-    # index: IntProperty(default=-1)
+    active: BoolProperty()
 
-    anim_transform_active: BoolProperty()
+    use_mask: BoolProperty()
 
     use_markers: BoolProperty(default=True,
-                              description='Let you choose to use markers for the reference frames',
+                              description='Let you choose to use markers for the mask',
                               update=toggle_markers)
 
-    in_use: BoolProperty()
-
-    l_margin: IntProperty(default=0,
-                          description="Margin for the magnet's effect")
-    l_blend: IntProperty(default=0, max=0,
+    mask_margin_l: IntProperty(default=0,
+                          description="Margin for the mask")
+    mask_blend_l: IntProperty(default=0, max=0,
                          description="Fade value for the left margin")
-    r_margin: IntProperty(default=0,
-                          description="Margin for the magnet's effect")
-    r_blend: IntProperty(default=0, min=0,
+    mask_margin_r: IntProperty(default=0,
+                          description="Margin for the mask")
+    mask_blend_r: IntProperty(default=0, min=0,
                          description="Fade value for the right margin")
 
     interp: EnumProperty(
@@ -160,8 +145,6 @@ class AnimAideMagnet(PropertyGroup):
 
 
 class AnimAideClone(PropertyGroup):
-    #
-    # clones: CollectionProperty(type=AnimAideClone)
 
     move_factor: FloatProperty(default=0.0,
                                min=-2.0,
@@ -241,46 +224,10 @@ class AnimSlider(PropertyGroup):
                                     max=2.0
                                     )
 
-    # factor_stepped: EnumProperty(
-    #     items=[('-1.000', ' ', '', 'RADIOBUT_OFF', 1),
-    #            ('-0.750', ' ', '', '', 2),
-    #            ('-0.500', ' ', '', '', 3),
-    #            ('-0.250', ' ', '', '', 4),
-    #            ('0.000', ' ', '', 'NODE_MATERIAL', 5),
-    #            ('0.250', ' ', '', '', 6),
-    #            ('0.500', ' ', '', '', 7),
-    #            ('0.750', ' ', '', '', 8),
-    #            ('1.000', '', '', 'RADIOBUT_OFF', 9)],
-    #     name="Factor Stepped",
-    #     default='0.000',
-    #     update=prop_utils.update_stepped
-    # )
-    #
-    # factor_stepped_overshoot: EnumProperty(
-    #     items=[('-1.300', ' ', '', '', 1),
-    #            ('-1.150', ' ', '', '', 2),
-    #            ('-1.000', ' ', '', 'RADIOBUT_OFF', 3),
-    #            ('-0.750', ' ', '', '', 4),
-    #            ('-0.500', ' ', '', '', 5),
-    #            ('-0.250', ' ', '', '', 6),
-    #            ('0.000', ' ', '', 'NODE_MATERIAL', 7),
-    #            ('0.250', ' ', '', '', 8),
-    #            ('0.500', ' ', '', '', 9),
-    #            ('0.750', ' ', '', '', 10),
-    #            ('1.000', ' ', '', 'RADIOBUT_OFF', 11),
-    #            ('1.150', ' ', '', '', 12),
-    #            ('1.300', '', '', '', 13)],
-    #     name="Factor Stepped Overshoot",
-    #     default='0.000',
-    #     update=prop_utils.update_stepped
-    # )
-
 
 class AnimAideScene(PropertyGroup):
-    magnet: PointerProperty(type=AnimAideMagnet)
+    anim_transform: PointerProperty(type=AnimAideAnimTransform)
     clone: PointerProperty(type=AnimAideClone)
-    # item: PointerProperty(type=AnimSlider)
-    # slots: CollectionProperty(type=AnimSlider)
     slider: PointerProperty(type=AnimSlider)
     slider_slots: CollectionProperty(type=AnimSlider)
 
@@ -313,7 +260,7 @@ class myPreferences(AddonPreferences):
         layout = self.layout
         # layout.label(text="Choose the area where the sliders will be:")
         layout.prop(self, "sliders", text="Use Sliders")
-        layout.prop(self, "magnet", text="Use Magnet")
+        layout.prop(self, "anim_transform", text="Use AnimTransform")
         layout.prop(self, "view_3d", text="Side panel in the '3D View' instead of the 'Graph Editor'")
 
 

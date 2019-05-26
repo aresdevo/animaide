@@ -39,7 +39,7 @@ from . import utils, key_utils, cur_utils, props, ops, ui
 
 classes = (
     # props.myPreferences,
-    props.AnimAideMagnet,
+    props.AnimAideAnimTransform,
     props.AnimAideClone,
     props.AnimSlider,
     props.AnimAideScene,
@@ -49,7 +49,7 @@ classes = (
     ops.AAT_OT_anim_transform_on,
     ops.AAT_OT_anim_transform_off,
     ops.AAT_OT_sliders_settings,
-    ops.AAT_OT_magnet_settings,
+    ops.AAT_OT_anim_transform_settings,
     ops.AAT_OT_get_ref_frame,
     ops.AAT_OT_sliders,
     ops.AAT_OT_ease,
@@ -68,11 +68,11 @@ classes = (
     ops.AAT_OT_tween,
     ops.AAT_OT_clone,
     ops.AAT_OT_clone_remove,
-    ops.AAT_OT_create_magnet,
-    ops.AAT_OT_delete_magnet,
+    ops.AAT_OT_create_anim_trans_mask,
+    ops.AAT_OT_delete_anim_trans_mask,
     # ops.AAT_OT_move_key,
     # ops.AAT_OT_modifier,
-    ui.AAT_PT_magnet,
+    ui.AAT_PT_anim_transform,
     ui.AAT_PT_sliders,
     ui.AAT_MT_pie_menu_a,
     ui.AAT_MT_pie_menu_b

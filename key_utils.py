@@ -490,7 +490,7 @@ def get_ref_frame_globals(left_ref_frame, right_ref_frame):
             global_values[obj.name] = curves
 
 
-def get_magnet_globals(object):
+def get_anim_transform_globals(object):
 
     anim = object.animation_data
     if anim is None:

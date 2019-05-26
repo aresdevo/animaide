@@ -2,9 +2,7 @@ import bpy
 from . import props, key_utils
 from bpy.types import Panel, Menu
 
-# def step_button(row, slot, factor, icon='',
-#                 text='', emboss=True, active=True,
-#                 operator_context='EXEC_DEFAULT', is_collection=True)
+
 def step_button(row, slot, factor, icon='',
                 text='', emboss=True, active=True,
                 operator_context='EXEC_DEFAULT'):
@@ -31,33 +29,19 @@ def step_button(row, slot, factor, icon='',
     # step.is_collection = is_collection
     step.op_context = operator_context
 
-# def slider_box(layout, slot, index=0, is_collection=True):
+
 def slider_box(layout, slot, index=-1):
-    if slot.overshoot == False:
+
+    if slot.overshoot is False:
         slider_length = 'factor'
-        # factor = slot.factor
 
     else:
         slider_length = 'factor_overshoot'
-        # factor = slot.factor_overshoot
 
     # -------- Options ---------
 
-    # if slot.index == -1:
-    #     slider_num = '1'
-    # else:
-    #     slider_num = '%s' % (slot.index + 2)
-
-    # animaide = bpy.context.scene.animaide
-
     box = layout.box()
     row = box.row(align=True)
-
-    # col = row.column(align=True)
-    # col.alignment = 'LEFT'
-    # col.active = False
-    # col.scale_x = 0.8
-    # col.label(text=slider_num)
 
     col = row.column(align=False)
     # col.prop_menu_enum(slot, 'selector', text=props.names[slot.selector], icon=props.icons[slot.selector])
@@ -165,7 +149,7 @@ def slider_box(layout, slot, index=-1):
 
 class AAT_PT_sliders(Panel):
     bl_idname = 'AA_PT_slider'
-    bl_label = "Slider"
+    bl_label = "Sliders"
     bl_region_type = 'UI'
     bl_category = 'AnimAide'
     bl_space_type = 'GRAPH_EDITOR'
@@ -207,8 +191,8 @@ class AAT_PT_sliders(Panel):
         # row.template_list("AA_UL_sliders", "", animaide, "slider_slots", animaide, "slider_i")
 
 
-class AAT_PT_magnet(Panel):
-    bl_idname = 'AAT_PT_magnet'
+class AAT_PT_anim_transform(Panel):
+    bl_idname = 'AAT_PT_anim_transform'
     bl_label = "Anim Transform"
     bl_space_type = 'GRAPH_EDITOR'
     # bl_space_type = props.space_type_pref()
@@ -222,43 +206,31 @@ class AAT_PT_magnet(Panel):
 
         row = layout.row(align=True)
 
-        if animaide.magnet.anim_transform_active is False:
+        if animaide.anim_transform.active is False:
             row.operator("animaide.anim_transform_on", text='Activate')
         else:
             row.operator("animaide.anim_transform_off", text="Dectivate")
 
             row = layout.row(align=True)
 
-            if animaide.magnet.in_use is False:
-                magnet = row.operator("animaide.create_magnet", text="Add Mask")
-                # magnet.l_margin = animaide.magnet.l_margin
-                # magnet.l_blend = animaide.magnet.l_blend
-                # magnet.r_margin = animaide.magnet.r_margin
-                # magnet.r_blend = animaide.magnet.r_blend
-                # magnet.interp = animaide.magnet.interp
-                # magnet.easing = animaide.magnet.easing
-                row.operator('animaide.magnet_settings', text='', icon='SETTINGS', emboss=True)
+            if animaide.anim_transform.use_mask is False:
+                row.operator("animaide.create_anim_trans_mask", text="Add Mask")
+                row.operator('animaide.anim_transform_settings', text='', icon='SETTINGS', emboss=True)
             else:
-                row.operator("animaide.delete_magnet", text="Remove Mask")
-                row.operator('animaide.magnet_settings', text='', icon='SETTINGS', emboss=True)
+                row.operator("animaide.delete_anim_trans_mask", text="Remove Mask")
+                row.operator('animaide.anim_transform_settings', text='', icon='SETTINGS', emboss=True)
 
                 col = layout.column_flow(columns=2, align=False)
                 col.label(text='Margins')
                 row = col.row(align=True)
-                row.prop(animaide.magnet, 'l_margin', text='', slider=False)
-                row.prop(animaide.magnet, 'r_margin', text='', slider=False)
+                row.prop(animaide.anim_transform, 'mask_margin_l', text='', slider=False)
+                row.prop(animaide.anim_transform, 'mask_margin_r', text='', slider=False)
 
                 col = layout.column_flow(columns=2, align=False)
                 col.label(text='Blends')
                 row = col.row(align=True)
-                row.prop(animaide.magnet, 'l_blend', text='', slider=False)
-                row.prop(animaide.magnet, 'r_blend', text='', slider=False)
-
-                # row = layout.row(align=False)
-                # row.alignment = 'RIGHT'
-                # row.prop(animaide.magnet, 'easing', text='', icon_only=False)
-                # # row.prop(animaide.magnet, 'interp', expand=True)
-                # row.prop(animaide.magnet, 'interp', text='', icon_only=True)
+                row.prop(animaide.anim_transform, 'mask_blend_l', text='', slider=False)
+                row.prop(animaide.anim_transform, 'mask_blend_r', text='', slider=False)
 
 
 class AAT_MT_pie_menu_a(Menu):

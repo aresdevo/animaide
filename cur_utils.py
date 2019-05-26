@@ -471,7 +471,7 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
     # remove_clones(objects)
 
 
-def magnet_handlers(dummy):
+def anim_transform_handlers(dummy):
 
     context = bpy.context
 
@@ -500,22 +500,15 @@ def magnet_handlers(dummy):
             # if fcurve.group.name == group_name:
             #     continue  # we don't want to select keys on reference fcurves
 
-            # magnet_index = animaide.magnet.index
-
-            use_magnet(obj, fcurve)
+            use_anim_trans_mask(obj, fcurve)
 
     return
 
 
-def magnet_shape_handlers(dummy):
+def anim_trans_mask_handlers(dummy):
     context = bpy.context
 
-    # obj = context.object
-    # animaide = obj.animaide
-    # anim = obj.animation_data
-
-    scene = bpy.context.scene
-    animaide = scene.animaide
+    scene = context.scene
     anim = scene.animation_data
 
     if anim is None:
@@ -524,25 +517,14 @@ def magnet_shape_handlers(dummy):
     if anim.action is None:
         return
 
-    # key_utils.get_magnet_globals(obj)
+    mask = anim.action.fcurves[0]
 
-    # magnet_index = animaide.magnet.index
-
-    magnet = anim.action.fcurves[0]
-
-    modify_magnet(magnet,
-                  magnet.keyframe_points,
-                  animaide.magnet.l_margin,
-                  animaide.magnet.l_blend,
-                  animaide.magnet.r_margin,
-                  animaide.magnet.r_blend,
-                  animaide.magnet.interp,
-                  animaide.magnet.easing)
+    modify_anim_trans_mask(mask, mask.keyframe_points)
 
     return
 
 
-def use_magnet(obj, fcurve):
+def use_anim_trans_mask(obj, fcurve):
     """
 
     :param objects:
@@ -552,7 +534,7 @@ def use_magnet(obj, fcurve):
     """
     scene = bpy.context.scene
     scene_anim = scene.animation_data
-    magnet = None
+    mask = None
 
     if fcurve.lock is True:
         return
@@ -562,16 +544,16 @@ def use_magnet(obj, fcurve):
 
     if scene_anim is not None:
         if scene_anim.action == bpy.data.actions['animaide']:
-            magnet = scene_anim.action.fcurves[0]
+            mask = scene_anim.action.fcurves[0]
 
-    delta_y = get_magnet_delta(obj, fcurve)
+    delta_y = get_anim_transform_delta(obj, fcurve)
 
     for k in fcurve.keyframe_points:
 
-        if magnet is None:
+        if mask is None:
             factor = 1
         else:
-            factor = magnet.evaluate(k.co.x)
+            factor = mask.evaluate(k.co.x)
 
         k.co.y = k.co.y + (delta_y * factor)
 
@@ -580,13 +562,10 @@ def use_magnet(obj, fcurve):
     return
 
 
-def get_magnet_delta(obj, fcurve):
+def get_anim_transform_delta(obj, fcurve):
     cur_frame = bpy.context.scene.frame_current
 
     source = fcurve.evaluate(cur_frame)
-
-    # global_fcurve = key_utils.global_values[obj.name][fcurve_index]
-    # source = global_fcurve['current_frame']
 
     prop = obj.path_resolve(fcurve.data_path)
 
@@ -595,11 +574,11 @@ def get_magnet_delta(obj, fcurve):
     return target - source
 
 
-def remove_magnet():
+def remove_anim_trans_mask():
     scene = bpy.context.scene
     animaide = scene.animaide
 
-    if animaide.magnet.in_use is False:
+    if animaide.anim_transform.use_mask is False:
         return
 
     if scene.animation_data is None:
@@ -621,11 +600,7 @@ def remove_magnet():
 
         scene.animation_data_clear()
 
-        # magnet = fcurves[magnet_index]
-
-        # fcurves.remove(magnet)
-
-        animaide.magnet.in_use = False
+        animaide.anim_transform.use_mask = False
 
         names = ['.M.', '.B.']
 
@@ -633,7 +608,6 @@ def remove_magnet():
 
         for marker in markers:
             if marker.name in names:
-            # if markers.is_animaide:
                 markers.remove(markers[marker.name])
 
 
@@ -665,7 +639,7 @@ def add_animaide_fcurve(action_group, color=(1, 1, 1)):
     return fcurve
 
 
-def add_magnet(l_margin=0, l_blend=0, r_margin=0, r_blend=0, interp='BEZIER', easing='EASE_IN_OUT'):
+def add_anim_trans_mask():
     """
 
     :param fcurve:
@@ -677,70 +651,75 @@ def add_magnet(l_margin=0, l_blend=0, r_margin=0, r_blend=0, interp='BEZIER', ea
     action = set_animaide_action()
 
     if action.fcurves.items() == []:
-        magnet = add_animaide_fcurve(action_group='Magnet')
-        keys = magnet.keyframe_points
+        mask = add_animaide_fcurve(action_group='Magnet')
+        keys = mask.keyframe_points
         keys.add(4)
     else:
         action = bpy.data.actions['animaide']
-        magnet = action.fcurves[0]
-        keys = magnet.keyframe_points
+        mask = action.fcurves[0]
+        keys = mask.keyframe_points
 
-    items = ({'side': 'L', 'names': ('B', 'M')}, {'side': 'R', 'names': ('M', 'B')})
     names = (('.B.', '.M.'), ('.M.', '.B.'))
     n = 0
 
-    if animaide.magnet.use_markers:
-        # for item in items:
-        #     for name in item['names']:
+    if animaide.anim_transform.use_markers:
         for group in names:
             for name in group:
-                marker = utils.add_marker(name_a=name,
-                                          name_b='',
-                                          side='',
-                                          frame=n,
-                                          overwrite_name=False)
+                utils.add_marker(name_a=name,
+                                 name_b='',
+                                 side='',
+                                 frame=n,
+                                 overwrite_name=False)
                 n += 1
 
-    modify_magnet(magnet, keys, l_margin, l_blend, r_margin, r_blend, interp, easing)
+    modify_anim_trans_mask(mask, keys)
 
-    animaide.magnet.in_use = True
+    animaide.anim_transform.use_mask = True
 
-    return magnet
+    return mask
 
 
-def modify_magnet(magnet, keys, l_margin=0, l_blend=0, r_margin=0, r_blend=0, interp='BEZIER', easing='EASE_IN_OUT'):
-    # cur_frame = bpy.context.scene.frame_current
+def modify_anim_trans_mask(mask, keys):
 
-    always_l = l_margin
-    always_r = r_margin
+    animaide = bpy.context.scene.animaide
 
-    if l_margin == r_margin:
-        always_l = l_margin - 0.5
-        always_r = r_margin + 0.5
-        l_blend = l_blend + 0.5
-        r_blend = r_blend - 0.5
+    mask_margin_l = animaide.anim_transform.mask_margin_l
+    mask_blend_l = animaide.anim_transform.mask_blend_l
+    mask_margin_r = animaide.anim_transform.mask_margin_r
+    mask_blend_r = animaide.anim_transform.mask_blend_r
+    interp = animaide.anim_transform.interp
+    easing = animaide.anim_transform.easing
 
-    if l_margin > r_margin:
-        always_l = r_margin
-        always_r = l_margin
+    always_l = mask_margin_l
+    always_r = mask_margin_r
 
-    if l_blend > -0.5:
-        l_blend = -0.5
+    if mask_margin_l == mask_margin_r:
+        always_l = mask_margin_l - 0.5
+        always_r = mask_margin_r + 0.5
+        mask_blend_l = mask_blend_l + 0.5
+        mask_blend_r = mask_blend_r - 0.5
 
-    if r_blend < 0.5:
-        r_blend = 0.5
+    if mask_margin_l > mask_margin_r:
+        always_l = mask_margin_r
+        always_r = mask_margin_l
 
-    keys[0].co.x = always_l + l_blend
+    if mask_blend_l > -0.5:
+        mask_blend_l = -0.5
+
+    if mask_blend_r < 0.5:
+        mask_blend_r = 0.5
+
+    keys[0].co.x = always_l + mask_blend_l
     keys[0].co.y = 0
     keys[1].co.x = always_l
     keys[1].co.y = 1
     keys[2].co.x = always_r
     keys[2].co.y = 1
-    keys[3].co.x = always_r + r_blend
+    keys[3].co.x = always_r + mask_blend_r
     keys[3].co.y = 0
 
     animaide = bpy.context.scene.animaide
-    if animaide.magnet.use_markers:
+    if animaide.anim_transform.use_markers:
         markers = bpy.context.scene.timeline_markers
         for n in range(4):
             markers[n].frame = keys[n].co.x
@@ -760,10 +739,10 @@ def modify_magnet(magnet, keys, l_margin=0, l_blend=0, r_margin=0, r_blend=0, in
     keys[2].interpolation = interp
     keys[2].easing = easing_b
 
-    magnet.lock = True
-    magnet.select = True
+    mask.lock = True
+    mask.select = True
 
-    magnet.update()
+    mask.update()
 
 
 def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=False):
