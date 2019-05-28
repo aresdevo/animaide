@@ -207,30 +207,32 @@ class AAT_PT_anim_transform(Panel):
         row = layout.row(align=True)
 
         if animaide.anim_transform.active is False:
-            row.operator("animaide.anim_transform_on", text='Activate')
+            row.operator("animaide.anim_transform_on", text='Activate', icon='PLUGIN')
         else:
-            row.operator("animaide.anim_transform_off", text="Dectivate")
+            row.operator("animaide.anim_transform_off", text="Dectivate", icon='CANCEL')
 
             row = layout.row(align=True)
 
             if animaide.anim_transform.use_mask is False:
-                row.operator("animaide.create_anim_trans_mask", text="Add Mask")
+                row.operator("animaide.create_anim_trans_mask", text="Add Mask", icon='SELECT_SUBTRACT')
                 row.operator('animaide.anim_transform_settings', text='', icon='SETTINGS', emboss=True)
             else:
-                row.operator("animaide.delete_anim_trans_mask", text="Remove Mask")
+                row.operator("animaide.delete_anim_trans_mask", text="Remove Mask", icon='TRASH')
                 row.operator('animaide.anim_transform_settings', text='', icon='SETTINGS', emboss=True)
 
-                col = layout.column_flow(columns=2, align=False)
-                col.label(text='Margins')
-                row = col.row(align=True)
-                row.prop(animaide.anim_transform, 'mask_margin_l', text='', slider=False)
-                row.prop(animaide.anim_transform, 'mask_margin_r', text='', slider=False)
+                # col = layout.column_flow(columns=2, align=False)
+                # col.label(text='Margins')
+                # row = col.row(align=True)
+                row = layout.row(align=True)
+                row.prop(animaide.anim_transform, 'mask_margin_l', text='Margin', slider=False)
+                row.prop(animaide.anim_transform, 'mask_margin_r', text='Margin', slider=False)
 
-                col = layout.column_flow(columns=2, align=False)
-                col.label(text='Blends')
-                row = col.row(align=True)
-                row.prop(animaide.anim_transform, 'mask_blend_l', text='', slider=False)
-                row.prop(animaide.anim_transform, 'mask_blend_r', text='', slider=False)
+                # col = layout.column_flow(columns=2, align=False)
+                # col.label(text='Blends')
+                # row = col.row(align=True)
+                row = layout.row(align=True)
+                row.prop(animaide.anim_transform, 'mask_blend_l', text='Blend', slider=False)
+                row.prop(animaide.anim_transform, 'mask_blend_r', text='Blend', slider=False)
 
 
 class AAT_MT_pie_menu_a(Menu):
@@ -297,7 +299,12 @@ class AAT_MT_pie_menu_b(Menu):
         col = pie.column(align=True)
 
 
-
+classes = (
+    AAT_PT_sliders,
+    AAT_PT_anim_transform,
+    AAT_MT_pie_menu_a,
+    AAT_MT_pie_menu_b
+)
 
 
 

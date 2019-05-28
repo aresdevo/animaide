@@ -5,6 +5,9 @@ from . import key_utils, utils
 
 group_name = 'animaide'
 
+user_preview_range = {}
+user_scene_range = {}
+
 
 def animation_transfrom(objects):
     cur_frame = bpy.context.scene.frame_current
@@ -500,31 +503,26 @@ def anim_transform_handlers(dummy):
             # if fcurve.group.name == group_name:
             #     continue  # we don't want to select keys on reference fcurves
 
-            use_anim_trans_mask(obj, fcurve)
+            animation_transform(obj, fcurve)
 
     return
 
 
 def anim_trans_mask_handlers(dummy):
-    context = bpy.context
 
-    scene = context.scene
-    anim = scene.animation_data
+    action = bpy.data.actions['animaide']
 
-    if anim is None:
+    if action is None:
         return
-
-    if anim.action is None:
-        return
-
-    mask = anim.action.fcurves[0]
+    if action.fcurves.items() != []:
+        mask = action.fcurves[0]
 
     modify_anim_trans_mask(mask, mask.keyframe_points)
 
     return
 
 
-def use_anim_trans_mask(obj, fcurve):
+def animation_transform(obj, fcurve):
     """
 
     :param objects:
@@ -532,8 +530,7 @@ def use_anim_trans_mask(obj, fcurve):
     :param go_to:
     :return:
     """
-    scene = bpy.context.scene
-    scene_anim = scene.animation_data
+
     mask = None
 
     if fcurve.lock is True:
@@ -542,9 +539,12 @@ def use_anim_trans_mask(obj, fcurve):
     if fcurve.group.name == group_name:
         return  # we don't want to select keys on reference fcurves
 
-    if scene_anim is not None:
-        if scene_anim.action == bpy.data.actions['animaide']:
-            mask = scene_anim.action.fcurves[0]
+    if 'animaide' in bpy.data.actions:
+
+        action = bpy.data.actions['animaide']
+
+        if action.fcurves.items() != []:
+            mask = action.fcurves[0]
 
     delta_y = get_anim_transform_delta(obj, fcurve)
 
@@ -581,50 +581,24 @@ def remove_anim_trans_mask():
     if animaide.anim_transform.use_mask is False:
         return
 
-    if scene.animation_data is None:
-        return
-
-    if scene.animation_data.action is None:
-        return
-
     if 'animaide' not in bpy.data.actions.keys():
         return
 
-    if scene.animation_data.action is bpy.data.actions['animaide']:
+    fcurves = bpy.data.actions['animaide'].fcurves
 
-        fcurves = scene.animation_data.action.fcurves
+    fcurves.remove(fcurves[0])
 
-        fcurves.remove(fcurves[0])
+    animaide.anim_transform.use_mask = False
 
-        scene.animation_data.action = None
-
-        scene.animation_data_clear()
-
-        animaide.anim_transform.use_mask = False
-
-        names = ['.M.', '.B.']
-
-        markers = bpy.context.scene.timeline_markers
-
-        for marker in markers:
-            if marker.name in names:
-                markers.remove(markers[marker.name])
+    reset_timeline_ranges()
 
 
 def set_animaide_action():
-    scene = bpy.context.scene
 
     if 'animaide' not in bpy.data.actions:
         action = bpy.data.actions.new('animaide')
     else:
         action = bpy.data.actions['animaide']
-
-    anim_data = scene.animation_data
-
-    if anim_data is None:
-        anim_data = scene.animation_data_create()
-
-    anim_data.action = action
 
     return action
 
@@ -639,6 +613,36 @@ def add_animaide_fcurve(action_group, color=(1, 1, 1)):
     return fcurve
 
 
+def set_timeline_ranges(blend_l, margin_l, margin_r, blend_r):
+    scene = bpy.context.scene
+    scene.use_preview_range = True
+
+    scene.frame_preview_start = blend_l
+    scene.frame_start = margin_l
+    scene.frame_end = margin_r
+    scene.frame_preview_end = blend_r
+
+
+def reset_timeline_ranges():
+    scene = bpy.context.scene
+
+    scene.frame_preview_start = user_preview_range['start']
+    scene.frame_preview_end = user_preview_range['end']
+    scene.use_preview_range = user_preview_range['use']
+    scene.frame_start = user_scene_range['start']
+    scene.frame_end = user_scene_range['end']
+
+
+def store_user_timeline_ranges():
+    scene = bpy.context.scene
+
+    user_preview_range['start'] = scene.frame_preview_start
+    user_preview_range['end'] = scene.frame_preview_end
+    user_preview_range['use'] = scene.use_preview_range
+    user_scene_range['start'] = scene.frame_start
+    user_scene_range['end'] = scene.frame_end
+
+
 def add_anim_trans_mask():
     """
 
@@ -646,6 +650,8 @@ def add_anim_trans_mask():
     :param interpolation:
     :return:
     """
+    store_user_timeline_ranges()
+
     animaide = bpy.context.scene.animaide
 
     action = set_animaide_action()
@@ -659,22 +665,11 @@ def add_anim_trans_mask():
         mask = action.fcurves[0]
         keys = mask.keyframe_points
 
-    names = (('.B.', '.M.'), ('.M.', '.B.'))
-    n = 0
-
-    if animaide.anim_transform.use_markers:
-        for group in names:
-            for name in group:
-                utils.add_marker(name_a=name,
-                                 name_b='',
-                                 side='',
-                                 frame=n,
-                                 overwrite_name=False)
-                n += 1
-
     modify_anim_trans_mask(mask, keys)
 
     animaide.anim_transform.use_mask = True
+
+    mask.update()
 
     return mask
 
@@ -693,21 +688,15 @@ def modify_anim_trans_mask(mask, keys):
     always_l = mask_margin_l
     always_r = mask_margin_r
 
-    if mask_margin_l == mask_margin_r:
-        always_l = mask_margin_l - 0.5
-        always_r = mask_margin_r + 0.5
-        mask_blend_l = mask_blend_l + 0.5
-        mask_blend_r = mask_blend_r - 0.5
-
     if mask_margin_l > mask_margin_r:
         always_l = mask_margin_r
         always_r = mask_margin_l
 
-    if mask_blend_l > -0.5:
-        mask_blend_l = -0.5
+    if mask_blend_l > 0:
+        mask_blend_l = 0
 
-    if mask_blend_r < 0.5:
-        mask_blend_r = 0.5
+    if mask_blend_r < 0:
+        mask_blend_r = 0
 
     keys[0].co.x = always_l + mask_blend_l
     keys[0].co.y = 0
@@ -718,11 +707,10 @@ def modify_anim_trans_mask(mask, keys):
     keys[3].co.x = always_r + mask_blend_r
     keys[3].co.y = 0
 
-    animaide = bpy.context.scene.animaide
-    if animaide.anim_transform.use_markers:
-        markers = bpy.context.scene.timeline_markers
-        for n in range(4):
-            markers[n].frame = keys[n].co.x
+    set_timeline_ranges(blend_l=keys[0].co.x,
+                        margin_l=keys[1].co.x,
+                        margin_r=keys[2].co.x,
+                        blend_r=keys[3].co.x)
 
     easing_b = easing
 
@@ -742,7 +730,7 @@ def modify_anim_trans_mask(mask, keys):
     mask.lock = True
     mask.select = True
 
-    mask.update()
+
 
 
 def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=False):

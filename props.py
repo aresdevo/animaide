@@ -84,24 +84,27 @@ def update_selector(self, context):
     self.modal_switch = False
 
 
-def toggle_markers(self, context):
-    anim = context.scene.animation_data
-    fcurves = anim.action.fcurves
-    markers = bpy.context.scene.timeline_markers
+def toggle_sliders_markers(self, context):
 
-    names = ['LB', 'LM', 'RM', 'RB']
-
+    n = 0
     if self.use_markers:
-        for n in range(4):
-            key = fcurves[0].keyframe_points[n]
-            utils.add_marker(name_a=names[n][1:],
-                             name_b='',
-                             side=names[n][:1],
-                             frame=key.co.x)
+        for side in ['L', 'R']:
+            if side == 'L':
+                frame = self.left_ref_frame
+            else:
+                frame = self.right_ref_frame
+
+            utils.add_marker(name_a='F',
+                             name_b=0,
+                             side=side,
+                             frame=frame,
+                             overwrite_name=False)
+            n += 1
     else:
-        for marker in markers:
-            if marker.name in names:
-                markers.remove(markers[marker.name])
+        for side in ['L', 'R']:
+            utils.remove_marker(name_a='F',
+                                name_b=0,
+                                side=side)
 
     return
 
@@ -112,9 +115,9 @@ class AnimAideAnimTransform(PropertyGroup):
 
     use_mask: BoolProperty()
 
-    use_markers: BoolProperty(default=True,
-                              description='Let you choose to use markers for the mask',
-                              update=toggle_markers)
+    # use_markers: BoolProperty(default=True,
+    #                           description='Let you choose to use markers for the mask',
+    #                           update=toggle_anim_trans_markers)
 
     mask_margin_l: IntProperty(default=0,
                           description="Margin for the mask")
@@ -125,20 +128,22 @@ class AnimAideAnimTransform(PropertyGroup):
     mask_blend_r: IntProperty(default=0, min=0,
                          description="Fade value for the right margin")
 
+    mask_blend_mapping: FloatProperty()
+
     interp: EnumProperty(
         items=[('LINEAR', ' ', 'Linear transition', 'IPO_LINEAR', 1),
-               ('SINE', ' ', 'Sine transition', 'IPO_SINE', 2),
-               ('CUBIC', ' ', 'Cubic transition', 'IPO_CUBIC', 3),
-               ('QUART', ' ', 'Quart transition', 'IPO_QUART', 4),
-               ('QUINT', ' ', 'Quint transition', 'IPO_QUINT', 5)],
+               ('SINE', ' ', 'Curve slope 1', 'IPO_SINE', 2),
+               ('CUBIC', ' ', 'Curve slope 3', 'IPO_CUBIC', 3),
+               ('QUART', ' ', 'Curve Slope 4', 'IPO_QUART', 4),
+               ('QUINT', ' ', 'Curve Slope 5', 'IPO_QUINT', 5)],
         name="Interpolation",
         default='SINE'
     )
 
     easing: EnumProperty(
-        items=[('EASE_IN', 'ease in', 'ease in', 'IPO_EASE_IN', 1),
-               ('EASE_IN_OUT', 'ease in-out', 'ease in-out', 'IPO_EASE_IN_OUT', 2),
-               ('EASE_OUT', 'ease out', 'ease out', 'IPO_EASE_OUT', 3)],
+        items=[('EASE_IN', 'Sharp', 'Sets Mask transition type', 'SHARPCURVE', 1),
+               ('EASE_IN_OUT', 'Smooth', 'Sets Mask transition type', 'SMOOTHCURVE', 2),
+               ('EASE_OUT', 'Round', 'Sets Mask transition type', 'INVERSESQUARECURVE', 3)],
         name="Easing",
         default='EASE_IN_OUT'
     )
@@ -172,7 +177,10 @@ class AnimAideClone(PropertyGroup):
 class AnimSlider(PropertyGroup):
 
     use_markers: BoolProperty(default=True,
-                              description='Let you choose to use markers for the reference frames')
+                              description='use markers for the reference frames')
+
+    affect_non_selected_frame: BoolProperty(default=True,
+                                            description='Affect not selected keys when cursor is over them')
 
     min_value: FloatProperty(default=-1)
 
@@ -232,10 +240,6 @@ class AnimAideScene(PropertyGroup):
     slider_slots: CollectionProperty(type=AnimSlider)
 
 
-# class AnimAideObject(PropertyGroup):
-#     magnet: PointerProperty(type=AnimAideMagnet)
-
-
 class myPreferences(AddonPreferences):
     # this must match the addon name, use '__package__'
     # when defining this in a submodule of a python package.
@@ -281,6 +285,15 @@ def set_props():
     bpy.types.Scene.animaide = PointerProperty(type=AnimAideScene)
     # bpy.types.Object.animaide = PointerProperty(type=AnimAideObject)
 
+
 def del_props():
     del bpy.types.Scene.animaide
 
+
+classes = (
+    # props.myPreferences,
+    AnimAideAnimTransform,
+    AnimAideClone,
+    AnimSlider,
+    AnimAideScene
+)

@@ -362,7 +362,14 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
     :return reversable list of complex keys that contains (index, key) on a tuple of the selected keys:
     """
 
-    objects = bpy.context.selected_objects
+    animaide = bpy.context.scene.animaide
+
+    if bpy.context.space_data.dopesheet.show_only_selected == True:
+        objects = bpy.context.selected_objects
+    else:
+        objects = bpy.data.objects
+
+    # objects = bpy.context.selected_objects
 
     for obj in objects:
         anim = obj.animation_data
@@ -424,17 +431,36 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
                     prevkey_value = smooth
 
             if not keyframes:
-                index = on_current_frame(fcurve)
-                left_neighbor, right_neighbor = get_frame_neighbors(fcurve, frame=None, clamped=False)
-                keyframes = [index]
+
+                if animaide.slider.affect_non_selected_frame is True:
+                    index = on_current_frame(fcurve)
+                    if index is None:
+                        keyframes = []
+                        left_neighbor = None
+                        right_neighbor = None
+                    else:
+                        keyframes = [index]
+                        left_neighbor, right_neighbor = get_frame_neighbors(fcurve, frame=None, clamped=False)
+                else:
+                    keyframes = []
+                    left_neighbor = None
+                    right_neighbor = None
+
             else:
                 left_neighbor, right_neighbor = get_selected_neigbors(fcurve, keyframes)
 
             if selected:
                 curve_items['selected_keys'] = keyframes
 
+            if left_neighbor is None:
+                curve_items['left_neighbor'] = None
+            else:
                 co = {'x': left_neighbor.co.x, 'y': left_neighbor.co.y}
                 curve_items['left_neighbor'] = co
+
+            if right_neighbor is None:
+                curve_items['right_neighbor'] = None
+            else:
                 co = {'x': right_neighbor.co.x, 'y': right_neighbor.co.y}
                 curve_items['right_neighbor'] = co
 
@@ -702,18 +728,19 @@ def on_current_frame(fcurve):
 
 
 def get_selected_neigbors(fcurve, keyframes):
+    left_neighbor = None
+    right_neighbor = None
+
     if not keyframes:
         index = on_current_frame(fcurve)
         if index is None:
-            return
+            return left_neighbor, right_neighbor
         keyframes = [index]
 
-    left_neighbor = None
-    right_neighbor = None
     every_key = fcurve.keyframe_points
+    # if keyframes.items() == []:
+    #     return left_neighbor, right_neighbor
     first_index = keyframes[0]
-    if keyframes[0] is None:
-        return left_neighbor, right_neighbor
     i = len(keyframes) - 1
     last_index = keyframes[i]
 

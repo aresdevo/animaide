@@ -121,15 +121,16 @@ def modify_marker(marker, name='SAME', frame='SAME'):
         marker.frame = frame
 
 
-def remove_marker(slider_num):
+def remove_marker(name_a='marker', name_b='0', side='L'):
+    if side in ['L', 'R']:
+        name = '%s%s%s' % (side, name_a, name_b)
+    else:
+        name = '%s%s' % (name_a, name_b)
+
     markers = bpy.context.scene.timeline_markers
 
-    left_name = 'LF%s' % slider_num
-    if left_name in markers.keys():
-        markers.remove(markers[left_name])
+    if name in markers.keys():
+        markers.remove(markers[name])
 
-    right_name = 'RF%s' % slider_num
-    if right_name in markers.keys():
-        markers.remove(markers[right_name])
     return
 

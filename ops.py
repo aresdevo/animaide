@@ -523,17 +523,38 @@ def slider_looper(self, context):
     slider_tools.min_value = slider.min_value
     slider_tools.max_value = slider.max_value
 
-    objects = context.selected_objects
+    if bpy.context.space_data.dopesheet.show_only_selected == True:
+        objects = context.selected_objects
+    else:
+        objects = bpy.data.objects
+
+    selected_pose_bones = bpy.context.selected_pose_bones
 
     for obj in objects:
         anim = obj.animation_data
 
-        if obj.type == 'ARMATURE' and obj.mode == 'POSE':
-            if bpy.context.selected_pose_bones is None:
-                channel_groups = anim.action.groups
+        if anim is None:
+            continue
+
+        visible = obj.visible_get()
+
+        if bpy.context.space_data.dopesheet.show_hidden is not True:
+
+            if not visible:
+                continue
+
+        if obj.type == 'ARMATURE':
+            if obj.mode == 'POSE':
+                if bpy.context.space_data.dopesheet.show_only_selected is True:
+                    if selected_pose_bones is None:
+                        channel_groups = []
+                    else:
+                        channel_groups = [bone.name for bone in obj.pose.bones if bone in selected_pose_bones]
+                else:
+                    channel_groups = [bone.name for bone in obj.pose.bones]
             else:
-                channel_groups = [bone.name for bone in bpy.context.selected_pose_bones]
-            # print('channel groups: ', channel_groups)
+                # channel_groups = ['Object Transforms']
+                channel_groups = anim.action.groups
         else:
             channel_groups = anim.action.groups
 
@@ -544,11 +565,6 @@ def slider_looper(self, context):
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, slider_tools.fcurve in fcurves.items():
-            # print('---')
-            # print('channel groups: ', channel_groups)
-            # print('fcurve group: ', slider_tools.fcurve.group.name)
-            # print('not in group: ', slider_tools.fcurve.group.name not in channel_groups)
-            # print('---')
 
             if slider_tools.fcurve.select is False:
                 continue
@@ -568,8 +584,8 @@ def slider_looper(self, context):
             slider_tools.global_fcurve = key_utils.global_values[obj.name][fcurve_index]
             slider_tools.selected_keys = slider_tools.global_fcurve['selected_keys']
 
-            if slider_tools.selected_keys[0] is None:
-                return {'FINISHED'}
+            if slider_tools.selected_keys == []:
+                continue
 
             slider_tools.original_values = slider_tools.global_fcurve['original_values']
             slider_tools.left_neighbor = slider_tools.global_fcurve['left_neighbor']
@@ -677,6 +693,9 @@ def slider_invoke(self, context, event):
 
     # self.animaide.slider.selector = self.slider_type
 
+    if self.op_context == 'EXEC_DEFAULT':
+        return self.execute(context)
+
     if self.slot_index == -1:
         slider = self.animaide.slider
         overshoot = slider.overshoot
@@ -709,7 +728,7 @@ def slider_poll(context):
     # space = context.area.spaces.active.type
     area = context.area.type
     # return objects != [] and area == 'GRAPH_EDITOR'
-    return objects != [] and anim_transform_active is False
+    return anim_transform_active is False and area == 'GRAPH_EDITOR'
 
 
 def anim_transform_poll(context):
@@ -758,9 +777,7 @@ class AAT_OT_sliders(Operator):
 
 
 class AAT_OT_create_anim_trans_mask(Operator):
-    ''' CREATE MASK
-
-Adds a mask to the AnimTransform. It determins the influence
+    ''' Adds a mask to the AnimTransform. It determins the influence
 over the keys in the object being manipulated in the 3D View'''
 
     bl_idname = "animaide.create_anim_trans_mask"
@@ -779,8 +796,8 @@ over the keys in the object being manipulated in the 3D View'''
 
         cur_frame = bpy.context.scene.frame_current
 
-        animaide.anim_transform.mask_margin_l = cur_frame - 2
-        animaide.anim_transform.mask_margin_r = cur_frame + 2
+        animaide.anim_transform.mask_margin_l = cur_frame
+        animaide.anim_transform.mask_margin_r = cur_frame
         animaide.anim_transform.mask_blend_l = -5
         animaide.anim_transform.mask_blend_r = 5
 
@@ -790,15 +807,11 @@ over the keys in the object being manipulated in the 3D View'''
 
         bpy.app.handlers.depsgraph_update_pre.append(cur_utils.anim_trans_mask_handlers)
 
-        # bpy.app.handlers.depsgraph_update_pre.append(cur_utils.anim_trans_mask_handlers)
-
         return {'FINISHED'}
 
 
 class AAT_OT_anim_transform_on(Operator):
-    ''' ACTIVATE
-
-Enables AnimTransform. Modify the entire animation
+    '''Enables AnimTransform. Modify the entire animation
 based on the object manipulation in the 3D View.
 This tool desables auto-key'''
 
@@ -818,9 +831,7 @@ This tool desables auto-key'''
 
 
 class AAT_OT_anim_transform_off(Operator):
-    ''' DEACTIVATE
-
-Disable AnimTransform. Objects can be animated again.'''
+    '''Disable AnimTransform. Objects can be animated again'''
 
     bl_idname = "animaide.anim_transform_off"
     bl_label = "Deactivate"
@@ -833,15 +844,15 @@ Disable AnimTransform. Objects can be animated again.'''
         animaide = context.scene.animaide
         animaide.anim_transform.active = False
         bpy.app.handlers.depsgraph_update_pre.remove(cur_utils.anim_transform_handlers)
+        if cur_utils.anim_trans_mask_handlers in bpy.app.handlers.depsgraph_update_pre:
+            bpy.app.handlers.depsgraph_update_pre.remove(cur_utils.anim_trans_mask_handlers)
         cur_utils.remove_anim_trans_mask()
 
         return {'FINISHED'}
 
 
 class AAT_OT_delete_anim_trans_mask(Operator):
-    ''' REMOVE MASK
-
-Removes the anim_trans_mask from the scene'''
+    '''Removes the anim_trans_mask from the scene'''
 
     bl_idname = "animaide.delete_anim_trans_mask"
     bl_label = "Delete Mask"
@@ -1593,7 +1604,11 @@ one on the right sets the right reference'''
                              side=self.side,
                              frame=current_frame)
         else:
-            utils.remove_marker(slider_num)
+            for side in ['L', 'R']:
+                utils.remove_marker(name_a='F',
+                                    name_b=slider_num,
+                                    side=side)
+            # utils.remove_marker(slider_num)
 
         # key_utils.get_ref_frame_globals(slider.left_neighbor, slider.right_neighbor)
 
@@ -1645,7 +1660,9 @@ Options related to the current tool on the slider'''
         col.label(text='Settings')
         col.prop(slider, 'slope', text='Slope', slider=False)
         col.prop(slider, 'overshoot', text='Overshoot', toggle=False)
-        col.prop(slider, 'use_markers', text='Use Markers', toggle=False)
+        if slider.selector == 'BLEND_FRAME':
+            col.prop(slider, 'use_markers', text='Use Markers', toggle=False)
+        col.prop(animaide.slider, 'affect_non_selected_frame', text='Not selected frames', toggle=False)
 
 
 class AAT_OT_anim_transform_settings(Operator):
@@ -1678,8 +1695,8 @@ Options related to the anim_transform'''
         row.prop(animaide.anim_transform, 'easing', text='', icon_only=False)
         row = layout.row(align=False)
         row.prop(animaide.anim_transform, 'interp', text=' ', expand=True)
-        row = layout.row(align=False)
-        row.prop(animaide.anim_transform, 'use_markers', text='Use Markers')
+        # row = layout.row(align=False)
+        # row.prop(animaide.anim_transform, 'use_markers', text='Use Markers')
         # row.prop(animaide.anim_transform, 'interp', text='', icon_only=False)
 
 
@@ -1780,8 +1797,34 @@ class AAT_OT_modifier(Operator):
         return {'FINISHED'}
 
 
-
-
+classes = (
+    AAT_OT_add_slider,
+    AAT_OT_remove_slider,
+    AAT_OT_anim_transform_on,
+    AAT_OT_anim_transform_off,
+    AAT_OT_sliders_settings,
+    AAT_OT_anim_transform_settings,
+    AAT_OT_get_ref_frame,
+    AAT_OT_sliders,
+    AAT_OT_ease,
+    AAT_OT_ease_in_out,
+    AAT_OT_blend_ease,
+    AAT_OT_blend_neighbor,
+    AAT_OT_blend_frame,
+    AAT_OT_blend_offset,
+    AAT_OT_push_pull,
+    AAT_OT_scale_average,
+    AAT_OT_scale_left,
+    AAT_OT_scale_right,
+    AAT_OT_smooth,
+    AAT_OT_noise,
+    AAT_OT_time_offset,
+    AAT_OT_tween,
+    AAT_OT_clone,
+    AAT_OT_clone_remove,
+    AAT_OT_create_anim_trans_mask,
+    AAT_OT_delete_anim_trans_mask
+)
 
 
 
