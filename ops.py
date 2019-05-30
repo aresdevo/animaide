@@ -529,12 +529,10 @@ def slider_looper(self, context):
         objects = bpy.data.objects
 
     selected_pose_bones = bpy.context.selected_pose_bones
+    usable_bones_names = []
 
     for obj in objects:
         anim = obj.animation_data
-
-        if anim is None:
-            continue
 
         visible = obj.visible_get()
 
@@ -543,25 +541,30 @@ def slider_looper(self, context):
             if not visible:
                 continue
 
-        if obj.type == 'ARMATURE':
-            if obj.mode == 'POSE':
-                if bpy.context.space_data.dopesheet.show_only_selected is True:
-                    if selected_pose_bones is None:
-                        channel_groups = []
-                    else:
-                        channel_groups = [bone.name for bone in obj.pose.bones if bone in selected_pose_bones]
-                else:
-                    channel_groups = [bone.name for bone in obj.pose.bones]
-            else:
-                # channel_groups = ['Object Transforms']
-                channel_groups = anim.action.groups
-        else:
-            channel_groups = anim.action.groups
-
         if anim is None:
             continue
+
+        if anim.action is None:
+            continue
+
         if anim.action.fcurves is None:
             continue
+
+        if obj.type == 'ARMATURE':
+            # if obj.mode == 'POSE':
+            if bpy.context.space_data.dopesheet.show_only_selected is True:
+                if selected_pose_bones is None:
+                    usable_bones_names = []
+                else:
+                    # usable_bones = selected_pose_bones
+                    usable_bones_names = [bone.name for bone in obj.pose.bones if bone in selected_pose_bones
+                                          and bone.bone.hide is False]
+            else:
+                # channel_groups = ['Object Transforms']
+                # channel_groups = anim.action.groups
+                # usable_bones = obj.pose.bones
+                usable_bones_names = [bone.name for bone in obj.pose.bones if bone.bone.hide is False]
+
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, slider_tools.fcurve in fcurves.items():
@@ -575,8 +578,12 @@ def slider_looper(self, context):
             if slider_tools.fcurve.hide is True:
                 continue
 
-            if slider_tools.fcurve.group.name not in channel_groups:
-                continue
+            if obj.type == 'ARMATURE':
+                split_data_path = slider_tools.fcurve.data_path.split(sep='"')
+                bone_name = split_data_path[1]
+                if bone_name not in usable_bones_names:
+                    if slider_tools.fcurve.group.name is not 'Object Transforms':
+                        continue
 
             if slider_tools.fcurve.group.name == cur_utils.group_name:
                 continue  # we don't want to select keys on reference fcurves

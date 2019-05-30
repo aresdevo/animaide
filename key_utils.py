@@ -375,6 +375,8 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
         anim = obj.animation_data
         if anim is None:
             continue
+        if anim.action is None:
+            continue
         if anim.action.fcurves is None:
             continue
         fcurves = obj.animation_data.action.fcurves
