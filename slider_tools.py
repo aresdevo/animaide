@@ -15,6 +15,7 @@ max_value = None
 
 
 def ease(factor, slope):
+    # global selected_keys, fcurve, left_neighbor, right_neighbor
 
     clamped_factor = utils.clamp(-factor, min_value, max_value)
 
@@ -38,6 +39,7 @@ def ease(factor, slope):
 
 
 def ease_in_out(factor, slope):
+    # global selected_keys, fcurve, left_neighbor, right_neighbor
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -77,6 +79,8 @@ def ease_in_out(factor, slope):
 
 
 def blend_neighbor(factor):
+    # global selected_keys, fcurve, left_neighbor, right_neighbor, original_values
+    # global max_value
 
     for index in selected_keys:
 
@@ -93,6 +97,7 @@ def blend_neighbor(factor):
 
 
 def blend_frame(factor, left_y_ref, right_y_ref):
+    # global selected_keys, fcurve, original_values, max_value
 
     for index in selected_keys:
 
@@ -109,6 +114,8 @@ def blend_frame(factor, left_y_ref, right_y_ref):
 
 
 def blend_ease(factor, slope):
+    # global selected_keys, fcurve, left_neighbor, right_neighbor, min_value, max_value
+    # global original_values
 
     local_y = right_neighbor['y'] - left_neighbor['y']
     local_x = right_neighbor['x'] - left_neighbor['x']
@@ -164,6 +171,8 @@ def blend_ease(factor, slope):
 
 
 def blend_offset(factor):
+    # global selected_keys, min_value, max_value, right_neighbor, left_neighbor
+    # global original_values, fcurve
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -184,6 +193,8 @@ def blend_offset(factor):
 
 
 def tween(factor):
+    # global selected_keys, min_value, max_value, right_neighbor, left_neighbor
+    # global fcurve
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -197,6 +208,8 @@ def tween(factor):
 
 
 def push_pull(factor):
+    # global selected_keys, min_value, max_value, right_neighbor, left_neighbor
+    # global fcurve, original_values
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -211,6 +224,7 @@ def push_pull(factor):
 
 
 def smooth(factor):
+    # global selected_keys, min_value, max_value, fcurve, original_values
 
     # factor = (self.factor/2) + 0.5
 
@@ -234,6 +248,7 @@ def smooth(factor):
 
 
 def time_offset(factor, fcurves):
+    # global selected_keys, min_value, max_value, fcurve
 
     # factor = (self.factor/2) + 0.5
     animaide = bpy.context.scene.animaide
@@ -257,6 +272,7 @@ def time_offset(factor, fcurves):
 
 
 def noise(factor, fcurves, fcurve_index):
+    # global selected_keys, min_value, max_value, fcurve, original_values
 
     # factor = (self.factor/2) + 0.5
     # animaide = bpy.context.scene.animaide
@@ -280,6 +296,7 @@ def noise(factor, fcurves, fcurve_index):
 
 
 def noise_random(factor, fcurves, range=1):
+    # global selected_keys, min_value, max_value, fcurve, original_values
 
     # factor = (self.factor/2) + 0.5
     # animaide = bpy.context.scene.animaide
@@ -311,6 +328,8 @@ def noise_random(factor, fcurves, range=1):
 
 
 def scale(factor, scale_type):
+    # global selected_keys, min_value, max_value, original_values, fcurve
+    # global original_values, left_neighbor, right_neighbor
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -329,3 +348,243 @@ def scale(factor, scale_type):
             delta = original_values[index]['y'] - y_average
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor
+
+
+####### For Operators
+
+
+def looper(self, context):
+    global min_value, max_value, global_fcurve, selected_keys
+    global original_values, left_neighbor, right_neighbor, fcurve
+
+    animaide = context.scene.animaide
+
+    if self.slot_index == -1:
+        slider = animaide.slider
+    else:
+        slider = animaide.slider_slots[self.slot_index]
+
+    if self.op_context == 'EXEC_DEFAULT':
+        key_utils.get_sliders_globals(left_frame=slider.left_ref_frame,
+                                      right_frame=slider.right_ref_frame)
+
+    # slider.factor = self.factor
+    # slider.factor_overshoot = self.factor
+
+    min_value = slider.min_value
+    max_value = slider.max_value
+
+    if bpy.context.space_data.dopesheet.show_only_selected is True:
+        objects = context.selected_objects
+    else:
+        objects = bpy.data.objects
+
+    selected_pose_bones = bpy.context.selected_pose_bones
+    usable_bones_names = []
+
+    for obj in objects:
+        anim = obj.animation_data
+
+        visible = obj.visible_get()
+
+        if bpy.context.space_data.dopesheet.show_hidden is not True:
+
+            if not visible:
+                continue
+
+        if anim is None:
+            continue
+
+        if anim.action is None:
+            continue
+
+        if anim.action.fcurves is None:
+            continue
+
+        if obj.type == 'ARMATURE':
+            # if obj.mode == 'POSE':
+            if bpy.context.space_data.dopesheet.show_only_selected is True:
+                if selected_pose_bones is None:
+                    usable_bones_names = []
+                else:
+                    # usable_bones = selected_pose_bones
+                    usable_bones_names = [bone.name for bone in obj.pose.bones if bone in selected_pose_bones
+                                          and bone.bone.hide is False]
+            else:
+                # channel_groups = ['Object Transforms']
+                # channel_groups = anim.action.groups
+                # usable_bones = obj.pose.bones
+                usable_bones_names = [bone.name for bone in obj.pose.bones if bone.bone.hide is False]
+
+        fcurves = obj.animation_data.action.fcurves
+
+        for fcurve_index, fcurve in fcurves.items():
+
+            if fcurve.select is False:
+                continue
+
+            if fcurve.lock is True:
+                continue
+
+            if fcurve.hide is True:
+                continue
+
+            if obj.type == 'ARMATURE':
+                split_data_path = fcurve.data_path.split(sep='"')
+                bone_name = split_data_path[1]
+                if bone_name not in usable_bones_names:
+                    if fcurve.group.name is not 'Object Transforms':
+                        continue
+
+            if fcurve.group.name == cur_utils.group_name:
+                continue  # we don't want to select keys on reference fcurves
+
+            global_fcurve = key_utils.global_values[obj.name][fcurve_index]
+            selected_keys = global_fcurve['selected_keys']
+
+            if selected_keys == []:
+                continue
+
+            original_values = global_fcurve['original_values']
+            left_neighbor = global_fcurve['left_neighbor']
+            right_neighbor = global_fcurve['right_neighbor']
+
+            if self.slider_type == 'EASE':
+                ease(self.factor, self.slope)
+
+            if self.slider_type == 'EASE_IN_OUT':
+                ease_in_out(self.factor, self.slope)
+
+            if self.slider_type == 'BLEND_NEIGHBOR':
+                blend_neighbor(self.factor)
+
+            if self.slider_type == 'BLEND_FRAME':
+                left_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['left_y']
+                right_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['right_y']
+                blend_frame(self.factor, left_y_ref, right_y_ref)
+
+            if self.slider_type == 'BLEND_EASE':
+                blend_ease(self.factor, self.slope)
+
+            if self.slider_type == 'BLEND_OFFSET':
+                blend_offset(self.factor)
+
+            if self.slider_type == 'TWEEN':
+                tween(self.factor)
+
+            if self.slider_type == 'PUSH_PULL':
+                push_pull(self.factor)
+
+            if self.slider_type == 'SCALE_LEFT':
+                scale(self.factor, 'L')
+
+            if self.slider_type == 'SCALE_RIGHT':
+                scale(self.factor, 'R')
+
+            if self.slider_type == 'SCALE_AVERAGE':
+                scale(self.factor, '')
+
+            if self.slider_type == 'SMOOTH':
+                smooth(self.factor)
+
+            if self.slider_type == 'TIME_OFFSET':
+                time_offset(self.factor, fcurves)
+
+            if self.slider_type == 'NOISE':
+                noise(self.factor, fcurves, fcurve_index)
+
+            fcurve.update()
+
+    #        message = "Factor: %f03" % animaide.sliders.factor
+    #        self.report({'INFO'}, "Factor:" + message)
+
+    return {'FINISHED'}
+
+
+def modal(self, context, event):
+    if event.type == 'MOUSEMOVE':  # Apply
+
+        slider_from_zero = (event.mouse_x - self.init_mouse_x) / 200
+        self.factor = slider_from_zero
+
+        if self.slot_index == -1:
+            self.item.factor = slider_from_zero
+            self.item.factor_overshoot = slider_from_zero
+        else:
+            self.slots[self.slot_index].factor = slider_from_zero
+            self.slots[self.slot_index].factor_overshoot = slider_from_zero
+
+        self.execute(context)
+
+    elif event.type == 'LEFTMOUSE':  # Confirm
+        if context.area.type == 'GRAPH_EDITOR':
+            context.area.tag_redraw()
+        key_utils.get_sliders_globals()
+        if self.slot_index == -1:
+            self.animaide.slider.modal_switch = False
+            self.animaide.slider.factor = 0.0
+            self.animaide.slider.factor_overshoot = 0.0
+        else:
+            self.slots[self.slot_index].modal_switch = False
+            self.slots[self.slot_index].factor = 0.0
+            self.slots[self.slot_index].factor_overshoot = 0.0
+        return {'FINISHED'}
+
+    if event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
+        if context.area.type == 'GRAPH_EDITOR':
+            context.area.tag_redraw()
+        key_utils.reset_original()
+        if self.slot_index == -1:
+            self.animaide.slider.modal_switch = False
+            self.animaide.slider.factor = 0.0
+            self.animaide.slider.factor_overshoot = 0.0
+        else:
+            self.slots[self.slot_index].modal_switch = False
+            self.slots[self.slot_index].factor = 0.0
+            self.slots[self.slot_index].factor_overshoot = 0.0
+        return {'CANCELLED'}
+
+    return {'RUNNING_MODAL'}
+
+
+def invoke(self, context, event):
+
+    # self.animaide.slider.selector = self.slider_type
+
+    if self.op_context == 'EXEC_DEFAULT':
+        return self.execute(context)
+
+    if self.slot_index == -1:
+        slider = self.animaide.slider
+        overshoot = slider.overshoot
+        slider.selector = self.slider_type
+        slider.overshoot = overshoot
+    else:
+        slider = self.slots[self.slot_index]
+
+    slider.modal_switch = True
+    slider.factor = 0.0
+    slider.factor_overshoot = 0.0
+    self.slope = slider.slope
+
+    self.factor = 0.0
+    self.init_mouse_x = event.mouse_x
+
+    key_utils.get_sliders_globals(left_frame=slider.left_ref_frame,
+                                  right_frame=slider.right_ref_frame)
+
+    self.execute(context)
+    context.window_manager.modal_handler_add(self)
+
+    return {'RUNNING_MODAL'}
+
+
+def poll(context):
+    objects = context.selected_objects
+    animaide = context.scene.animaide
+    anim_transform_active = animaide.anim_transform.active
+    # space = context.area.spaces.active.type
+    area = context.area.type
+    # return objects != [] and area == 'GRAPH_EDITOR'
+    return anim_transform_active is False and area == 'GRAPH_EDITOR'
+

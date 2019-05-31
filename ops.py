@@ -1,6 +1,6 @@
 import bpy
 
-from . import utils, key_utils, cur_utils, slider_tools
+from . import utils, key_utils, cur_utils, slider_tools, magnet
 from bpy.props import StringProperty, EnumProperty, BoolProperty, \
     IntProperty, FloatProperty
 from bpy.types import Operator
@@ -505,248 +505,6 @@ class AAT_OT_sliders_everything(Operator):
         return {'RUNNING_MODAL'}
 
 
-def slider_looper(self, context):
-    animaide = context.scene.animaide
-
-    if self.slot_index == -1:
-        slider = animaide.slider
-    else:
-        slider = animaide.slider_slots[self.slot_index]
-
-    if self.op_context == 'EXEC_DEFAULT':
-        key_utils.get_sliders_globals(left_frame=slider.left_ref_frame,
-                                      right_frame=slider.right_ref_frame)
-
-    # slider.factor = self.factor
-    # slider.factor_overshoot = self.factor
-
-    slider_tools.min_value = slider.min_value
-    slider_tools.max_value = slider.max_value
-
-    if bpy.context.space_data.dopesheet.show_only_selected == True:
-        objects = context.selected_objects
-    else:
-        objects = bpy.data.objects
-
-    selected_pose_bones = bpy.context.selected_pose_bones
-    usable_bones_names = []
-
-    for obj in objects:
-        anim = obj.animation_data
-
-        visible = obj.visible_get()
-
-        if bpy.context.space_data.dopesheet.show_hidden is not True:
-
-            if not visible:
-                continue
-
-        if anim is None:
-            continue
-
-        if anim.action is None:
-            continue
-
-        if anim.action.fcurves is None:
-            continue
-
-        if obj.type == 'ARMATURE':
-            # if obj.mode == 'POSE':
-            if bpy.context.space_data.dopesheet.show_only_selected is True:
-                if selected_pose_bones is None:
-                    usable_bones_names = []
-                else:
-                    # usable_bones = selected_pose_bones
-                    usable_bones_names = [bone.name for bone in obj.pose.bones if bone in selected_pose_bones
-                                          and bone.bone.hide is False]
-            else:
-                # channel_groups = ['Object Transforms']
-                # channel_groups = anim.action.groups
-                # usable_bones = obj.pose.bones
-                usable_bones_names = [bone.name for bone in obj.pose.bones if bone.bone.hide is False]
-
-        fcurves = obj.animation_data.action.fcurves
-
-        for fcurve_index, slider_tools.fcurve in fcurves.items():
-
-            if slider_tools.fcurve.select is False:
-                continue
-
-            if slider_tools.fcurve.lock is True:
-                continue
-
-            if slider_tools.fcurve.hide is True:
-                continue
-
-            if obj.type == 'ARMATURE':
-                split_data_path = slider_tools.fcurve.data_path.split(sep='"')
-                bone_name = split_data_path[1]
-                if bone_name not in usable_bones_names:
-                    if slider_tools.fcurve.group.name is not 'Object Transforms':
-                        continue
-
-            if slider_tools.fcurve.group.name == cur_utils.group_name:
-                continue  # we don't want to select keys on reference fcurves
-
-            slider_tools.global_fcurve = key_utils.global_values[obj.name][fcurve_index]
-            slider_tools.selected_keys = slider_tools.global_fcurve['selected_keys']
-
-            if slider_tools.selected_keys == []:
-                continue
-
-            slider_tools.original_values = slider_tools.global_fcurve['original_values']
-            slider_tools.left_neighbor = slider_tools.global_fcurve['left_neighbor']
-            slider_tools.right_neighbor = slider_tools.global_fcurve['right_neighbor']
-
-            if self.slider_type == 'EASE':
-                slider_tools.ease(self.factor, self.slope)
-
-            if self.slider_type == 'EASE_IN_OUT':
-                slider_tools.ease_in_out(self.factor, self.slope)
-
-            if self.slider_type == 'BLEND_NEIGHBOR':
-                slider_tools.blend_neighbor(self.factor)
-
-            if self.slider_type == 'BLEND_FRAME':
-                left_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['left_y']
-                right_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['right_y']
-                slider_tools.blend_frame(self.factor, left_y_ref, right_y_ref)
-
-            if self.slider_type == 'BLEND_EASE':
-                slider_tools.blend_ease(self.factor, self.slope)
-
-            if self.slider_type == 'BLEND_OFFSET':
-                slider_tools.blend_offset(self.factor)
-
-            if self.slider_type == 'TWEEN':
-                slider_tools.tween(self.factor)
-
-            if self.slider_type == 'PUSH_PULL':
-                slider_tools.push_pull(self.factor)
-
-            if self.slider_type == 'SCALE_LEFT':
-                slider_tools.scale(self.factor, 'L')
-
-            if self.slider_type == 'SCALE_RIGHT':
-                slider_tools.scale(self.factor, 'R')
-
-            if self.slider_type == 'SCALE_AVERAGE':
-                slider_tools.scale(self.factor, '')
-
-            if self.slider_type == 'SMOOTH':
-                slider_tools.smooth(self.factor)
-
-            if self.slider_type == 'TIME_OFFSET':
-                slider_tools.time_offset(self.factor, fcurves)
-
-            if self.slider_type == 'NOISE':
-                slider_tools.noise(self.factor, fcurves, fcurve_index)
-
-            slider_tools.fcurve.update()
-
-    #        message = "Factor: %f03" % animaide.sliders.factor
-    #        self.report({'INFO'}, "Factor:" + message)
-
-    return {'FINISHED'}
-
-
-def slider_modal(self, context, event):
-    if event.type == 'MOUSEMOVE':  # Apply
-
-        slider_from_zero = (event.mouse_x - self.init_mouse_x) / 200
-        self.factor = slider_from_zero
-
-        if self.slot_index == -1:
-            self.item.factor = slider_from_zero
-            self.item.factor_overshoot = slider_from_zero
-        else:
-            self.slots[self.slot_index].factor = slider_from_zero
-            self.slots[self.slot_index].factor_overshoot = slider_from_zero
-
-        self.execute(context)
-
-    elif event.type == 'LEFTMOUSE':  # Confirm
-        if context.area.type == 'GRAPH_EDITOR':
-            context.area.tag_redraw()
-        key_utils.get_sliders_globals()
-        if self.slot_index == -1:
-            self.animaide.slider.modal_switch = False
-            self.animaide.slider.factor = 0.0
-            self.animaide.slider.factor_overshoot = 0.0
-        else:
-            self.slots[self.slot_index].modal_switch = False
-            self.slots[self.slot_index].factor = 0.0
-            self.slots[self.slot_index].factor_overshoot = 0.0
-        return {'FINISHED'}
-
-    if event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
-        if context.area.type == 'GRAPH_EDITOR':
-            context.area.tag_redraw()
-        key_utils.reset_original()
-        if self.slot_index == -1:
-            self.animaide.slider.modal_switch = False
-            self.animaide.slider.factor = 0.0
-            self.animaide.slider.factor_overshoot = 0.0
-        else:
-            self.slots[self.slot_index].modal_switch = False
-            self.slots[self.slot_index].factor = 0.0
-            self.slots[self.slot_index].factor_overshoot = 0.0
-        return {'CANCELLED'}
-
-    return {'RUNNING_MODAL'}
-
-
-def slider_invoke(self, context, event):
-
-    # self.animaide.slider.selector = self.slider_type
-
-    if self.op_context == 'EXEC_DEFAULT':
-        return self.execute(context)
-
-    if self.slot_index == -1:
-        slider = self.animaide.slider
-        overshoot = slider.overshoot
-        slider.selector = self.slider_type
-        slider.overshoot = overshoot
-    else:
-        slider = self.slots[self.slot_index]
-
-    slider.modal_switch = True
-    slider.factor = 0.0
-    slider.factor_overshoot = 0.0
-    self.slope = slider.slope
-
-    self.factor = 0.0
-    self.init_mouse_x = event.mouse_x
-
-    key_utils.get_sliders_globals(left_frame=slider.left_ref_frame,
-                                  right_frame=slider.right_ref_frame)
-
-    self.execute(context)
-    context.window_manager.modal_handler_add(self)
-
-    return {'RUNNING_MODAL'}
-
-
-def slider_poll(context):
-    objects = context.selected_objects
-    animaide = context.scene.animaide
-    anim_transform_active = animaide.anim_transform.active
-    # space = context.area.spaces.active.type
-    area = context.area.type
-    # return objects != [] and area == 'GRAPH_EDITOR'
-    return anim_transform_active is False and area == 'GRAPH_EDITOR'
-
-
-def anim_transform_poll(context):
-    obj = context.object
-    anim = obj.animation_data
-    # space = context.area.spaces.active.type
-    area = context.area.type
-    # return obj is not None and area == 'GRAPH_EDITOR' and anim is not None
-    return obj is not None and anim is not None
-
-
 class AAT_OT_sliders(Operator):
     bl_idname = "animaide.sliders"
     bl_label = "Sliders"
@@ -759,7 +517,7 @@ class AAT_OT_sliders(Operator):
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -772,15 +530,15 @@ class AAT_OT_sliders(Operator):
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_create_anim_trans_mask(Operator):
@@ -793,7 +551,7 @@ over the keys in the object being manipulated in the 3D View'''
 
     @classmethod
     def poll(cls, context):
-        return anim_transform_poll(context)
+        return magnet.poll(context)
 
     def execute(self, context):
         scene = context.scene
@@ -808,11 +566,11 @@ over the keys in the object being manipulated in the 3D View'''
         animaide.anim_transform.mask_blend_l = -5
         animaide.anim_transform.mask_blend_r = 5
 
-        cur_utils.add_anim_trans_mask()
+        magnet.add_anim_trans_mask()
 
         context.scene.tool_settings.use_keyframe_insert_auto = False
 
-        bpy.app.handlers.depsgraph_update_pre.append(cur_utils.anim_trans_mask_handlers)
+        bpy.app.handlers.depsgraph_update_pre.append(magnet.anim_trans_mask_handlers)
 
         return {'FINISHED'}
 
@@ -827,12 +585,12 @@ This tool desables auto-key'''
 
     @classmethod
     def poll(cls, context):
-        return anim_transform_poll(context)
+        return magnet.poll(context)
 
     def execute(self, context):
         animaide = context.scene.animaide
         animaide.anim_transform.active = True
-        bpy.app.handlers.depsgraph_update_pre.append(cur_utils.anim_transform_handlers)
+        bpy.app.handlers.depsgraph_update_pre.append(magnet.anim_transform_handlers)
 
         return {'FINISHED'}
 
@@ -845,15 +603,15 @@ class AAT_OT_anim_transform_off(Operator):
 
     @classmethod
     def poll(cls, context):
-        return anim_transform_poll(context)
+        return magnet.poll(context)
 
     def execute(self, context):
         animaide = context.scene.animaide
         animaide.anim_transform.active = False
-        bpy.app.handlers.depsgraph_update_pre.remove(cur_utils.anim_transform_handlers)
-        if cur_utils.anim_trans_mask_handlers in bpy.app.handlers.depsgraph_update_pre:
-            bpy.app.handlers.depsgraph_update_pre.remove(cur_utils.anim_trans_mask_handlers)
-        cur_utils.remove_anim_trans_mask()
+        bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_transform_handlers)
+        if magnet.anim_trans_mask_handlers in bpy.app.handlers.depsgraph_update_pre:
+            bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_trans_mask_handlers)
+        magnet.remove_anim_trans_mask()
 
         return {'FINISHED'}
 
@@ -867,13 +625,13 @@ class AAT_OT_delete_anim_trans_mask(Operator):
 
     @classmethod
     def poll(cls, context):
-        return anim_transform_poll(context)
+        return magnet.poll(context)
 
     def execute(self, context):
 
-        bpy.app.handlers.depsgraph_update_pre.remove(cur_utils.anim_trans_mask_handlers)
+        bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_trans_mask_handlers)
 
-        cur_utils.remove_anim_trans_mask()
+        magnet.remove_anim_trans_mask()
 
         return {'FINISHED'}
 
@@ -900,7 +658,7 @@ pie_menu-1:  (alt-1)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -913,15 +671,15 @@ pie_menu-1:  (alt-1)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_ease_in_out(Operator):
@@ -946,7 +704,7 @@ pie_menu-1:  (alt-1)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -959,15 +717,15 @@ pie_menu-1:  (alt-1)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_blend_neighbor(Operator):
@@ -991,7 +749,7 @@ pie_menu-1: (alt-1)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1004,15 +762,15 @@ pie_menu-1: (alt-1)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_blend_frame(Operator):
@@ -1036,7 +794,7 @@ pie_menu-1: (alt-1)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1049,15 +807,15 @@ pie_menu-1: (alt-1)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_blend_ease(Operator):
@@ -1081,7 +839,7 @@ pie_menu-1: (alt-1)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1094,15 +852,15 @@ pie_menu-1: (alt-1)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_blend_offset(Operator):
@@ -1126,7 +884,7 @@ pie_menu-2: (alt-2)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1139,15 +897,15 @@ pie_menu-2: (alt-2)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_tween(Operator):
@@ -1172,7 +930,7 @@ pie_menu-1: (alt-1)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1185,15 +943,15 @@ pie_menu-1: (alt-1)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_push_pull(Operator):
@@ -1217,7 +975,7 @@ pie_menu-1: (alt-1)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1230,15 +988,15 @@ pie_menu-1: (alt-1)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_smooth(Operator):
@@ -1261,7 +1019,7 @@ pie_menu-2: (alt-2)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1274,15 +1032,15 @@ pie_menu-2: (alt-2)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_time_offset(Operator):
@@ -1305,7 +1063,7 @@ pie_menu-2: (alt-2)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1318,15 +1076,15 @@ pie_menu-2: (alt-2)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_noise(Operator):
@@ -1348,7 +1106,7 @@ pie_menu-2: (alt-2)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1361,15 +1119,15 @@ pie_menu-2: (alt-2)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_scale_left(Operator):
@@ -1392,7 +1150,7 @@ pie_menu-2: (alt-2)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1405,15 +1163,15 @@ pie_menu-2: (alt-2)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_scale_right(Operator):
@@ -1436,7 +1194,7 @@ pie_menu-2: (alt-2)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1449,15 +1207,15 @@ pie_menu-2: (alt-2)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 class AAT_OT_scale_average(Operator):
@@ -1481,7 +1239,7 @@ pie_menu-1: (alt-1)'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def __init__(self):
         self.animaide = bpy.context.scene.animaide
@@ -1494,15 +1252,15 @@ pie_menu-1: (alt-1)'''
 
     def execute(self, context):
 
-        return slider_looper(self, context)
+        return slider_tools.looper(self, context)
 
     def modal(self, context, event):
 
-        return slider_modal(self, context, event)
+        return slider_tools.modal(self, context, event)
 
     def invoke(self, context, event):
 
-        return slider_invoke(self, context, event)
+        return slider_tools.invoke(self, context, event)
 
 
 ################  TOOLS  ###############
@@ -1646,7 +1404,7 @@ Options related to the current tool on the slider'''
 
     @classmethod
     def poll(cls, context):
-        return slider_poll(context)
+        return slider_tools.poll(context)
 
     def execute(self, context):
         return {'FINISHED'}
@@ -1684,7 +1442,7 @@ Options related to the anim_transform'''
 
     @classmethod
     def poll(cls, context):
-        return anim_transform_poll(context)
+        return magnet.poll(context)
 
     def execute(self, context):
         return {'FINISHED'}

@@ -35,7 +35,7 @@ bl_info = {
 
 # load and reload submodules
 #################################
-from . import utils, key_utils, cur_utils, props, ops, ui
+from . import utils, key_utils, cur_utils, magnet, props, ops, ui
 
 classes = props.classes + ops.classes + ui.classes
 
