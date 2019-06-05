@@ -75,6 +75,7 @@ def register_keymaps():
         addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new('animaide.blend_neighbor', 'THREE', 'PRESS')
+        kmi.properties.op_context = 'INVOKE_DEFAULT'
         addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new('animaide.blend_neighbor', 'MINUS', 'PRESS')
