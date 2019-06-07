@@ -590,6 +590,13 @@ This tool desables auto-key'''
     def execute(self, context):
         animaide = context.scene.animaide
         animaide.anim_transform.active = True
+        magnet.user_auto_animate = context.scene.tool_settings.use_keyframe_insert_auto
+        context.scene.tool_settings.use_keyframe_insert_auto = False
+        # context.area.tag_redraw()
+        # bpy.ops.wm.redraw_timer()
+        # bpy.data.window_managers['WinMan'].windows.update()
+        bpy.data.window_managers['WinMan'].update_tag()
+
         bpy.app.handlers.depsgraph_update_pre.append(magnet.anim_transform_handlers)
 
         return {'FINISHED'}
@@ -612,6 +619,12 @@ class AAT_OT_anim_transform_off(Operator):
         if magnet.anim_trans_mask_handlers in bpy.app.handlers.depsgraph_update_pre:
             bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_trans_mask_handlers)
         magnet.remove_anim_trans_mask()
+
+        context.scene.tool_settings.use_keyframe_insert_auto = magnet.user_auto_animate
+        # context.area.tag_redraw()
+        # bpy.ops.wm.redraw_timer()
+        # bpy.data.window_managers['WinMan'].windows.update()
+        bpy.data.window_managers['WinMan'].update_tag()
 
         return {'FINISHED'}
 

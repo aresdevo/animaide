@@ -430,10 +430,12 @@ def looper(self, context):
                 continue
 
             if obj.type == 'ARMATURE':
-                split_data_path = fcurve.data_path.split(sep='"')
-                bone_name = split_data_path[1]
+                if fcurve.group.name != 'Object Transforms':
+                    split_data_path = fcurve.data_path.split(sep='"')
+                    bone_name = split_data_path[1]
+
                 if bone_name not in usable_bones_names:
-                    if fcurve.group.name is not 'Object Transforms':
+                    if fcurve.group.name != 'Object Transforms':
                         continue
 
             if fcurve.group.name == cur_utils.group_name:
@@ -586,5 +588,5 @@ def poll(context):
     # space = context.area.spaces.active.type
     area = context.area.type
     # return objects != [] and area == 'GRAPH_EDITOR'
-    return anim_transform_active is False and area == 'GRAPH_EDITOR'
+    return anim_transform_active is False and area == 'GRAPH_EDITOR' and objects is not None
 

@@ -1,5 +1,5 @@
 import bpy
-from . import props, key_utils
+from . import props, key_utils, magnet
 from bpy.types import Panel, Menu
 
 
@@ -206,14 +206,16 @@ class AAT_PT_anim_transform(Panel):
 
         row = layout.row(align=True)
 
-        if animaide.anim_transform.active is False:
+        # if animaide.anim_transform.active is False:
+        if magnet.anim_transform_handlers not in bpy.app.handlers.depsgraph_update_pre:
             row.operator("animaide.anim_transform_on", text='Activate', icon='PLUGIN')
         else:
             row.operator("animaide.anim_transform_off", text="Dectivate", icon='CANCEL')
 
             row = layout.row(align=True)
 
-            if animaide.anim_transform.use_mask is False:
+            # if animaide.anim_transform.use_mask is False:
+            if magnet.anim_trans_mask_handlers not in bpy.app.handlers.depsgraph_update_pre:
                 row.operator("animaide.create_anim_trans_mask", text="Add Mask", icon='SELECT_SUBTRACT')
                 row.operator('animaide.anim_transform_settings', text='', icon='SETTINGS', emboss=True)
             else:

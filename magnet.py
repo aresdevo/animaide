@@ -6,12 +6,17 @@ from . import cur_utils
 
 user_preview_range = {}
 user_scene_range = {}
+user_auto_animate = False
 
 
 def anim_transform_handlers(dummy):
 
+    # global user_auto_animate
+
     context = bpy.context
 
+    # user_auto_animate = context.scene.tool_settings.use_keyframe_insert_auto
+    #
     context.scene.tool_settings.use_keyframe_insert_auto = False
 
     selected_objects = context.selected_objects
@@ -269,10 +274,11 @@ def modify_anim_trans_mask(mask, keys):
 
 
 def poll(context):
+    objects = context.selected_objects
     obj = context.object
-    anim = obj.animation_data
     # space = context.area.spaces.active.type
     area = context.area.type
     # return obj is not None and area == 'GRAPH_EDITOR' and anim is not None
-    return obj is not None and anim is not None
+    # return obj is not None and obj.animation_data is not None
+    return objects is not None
 
