@@ -111,7 +111,14 @@ def get_anim_transform_delta(obj, fcurve):
 
     prop = obj.path_resolve(fcurve.data_path)
 
-    target = prop[fcurve.array_index]
+    # print('fcurve path: ', fcurve.data_path)
+    # print('prop: ', prop)
+    # print('array index: ', fcurve.array_index)
+
+    try:
+        target = prop[fcurve.array_index]
+    except TypeError:
+        target = prop
 
     return target - source
 
