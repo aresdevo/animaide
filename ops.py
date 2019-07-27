@@ -43,7 +43,7 @@ class AAT_OT_sliders_everything(Operator):
     def __del__(self):
         bpy.context.area.tag_redraw()
 
-    def ease(self):
+    def ease_to_ease(self):
 
         clamped_factor = utils.clamp(-self.factor, self.min_value, self.max_value)
 
@@ -65,7 +65,7 @@ class AAT_OT_sliders_everything(Operator):
 
             k.co.y = self.left_neighbor['y'] + local_y * ease_y
 
-    def ease_in_out(self):
+    def ease(self):
 
         clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
@@ -389,11 +389,11 @@ class AAT_OT_sliders_everything(Operator):
                 # self.left_neighbor, self.right_neighbor = key_utils.get_selected_neigbors(self.fcurve,
                 #                                                                           self.selected_keys)
 
+                if self.slider_type == 'EASE_TO_EASE':
+                    self.ease_to_ease()
+
                 if self.slider_type == 'EASE':
                     self.ease()
-
-                if self.slider_type == 'EASE_IN_OUT':
-                    self.ease_in_out()
 
                 if self.slider_type == 'BLEND_NEIGHBOR':
                     self.blend_neighbor()
@@ -649,14 +649,58 @@ class AAT_OT_delete_anim_trans_mask(Operator):
         return {'FINISHED'}
 
 
-class AAT_OT_ease(Operator):
-    ''' EASE
-
+class AAT_OT_ease_to_ease(Operator):
+    '''
 Transition selected keys - or current key - from the neighboring
 ones with a "S" shape manner (ease-in and ease-out simultaneously).
 It doesn't take into consideration the current key values.
 
 shortcut:   1
+pie_menu-1:  (alt-1)'''
+
+    bl_idname = "animaide.ease_to_ease"
+    bl_label = "Ease To Ease"
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    # slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT')
+    slider_type = 'EASE_TO_EASE'
+
+    @classmethod
+    def poll(cls, context):
+        return slider_tools.poll(context)
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        pass
+
+    def execute(self, context):
+
+        return slider_tools.looper(self, context)
+
+    def modal(self, context, event):
+
+        return slider_tools.modal(self, context, event)
+
+    def invoke(self, context, event):
+
+        return slider_tools.invoke(self, context, event)
+
+
+class AAT_OT_ease(Operator):
+    '''
+Transition selected keys - or current key - from the neighboring
+ones with a "C" shape manner (ease-in or ease-out). It doesn't
+take into consideration the current key values.
+
+shortcut:   2
 pie_menu-1:  (alt-1)'''
 
     bl_idname = "animaide.ease"
@@ -695,55 +739,8 @@ pie_menu-1:  (alt-1)'''
         return slider_tools.invoke(self, context, event)
 
 
-class AAT_OT_ease_in_out(Operator):
-    ''' EASE-IN-OUT
-
-Transition selected keys - or current key - from the neighboring
-ones with a "C" shape manner (ease-in or ease-out). It doesn't
-take into consideration the current key values.
-
-shortcut:   2
-pie_menu-1:  (alt-1)'''
-
-    bl_idname = "animaide.ease_in_out"
-    bl_label = "Ease In Out"
-
-    slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
-    slider_type = 'EASE_IN_OUT'
-
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
-
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
 class AAT_OT_blend_neighbor(Operator):
-    ''' BLEND NEIGHBOR
-
+    '''
 Blend selected keys - or current key - to the value of the neighboring
 left and right keys.
 
@@ -787,8 +784,7 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_blend_frame(Operator):
-    ''' BLEND FRAME
-
+    '''
 Blend selected keys - or current key - to the value of the chosen
 left and right frames.
 
@@ -832,8 +828,7 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_blend_ease(Operator):
-    ''' BLEND EASE
-
+    '''
 Blend selected keys - or current key - to the ease-in or ease-out
 curve using the neighboring keys.
 
@@ -877,8 +872,7 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_blend_offset(Operator):
-    ''' BLEND OFFSET
-
+    '''
 Blend selected keys - or current key - to the
 value of the chosen left and right frames.
 
@@ -922,8 +916,7 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_tween(Operator):
-    ''' TWEEN
-
+    '''
 Set lineal relative value of the selected keys - or current key -
 in relationship to the neighboring ones. It doesn't take into
 consideration the current key values.
@@ -968,8 +961,7 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_push_pull(Operator):
-    ''' PUSH-PULL
-
+    '''
 Exagerates or decreases the value of the selected keys
 - or current key -
 
@@ -1013,8 +1005,7 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_smooth(Operator):
-    ''' SMOOTH
-
+    '''
 Averages values of selected keys creating
 a smoother fcurve
 
@@ -1057,8 +1048,7 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_time_offset(Operator):
-    ''' TIME OFFSET
-
+    '''
 Shift the value of selected keys - or current key -
 to the ones of the left or right in the seme fcurve
 
@@ -1101,8 +1091,7 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_noise(Operator):
-    ''' NOISE
-
+    '''
 Set random values to the selected keys - or current key -
 
 shortcut:   shift-6
@@ -1144,8 +1133,7 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_scale_left(Operator):
-    ''' SCALE LEFT
-
+    '''
 Increase or decrease the value of selected keys - or current key -
 in relationship to the left neighboring one.
 
@@ -1188,8 +1176,7 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_scale_right(Operator):
-    ''' SCALE RIGHT
-
+    '''
 Increase or decrease the value of selected keys - or current key -
 in relationship to the right neighboring one.
 
@@ -1232,8 +1219,7 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_scale_average(Operator):
-    ''' SCALE AVERAGE
-
+    '''
 Increase or decrease the value of selected keys - or current key -
 in relationship to the average point of those affected.
 
@@ -1280,8 +1266,7 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_add_slider(Operator):
-    ''' ADD EXTRA SLIDER
-
+    '''
 Add aditional slider to the panel'''
 
     bl_idname = 'animaide.add_slider'
@@ -1303,8 +1288,7 @@ Add aditional slider to the panel'''
 
 
 class AAT_OT_remove_slider(Operator):
-    ''' REMOVE SLIDERS
-
+    '''
 Removes last slider of the list'''
 
     bl_idname = 'animaide.remove_slider'
@@ -1327,8 +1311,7 @@ Removes last slider of the list'''
 
 
 class AAT_OT_get_ref_frame(Operator):
-    ''' SET REFERENCE FRAME
-
+    '''
 Sets a refernce frame that will be use by the BLEND FRAME
 slider. The one at the left sets the left reference, and the
 one on the right sets the right reference'''
@@ -1405,9 +1388,90 @@ one on the right sets the right reference'''
         return {'FINISHED'}
 
 
-class AAT_OT_sliders_settings(Operator):
-    ''' SLIDER SETTING
+class AAT_OT_help(Operator):
+    '''
+Shows all the shortuts for the tool'''
 
+    bl_idname = "animaide.help"
+    bl_label = "Shortcuts"
+
+    slot_index: IntProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return slider_tools.poll(context)
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_popup(self, width=200)
+
+    def draw(self, context):
+        animaide = context.scene.animaide
+
+        layout = self.layout
+        col = layout.column(align=False)
+        col.label(text='Shortcuts')
+        col.label(text='')
+        col.label(text='Ease To Ease    (1)')
+        col.label(text='Tween           (shift 1)')
+        col.label(text='Ease-In-Out     (2)')
+        col.label(text='Blend Ease      (shift 2)')
+        col.label(text='Blend Neighbor  (3)')
+        col.label(text='Blend Frame     (shift 3)')
+        col.label(text='Push-Pull       (4)')
+        col.label(text='Scale Average   (shift 4)')
+        col.label(text='Scale Left      (5)')
+        col.label(text='Scale Right     (shift 5)')
+        col.label(text='Smooth          (6)')
+        col.label(text='Noise           (shift 6)')
+        col.label(text='Time Offset     (7)')
+        col.label(text='Blend Offset    (shift 7)')
+        col.label(text='')
+        col.label(text='Toward Left Neighbor    (-)')
+        col.label(text='Toward Right Neighbor   (+)')
+        col.label(text='')
+        col.label(text='To Left Neighbor    (shift -)')
+        col.label(text='To Right Neighbor   (shift +)')
+        col.label(text='')
+        col.label(text='pie_menu-1  (alt 1)')
+        col.label(text='pie_menu-2  (alt 2)')
+
+
+class AAT_OT_global_settings(Operator):
+    '''
+Options for the entire sliders tool'''
+
+    bl_idname = "animaide.global_settings"
+    bl_label = "Global Settings"
+
+    slot_index: IntProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return slider_tools.poll(context)
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_popup(self, width=200)
+
+    def draw(self, context):
+        animaide = context.scene.animaide
+
+        layout = self.layout
+        col = layout.column(align=False)
+        col.label(text='Settings')
+        col.prop(animaide.slider, 'affect_non_selected_fcurves', text='Non-selected fcurves', toggle=False)
+        col.prop(animaide.slider, 'affect_non_selected_keys', text='Non-selected keys on frame', toggle=False)
+
+
+class AAT_OT_sliders_settings(Operator):
+    '''
 Options related to the current tool on the slider'''
 
     bl_idname = "animaide.sliders_settings"
@@ -1440,12 +1504,11 @@ Options related to the current tool on the slider'''
         col.prop(slider, 'overshoot', text='Overshoot', toggle=False)
         if slider.selector == 'BLEND_FRAME':
             col.prop(slider, 'use_markers', text='Use Markers', toggle=False)
-        col.prop(animaide.slider, 'affect_non_selected_frame', text='Not selected frames', toggle=False)
+        # col.prop(animaide.slider, 'affect_non_selected_frame', text='Not selected frames', toggle=False)
 
 
 class AAT_OT_anim_transform_settings(Operator):
-    ''' MAGNET SETTING
-
+    '''
 Options related to the anim_transform'''
 
     bl_idname = "animaide.anim_transform_settings"
@@ -1580,12 +1643,14 @@ classes = (
     AAT_OT_remove_slider,
     AAT_OT_anim_transform_on,
     AAT_OT_anim_transform_off,
+    AAT_OT_help,
     AAT_OT_sliders_settings,
+    AAT_OT_global_settings,
     AAT_OT_anim_transform_settings,
     AAT_OT_get_ref_frame,
     AAT_OT_sliders,
+    AAT_OT_ease_to_ease,
     AAT_OT_ease,
-    AAT_OT_ease_in_out,
     AAT_OT_blend_ease,
     AAT_OT_blend_neighbor,
     AAT_OT_blend_frame,

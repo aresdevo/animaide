@@ -14,7 +14,7 @@ min_value = None
 max_value = None
 
 
-def ease(factor, slope):
+def ease_to_ease(factor, slope):
     # global selected_keys, fcurve, left_neighbor, right_neighbor
 
     clamped_factor = utils.clamp(-factor, min_value, max_value)
@@ -38,7 +38,7 @@ def ease(factor, slope):
         k.co.y = left_neighbor['y'] + local_y * ease_y
 
 
-def ease_in_out(factor, slope):
+def ease(factor, slope):
     # global selected_keys, fcurve, left_neighbor, right_neighbor
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
@@ -383,7 +383,10 @@ def looper(self, context):
     usable_bones_names = []
 
     for obj in objects:
-        anim = obj.animation_data
+        # anim = obj.animation_data
+
+        if not key_utils.valid_anim(obj):
+            continue
 
         visible = obj.visible_get()
 
@@ -392,14 +395,14 @@ def looper(self, context):
             if not visible:
                 continue
 
-        if anim is None:
-            continue
-
-        if anim.action is None:
-            continue
-
-        if anim.action.fcurves is None:
-            continue
+        # if anim is None:
+        #     continue
+        #
+        # if anim.action is None:
+        #     continue
+        #
+        # if anim.action.fcurves is None:
+        #     continue
 
         if obj.type == 'ARMATURE':
             # if obj.mode == 'POSE':
@@ -420,13 +423,16 @@ def looper(self, context):
 
         for fcurve_index, fcurve in fcurves.items():
 
-            if fcurve.select is False:
-                continue
+            # # if fcurve.select is False:
+            # #     continue
+            #
+            # if fcurve.lock is True:
+            #     continue
+            #
+            # if fcurve.hide is True:
+            #     continue
 
-            if fcurve.lock is True:
-                continue
-
-            if fcurve.hide is True:
+            if not key_utils.valid_fcurve(fcurve):
                 continue
 
             if obj.type == 'ARMATURE':
@@ -434,9 +440,9 @@ def looper(self, context):
                     split_data_path = fcurve.data_path.split(sep='"')
                     bone_name = split_data_path[1]
 
-                if bone_name not in usable_bones_names:
-                    if fcurve.group.name != 'Object Transforms':
-                        continue
+                    if bone_name not in usable_bones_names:
+                        if fcurve.group.name != 'Object Transforms':
+                            continue
 
             if fcurve.group.name == cur_utils.group_name:
                 continue  # we don't want to select keys on reference fcurves
@@ -451,11 +457,11 @@ def looper(self, context):
             left_neighbor = global_fcurve['left_neighbor']
             right_neighbor = global_fcurve['right_neighbor']
 
+            if self.slider_type == 'EASE_TO_EASE':
+                ease_to_ease(self.factor, self.slope)
+
             if self.slider_type == 'EASE':
                 ease(self.factor, self.slope)
-
-            if self.slider_type == 'EASE_IN_OUT':
-                ease_in_out(self.factor, self.slope)
 
             if self.slider_type == 'BLEND_NEIGHBOR':
                 blend_neighbor(self.factor)
@@ -506,7 +512,7 @@ def looper(self, context):
 def modal(self, context, event):
     if event.type == 'MOUSEMOVE':  # Apply
 
-        slider_from_zero = (event.mouse_x - self.init_mouse_x) / 200
+        slider_from_zero = (event.mouse_x - self.init_mouse_x) / 100
         self.factor = slider_from_zero
 
         if self.slot_index == -1:

@@ -169,9 +169,11 @@ class AAT_PT_sliders(Panel):
 
         slider_box(layout, slider)
 
-        row = layout.row(align=True)
+        row = layout.row(align=False)
         row.operator("animaide.add_slider", text='', icon='ADD')
         row.operator("animaide.remove_slider", text='', icon='REMOVE')
+        row.operator('animaide.global_settings', text='', icon='PREFERENCES', emboss=False)
+        row.operator('animaide.help', text='', icon='QUESTION', emboss=False)
         # row.label(text='Extra Sliders')
 
         if len(slots) == 0:
@@ -246,7 +248,7 @@ class AAT_MT_pie_menu_a(Menu):
         pie = layout.menu_pie()
 
         col = pie.column()
-        col.operator("animaide.ease")
+        col.operator("animaide.ease_to_ease")
 
         col = pie.column(align=True)
         col.operator("animaide.tween")
@@ -255,7 +257,7 @@ class AAT_MT_pie_menu_a(Menu):
         col.operator("animaide.blend_ease")
 
         col = pie.column(align=True)
-        col.operator("animaide.ease_in_out")
+        col.operator("animaide.ease")
 
         col = pie.column(align=True)
         col.operator("animaide.blend_neighbor")

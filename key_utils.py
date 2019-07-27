@@ -357,6 +357,41 @@ def get_selected(fcurve):
     return keyframe_indexes
 
 
+def valid_anim(obj):
+    anim = obj.animation_data
+
+    if anim is None:
+        return False
+
+    elif anim.action is None:
+        return False
+
+    elif anim.action.fcurves is None:
+        return False
+
+    else:
+        return True
+
+
+def valid_fcurve(fcurve):
+    animaide = bpy.context.scene.animaide
+    if animaide.slider.affect_non_selected_fcurves is False:
+        if fcurve.select is False:
+            return False
+
+    if fcurve.lock is True:
+        return False
+
+    if fcurve.hide is True:
+        return False
+
+    if fcurve.group.name == cur_utils.group_name:
+        return False  # we don't want to select keys on reference fcurves
+
+    else:
+        return True
+
+
 def get_sliders_globals(selected=True, original=True, left_frame=None, right_frame=None):
     """
     :return reversable list of complex keys that contains (index, key) on a tuple of the selected keys:
@@ -372,13 +407,17 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
     # objects = bpy.context.selected_objects
 
     for obj in objects:
-        anim = obj.animation_data
-        if anim is None:
+        # anim = obj.animation_data
+        # if anim is None:
+        #     continue
+        # if anim.action is None:
+        #     continue
+        # if anim.action.fcurves is None:
+        #     continue
+
+        if not valid_anim(obj):
             continue
-        if anim.action is None:
-            continue
-        if anim.action.fcurves is None:
-            continue
+
         fcurves = obj.animation_data.action.fcurves
 
         curves = {}
@@ -386,14 +425,17 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
         for fcurve_index, fcurve in fcurves.items():
             curve_items = {}
 
-            if fcurve.select is False:
-                continue
+            # # if fcurve.select is False:
+            # #     continue
+            #
+            # if fcurve.hide is True:
+            #     continue
+            #
+            # if fcurve.group.name == cur_utils.group_name:
+            #     continue  # we don't want to select keys on reference fcurves
 
-            if fcurve.hide is True:
+            if not valid_fcurve(fcurve):
                 continue
-
-            if fcurve.group.name == cur_utils.group_name:
-                continue  # we don't want to select keys on reference fcurves
 
             keyframes = []
             values = {}
@@ -434,7 +476,7 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
 
             if not keyframes:
 
-                if animaide.slider.affect_non_selected_frame is True:
+                if animaide.slider.affect_non_selected_keys is True:
                     index = on_current_frame(fcurve)
                     if index is None:
                         keyframes = []

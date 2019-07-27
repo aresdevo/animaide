@@ -7,8 +7,8 @@ from bpy.props import StringProperty, BoolProperty, EnumProperty, \
 from bpy.types import PropertyGroup, AddonPreferences
 
 
-icons = {'EASE': 'IPO_EASE_IN_OUT',
-         'EASE_IN_OUT': 'ANIM_DATA',
+icons = {'EASE_TO_EASE': 'IPO_EASE_IN_OUT',
+         'EASE': 'ANIM_DATA',
          'BLEND_EASE': 'TRACKING',
          'BLEND_NEIGHBOR': 'TRACKING_FORWARDS',
          'BLEND_FRAME': 'TRACKING_FORWARDS_SINGLE',
@@ -23,8 +23,8 @@ icons = {'EASE': 'IPO_EASE_IN_OUT',
          'TWEEN': 'DRIVER_DISTANCE'}
 
 
-names = {'EASE': 'Ease',
-         'EASE_IN_OUT': 'Ease In Out',
+names = {'EASE_TO_EASE': 'Ease To Ease',
+         'EASE': 'Ease',
          'BLEND_EASE': 'Blend Ease',
          'BLEND_NEIGHBOR': 'Blend Neighbor',
          'BLEND_FRAME': 'Blend Frame',
@@ -179,8 +179,11 @@ class AnimSlider(PropertyGroup):
     use_markers: BoolProperty(default=True,
                               description='use markers for the reference frames')
 
-    affect_non_selected_frame: BoolProperty(default=True,
-                                            description='Affect not selected keys when cursor is over them')
+    affect_non_selected_fcurves: BoolProperty(default=True,
+                                           description='Affect non-selected fcurves')
+
+    affect_non_selected_keys: BoolProperty(default=False,
+                                            description='Affect non-selected keys when cursor is over them')
 
     min_value: FloatProperty(default=-1)
 
@@ -203,8 +206,8 @@ class AnimSlider(PropertyGroup):
     right_ref_frame: IntProperty()
 
     selector: EnumProperty(
-        items=[('EASE', names['EASE'], 'S shape transition', icons['EASE'], 1),
-               ('EASE_IN_OUT', names['EASE_IN_OUT'], 'C shape transition', icons['EASE_IN_OUT'], 2),
+        items=[('EASE_TO_EASE', names['EASE_TO_EASE'], 'S shape transition', icons['EASE_TO_EASE'], 1),
+               ('EASE', names['EASE'], 'C shape transition', icons['EASE'], 2),
                ('BLEND_EASE', names['BLEND_EASE'], 'From current to C shape', icons['BLEND_EASE'], 3),
                ('BLEND_NEIGHBOR', names['BLEND_NEIGHBOR'], 'From current to neighbors', icons['BLEND_NEIGHBOR'], 4),
                ('BLEND_FRAME', names['BLEND_FRAME'], 'From current to set frames', icons['BLEND_FRAME'], 5),
@@ -218,7 +221,7 @@ class AnimSlider(PropertyGroup):
                ('TIME_OFFSET', names['TIME_OFFSET'], 'Slide fcurve in time without afecting keys frame value', icons['TIME_OFFSET'], 13),
                ('TWEEN', names['TWEEN'], 'Sets key value using neighbors as reference', icons['TWEEN'], 14)],
         name="Ease Slider Selector",
-        default='EASE',
+        default='EASE_TO_EASE',
         update=update_selector
     )
 
