@@ -163,7 +163,7 @@ But in case you like having the option to interact with different sliders at the
 
 ![Extra Sliders](images/extra_sliders_sample.jpg)
 
-There is another workflow where you can jump from key to key and adjusting each one just with the keyboard. For that there are some shortcuts:
+There is another workflow where you can jump from key to key and adjust each one just with the keyboard. For that there are some shortcuts:
 
 ```
 Toward the Left Neighboring Key: (-)
