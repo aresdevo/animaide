@@ -152,7 +152,7 @@ Aside from accessing those tools using the slider on the panel, you can also use
 
 ![Shortcuts](images/shortcuts.jpg)
 
-If pie menus are your thing, We have also provided two of them
+If pie menus are your thing, we have also provided two of them
 
 ![Pie Menu A](images/pie_menu_a.jpg)
 ![Pie Menu B](images/pie_menu_b.jpg)

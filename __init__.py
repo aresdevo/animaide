@@ -31,7 +31,9 @@ bl_info = {
     "location": "Graph Editor > Side Panel",
     "warning": "This addon is still in development.",
     "wiki_url": "",
-    "category": "Animation"}
+    "category": "Animation"},
+    "wiki_url": "https://github.com/aresdevo/animaide",
+    "tracker_url: "https://github.com/aresdevo/animaide/issues"
 
 # load and reload submodules
 #################################
