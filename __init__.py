@@ -30,10 +30,10 @@ bl_info = {
     "blender": (2, 80, 0),
     "location": "Graph Editor > Side Panel",
     "warning": "This addon is still in development.",
-    "wiki_url": "",
     "category": "Animation"},
     "wiki_url": "https://github.com/aresdevo/animaide",
-    "tracker_url: "https://github.com/aresdevo/animaide/issues"
+    "tracker_url": "https://github.com/aresdevo/animaide/issues"
+}
 
 # load and reload submodules
 #################################
