@@ -174,6 +174,7 @@ class AAT_PT_sliders(Panel):
         row.operator("animaide.remove_slider", text='', icon='REMOVE')
         row.operator('animaide.global_settings', text='', icon='PREFERENCES', emboss=False)
         row.operator('animaide.help', text='', icon='QUESTION', emboss=False)
+        row.operator('animaide.manual', text='', icon='HELP', emboss=False)
         # row.label(text='Extra Sliders')
 
         if len(slots) == 0:

@@ -32,7 +32,8 @@ bl_info = {
     "warning": "This addon is still in development.",
     "category": "Animation",
     "wiki_url": "https://github.com/aresdevo/animaide",
-    "tracker_url": "https://github.com/aresdevo/animaide/issues"}
+    "tracker_url": "https://github.com/aresdevo/animaide/issues"
+}
 
 # load and reload submodules
 #################################

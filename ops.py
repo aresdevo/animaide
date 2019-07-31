@@ -1,4 +1,4 @@
-import bpy
+import bpy, os
 
 from . import utils, key_utils, cur_utils, slider_tools, magnet
 from bpy.props import StringProperty, EnumProperty, BoolProperty, \
@@ -1440,6 +1440,27 @@ Shows all the shortuts for the tool'''
         col.label(text='pie_menu-2  (alt 2)')
 
 
+class AAT_OT_manual(Operator):
+    '''
+Opens Animaide manual'''
+
+    bl_idname = "animaide.manual"
+    bl_label = "Shortcuts"
+
+    slot_index: IntProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        path = os.path.join(my_path, "readme.html")
+        url = 'file://' + path
+        bpy.ops.wm.url_open(url=url)
+        return {'FINISHED'}
+
+
 class AAT_OT_global_settings(Operator):
     '''
 Options for the entire sliders tool'''
@@ -1644,6 +1665,7 @@ classes = (
     AAT_OT_anim_transform_on,
     AAT_OT_anim_transform_off,
     AAT_OT_help,
+    AAT_OT_manual,
     AAT_OT_sliders_settings,
     AAT_OT_global_settings,
     AAT_OT_anim_transform_settings,
