@@ -1445,7 +1445,7 @@ class AAT_OT_manual(Operator):
 Opens Animaide manual'''
 
     bl_idname = "animaide.manual"
-    bl_label = "Shortcuts"
+    bl_label = "Manual"
 
     slot_index: IntProperty()
 
