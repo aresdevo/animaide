@@ -1454,10 +1454,11 @@ Opens Animaide manual'''
         return True
 
     def execute(self, context):
-        my_path = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(my_path, "readme.html")
-        url = 'file://' + path
-        bpy.ops.wm.url_open(url=url)
+        # my_path = os.path.abspath(os.path.dirname(__file__))
+        # path = os.path.join(my_path, "readme.html")
+        # url = 'file://' + path
+        # bpy.ops.wm.url_open(url=url)
+        bpy.ops.wm.url_open(url="https://github.com/aresdevo/animaide/blob/master/readme.md")
         return {'FINISHED'}
 
 
