@@ -350,7 +350,7 @@ def scale(factor, scale_type):
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
 
-####### For Operators
+####### Functions for Operators
 
 
 def looper(self, context):
@@ -395,54 +395,37 @@ def looper(self, context):
             if not visible:
                 continue
 
-        # if anim is None:
-        #     continue
-        #
-        # if anim.action is None:
-        #     continue
-        #
-        # if anim.action.fcurves is None:
-        #     continue
-
-        if obj.type == 'ARMATURE':
-            # if obj.mode == 'POSE':
-            if bpy.context.space_data.dopesheet.show_only_selected is True:
-                if selected_pose_bones is None:
-                    usable_bones_names = []
-                else:
-                    # usable_bones = selected_pose_bones
-                    usable_bones_names = [bone.name for bone in obj.pose.bones if bone in selected_pose_bones
-                                          and bone.bone.hide is False]
-            else:
-                # channel_groups = ['Object Transforms']
-                # channel_groups = anim.action.groups
-                # usable_bones = obj.pose.bones
-                usable_bones_names = [bone.name for bone in obj.pose.bones if bone.bone.hide is False]
+        # if obj.type == 'ARMATURE':
+        #     usable_bones_names = utils.get_usable_bone(obj, selected_pose_bones)
 
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, fcurve in fcurves.items():
 
-            # # if fcurve.select is False:
-            # #     continue
-            #
-            # if fcurve.lock is True:
-            #     continue
-            #
-            # if fcurve.hide is True:
-            #     continue
-
             if not key_utils.valid_fcurve(fcurve):
                 continue
 
             if obj.type == 'ARMATURE':
+                # bone_name = utils.get_bone_name(fcurve, usable_bones_names)
+                # bone_name = utils.get_bone_name(obj, fcurve)
+                #
                 if fcurve.group.name != 'Object Transforms':
                     split_data_path = fcurve.data_path.split(sep='"')
                     bone_name = split_data_path[1]
+                    bone = obj.data.bones.get(bone_name)
 
-                    if bone_name not in usable_bones_names:
-                        if fcurve.group.name != 'Object Transforms':
+                    if bone is None:
+                        continue
+
+                    if bpy.context.space_data.dopesheet.show_only_selected is True:
+                        if bone.select is False:
                             continue
+
+                    if bone.hide:
+                        continue
+
+                # if bone_name is None:
+                #     continue
 
             if fcurve.group.name == cur_utils.group_name:
                 continue  # we don't want to select keys on reference fcurves

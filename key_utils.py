@@ -13,7 +13,6 @@ global_values = {}
 # right_neighbor_global = {}
 
 
-
 def set_type(objects, kind):
     if kind == 'KEYFRAME' or kind == 'BREAKDOWN' or kind == 'JITTER':
 
@@ -453,26 +452,23 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
                 if key.select_control_point:
                     keyframes.append(key_index)
 
-            prevkey_value = None
-
             for key_index in keyframes:
                 key = fcurve.keyframe_points[key_index]
 
                 if key_index - 1 not in keyframes:
-                    prevkey_value = 'book end'
-
-                if key_index + 1 not in keyframes:
-                    nextkey_value = 'book end'
-                else:
-                    nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
-
-                if prevkey_value == 'book end' or nextkey_value == 'book end':
                     values[key_index]['sy'] = 'book end'
                     prevkey_value = key.co.y
                 else:
-                    smooth = (prevkey_value + key.co.y + nextkey_value)/3
-                    values[key_index]['sy'] = smooth
-                    prevkey_value = smooth
+                    prevkey_value = fcurve.keyframe_points[key_index - 1].co.y
+
+                if key_index + 1 not in keyframes:
+                    values[key_index]['sy'] = 'book end'
+                    nextkey_value = key.co.y
+                else:
+                    nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
+
+                smooth = (prevkey_value + key.co.y + nextkey_value)/3
+                values[key_index]['sy'] = smooth
 
             if not keyframes:
 

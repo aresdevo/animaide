@@ -32,20 +32,16 @@ def step_button(row, slot, factor, icon='',
 
 def slider_box(layout, slot, index=-1):
 
-    if slot.overshoot is False:
-        slider_length = 'factor'
-
-    else:
-        slider_length = 'factor_overshoot'
-
-    # -------- Options ---------
-
     box = layout.box()
     row = box.row(align=True)
+
+    # -------- Selector ---------
 
     col = row.column(align=False)
     # col.prop_menu_enum(slot, 'selector', text=props.names[slot.selector], icon=props.icons[slot.selector])
     col.prop(slot, 'selector', text='')
+
+    # -------- Setting ---------
 
     col = row.column(align=False)
     setting = col.operator('animaide.sliders_settings', text='', icon='SETTINGS', emboss=False)
@@ -53,43 +49,58 @@ def slider_box(layout, slot, index=-1):
 
     # -------- Slider -----------
 
+    if slot.overshoot is False:
+        slider_length = 'factor'
+
+    else:
+        slider_length = 'factor_overshoot'
+
     row = box.row(align=True)
     row.scale_y = .6
     row.active = True
     row.operator_context = 'EXEC_DEFAULT'
 
     if slot.modal_switch == False:
+        # when slider is not active
 
+        # left overshoot extra buttons
         if slot.overshoot == True:
             for f in [-2, -1.5]:
                 step_button(row, slot, factor=f, text=' ', icon='')
 
+        # left end button
         step_button(row, slot, factor=-1, text='',
                     icon='CHECKBOX_DEHLT', emboss=False, active=True)
 
+        # left buttons
         for f in [-0.75, -0.5, -0.25]:
             step_button(row, slot, factor=f, text=' ', icon='')
 
+        # Center Button
         step_button(row, slot, factor=0, text='', icon='ANTIALIASED',
                     emboss=False, operator_context='INVOKE_DEFAULT',
                     active=True)
 
+        # rith buttons
         for f in [0.25, 0.5, 0.75]:
             step_button(row, slot, factor=f, text=' ', icon='')
 
+        # right en button
         step_button(row, slot, factor=1, text='',
                     icon='CHECKBOX_DEHLT', emboss=False, active=True)
 
+        # right overshoot extra buttons
         if slot.overshoot == True:
             for f in [1.5, 2]:
                 step_button(row, slot, factor=f, text=' ', icon='')
 
     else:
+        # when slider is active
         row.prop(slot, slider_length, text='', slider=True)
 
     row.operator_context = 'INVOKE_DEFAULT'
 
-    # -------- Frames -----------
+    # -------- Blend Frames -----------
 
     row = box.row(align=False)
     row.scale_y = 0.6
@@ -106,45 +117,27 @@ def slider_box(layout, slot, index=-1):
         # else:
         #     right_text = str(slot.right_neighbor)
 
-        left_text = str(slot.left_ref_frame)
-        right_text = str(slot.right_ref_frame)
-
+        # left reference botton
+        text = str(slot.left_ref_frame)
         col = row.column(align=True)
         left_ref_frame = col.operator("animaide.get_ref_frame",
-                                      text=left_text, emboss=True)
+                                      text=text, emboss=True)
         left_ref_frame.slot_index = index
         left_ref_frame.side = 'L'
-        # left_ref_frame.is_collection = is_collection
 
-        if slot.modal_switch == False:
-            col = row.column(align=True)
-            col.scale_x = 0.85
-            col.alignment = 'CENTER'
-            # col.label(text='%0.2f' % factor)
-            col.label(text='')
-        else:
-            col = row.column(align=True)
-            col.scale_x = 0.85
-            col.alignment = 'CENTER'
-            col.label(text='')
+        # middle space
+        col = row.column(align=True)
+        col.scale_x = 0.85
+        col.alignment = 'CENTER'
+        col.label(text='')
 
+        # right reference button
+        text = str(slot.right_ref_frame)
         col = row.column(align=True)
         right_ref_frame = col.operator("animaide.get_ref_frame",
-                                       text=right_text, emboss=True)
+                                       text=text, emboss=True)
         right_ref_frame.slot_index = index
         right_ref_frame.side = 'R'
-        # right_ref_frame.is_collection = is_collection
-
-    # elif slot.modal_switch == False:
-    #     row.active = False
-    #     row.alignment = 'CENTER'
-    #     row.scale_x = 0.85
-    #     row.enabled = False
-    #     row.label(text='%0.2f' % factor)
-    # else:
-    #     row.scale_x = 0.85
-    #     row.alignment = 'CENTER'
-    #     row.label(text='')
 
 
 class AAT_PT_sliders(Panel):
@@ -164,30 +157,28 @@ class AAT_PT_sliders(Panel):
 
         layout = self.layout
 
-        # row = layout.row(align=True)
-        # row.label(text='Main Slider')
-
+        # Adds slider tool to the panel
         slider_box(layout, slider)
 
+        # line of icon below the slider
         row = layout.row(align=False)
         row.operator("animaide.add_slider", text='', icon='ADD')
         row.operator("animaide.remove_slider", text='', icon='REMOVE')
         row.operator('animaide.global_settings', text='', icon='PREFERENCES', emboss=False)
         row.operator('animaide.help', text='', icon='QUESTION', emboss=False)
         row.operator('animaide.manual', text='', icon='HELP', emboss=False)
-        # row.label(text='Extra Sliders')
 
+        # If no extra sliders draw an empty box
         if len(slots) == 0:
             box = layout.box()
             row = box.row(align=True)
             row.alignment = 'CENTER'
             row.label(text='Extra sliders', translate=False)
 
+        # Extra sliders
         index = 0
         for slot in slots:
-
             slider_box(layout, slot, index)
-
             index += 1
 
         # row = layout.row(align=True)
@@ -219,9 +210,14 @@ class AAT_PT_anim_transform(Panel):
 
             # if animaide.anim_transform.use_mask is False:
             if magnet.anim_trans_mask_handlers not in bpy.app.handlers.depsgraph_update_pre:
+
+                # Buttons when mask is unactive
                 row.operator("animaide.create_anim_trans_mask", text="Add Mask", icon='SELECT_SUBTRACT')
                 row.operator('animaide.anim_transform_settings', text='', icon='SETTINGS', emboss=True)
-            else:
+
+            elif 'animaide' in bpy.data.actions and bpy.data.actions['animaide'].fcurves.items() != []:
+
+                # Buttons when mask is active
                 row.operator("animaide.delete_anim_trans_mask", text="Remove Mask", icon='TRASH')
                 row.operator('animaide.anim_transform_settings', text='', icon='SETTINGS', emboss=True)
 
@@ -238,6 +234,11 @@ class AAT_PT_anim_transform(Panel):
                 row = layout.row(align=True)
                 row.prop(animaide.anim_transform, 'mask_blend_l', text='Blend', slider=False)
                 row.prop(animaide.anim_transform, 'mask_blend_r', text='Blend', slider=False)
+
+            else:
+                bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_trans_mask_handlers)
+                magnet.remove_anim_trans_mask()
+                bpy.data.window_managers['WinMan'].update_tag()
 
 
 class AAT_MT_pie_menu_a(Menu):
