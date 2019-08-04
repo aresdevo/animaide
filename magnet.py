@@ -64,12 +64,7 @@ def anim_transform_handlers(scene):
                 if bone.hide:
                     return
 
-                if not bone.select:
-                    for b in {bone.parent, *bone.children}:
-                        # if b and not b.select:
-                        if b:
-                            animation_transform(obj, fcurve)
-                else:
+                if bone.select or bone.parent or bone.children:
                     animation_transform(obj, fcurve)
 
             else:
@@ -111,6 +106,9 @@ def animation_transform(obj, fcurve):
     """
 
     if fcurve.lock is True:
+        return
+
+    if fcurve.group is None:
         return
 
     if fcurve.group.name == cur_utils.group_name:

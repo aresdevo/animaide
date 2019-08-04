@@ -346,6 +346,9 @@ def get_selected(fcurve):
     keys = fcurve.keyframe_points
     keyframe_indexes = []
 
+    if fcurve.group is None:
+        return
+
     if fcurve.group.name == cur_utils.group_name:
         return []  # we don't want to select keys on reference fcurves
 
@@ -382,6 +385,9 @@ def valid_fcurve(fcurve):
         return False
 
     if fcurve.hide is True:
+        return False
+
+    if fcurve.group is None:
         return False
 
     if fcurve.group.name == cur_utils.group_name:
@@ -730,6 +736,9 @@ def flatten(objects, side):
         action = obj.animation_data.action
 
         for fcurve in action.fcurves:
+
+            if fcurve.group is None:
+                continue
 
             if fcurve.group.name == cur_utils.group_name:
                 continue  # we don't want to add to the list the helper curves we have created

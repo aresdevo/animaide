@@ -159,5 +159,11 @@ def unregister():
 
     props.del_props()
 
+    if magnet.anim_transform_handlers in bpy.app.handlers.depsgraph_update_pre:
+        bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_transform_handlers)
+
+    if magnet.anim_trans_mask_handlers in bpy.app.handlers.depsgraph_update_pre:
+        bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_trans_mask_handlers)
+
     unregister_keymaps()
 

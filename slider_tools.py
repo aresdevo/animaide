@@ -409,6 +409,10 @@ def looper(self, context):
                 # bone_name = utils.get_bone_name(fcurve, usable_bones_names)
                 # bone_name = utils.get_bone_name(obj, fcurve)
                 #
+
+                if fcurve.group is None:
+                    continue
+
                 if fcurve.group.name != 'Object Transforms':
                     split_data_path = fcurve.data_path.split(sep='"')
                     bone_name = split_data_path[1]
