@@ -25,6 +25,9 @@ import random as rd
 
 from . import utils, key_utils, cur_utils
 
+
+# Sliders global variables
+
 fcurve = None
 global_fcurve = None
 selected_keys = None
@@ -36,7 +39,9 @@ max_value = None
 
 
 def ease_to_ease(factor, slope):
-    # global selected_keys, fcurve, left_neighbor, right_neighbor
+    '''
+    Transition selected keys from the neighboring ones in an "S" shape manner (ease-in and ease-out simultaneously)
+    '''
 
     clamped_factor = utils.clamp(-factor, min_value, max_value)
 
@@ -60,7 +65,9 @@ def ease_to_ease(factor, slope):
 
 
 def ease(factor, slope):
-    # global selected_keys, fcurve, left_neighbor, right_neighbor
+    '''
+    Transition selected keys from the neighboring ones in a "C" shape manner (ease-in or ease-out)
+    '''
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -100,8 +107,9 @@ def ease(factor, slope):
 
 
 def blend_neighbor(factor):
-    # global selected_keys, fcurve, left_neighbor, right_neighbor, original_values
-    # global max_value
+    '''
+    Blend selected keys to the value of the neighboring left and right keys
+    '''
 
     for index in selected_keys:
 
@@ -118,7 +126,9 @@ def blend_neighbor(factor):
 
 
 def blend_frame(factor, left_y_ref, right_y_ref):
-    # global selected_keys, fcurve, original_values, max_value
+    '''
+    Blend selected keys to the value of the chosen left and right frames
+    '''
 
     for index in selected_keys:
 
@@ -135,8 +145,9 @@ def blend_frame(factor, left_y_ref, right_y_ref):
 
 
 def blend_ease(factor, slope):
-    # global selected_keys, fcurve, left_neighbor, right_neighbor, min_value, max_value
-    # global original_values
+    '''
+    Blend selected keys to an ease-in or ease-out curve using the neighboring keys
+    '''
 
     local_y = right_neighbor['y'] - left_neighbor['y']
     local_x = right_neighbor['x'] - left_neighbor['x']
@@ -192,8 +203,9 @@ def blend_ease(factor, slope):
 
 
 def blend_offset(factor):
-    # global selected_keys, min_value, max_value, right_neighbor, left_neighbor
-    # global original_values, fcurve
+    '''
+    Blend selected keys to the value of the chosen left and right frames
+    '''
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -214,8 +226,9 @@ def blend_offset(factor):
 
 
 def tween(factor):
-    # global selected_keys, min_value, max_value, right_neighbor, left_neighbor
-    # global fcurve
+    '''
+    Set lineal relative value of the selected keys in relationship to the neighboring ones
+    '''
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -229,8 +242,9 @@ def tween(factor):
 
 
 def push_pull(factor):
-    # global selected_keys, min_value, max_value, right_neighbor, left_neighbor
-    # global fcurve, original_values
+    '''
+    Exagerates or decreases the value of the selected keys
+    '''
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -245,7 +259,9 @@ def push_pull(factor):
 
 
 def smooth(factor):
-    # global selected_keys, min_value, max_value, fcurve, original_values
+    '''
+    Averages values of selected keys creating a smoother fcurve
+    '''
 
     # factor = (self.factor/2) + 0.5
 
@@ -269,7 +285,9 @@ def smooth(factor):
 
 
 def time_offset(factor, fcurves):
-    # global selected_keys, min_value, max_value, fcurve
+    '''
+    Shift the value of selected keys to the ones of the left or right in the same fcurve
+    '''
 
     # factor = (self.factor/2) + 0.5
     animaide = bpy.context.scene.animaide
@@ -293,7 +311,9 @@ def time_offset(factor, fcurves):
 
 
 def noise(factor, fcurves, fcurve_index):
-    # global selected_keys, min_value, max_value, fcurve, original_values
+    '''
+    Set random values to the selected keys
+    '''
 
     # factor = (self.factor/2) + 0.5
     # animaide = bpy.context.scene.animaide
@@ -317,7 +337,9 @@ def noise(factor, fcurves, fcurve_index):
 
 
 def noise_random(factor, fcurves, range=1):
-    # global selected_keys, min_value, max_value, fcurve, original_values
+    '''
+    Set random values to the selected keys
+    '''
 
     # factor = (self.factor/2) + 0.5
     # animaide = bpy.context.scene.animaide
@@ -349,8 +371,12 @@ def noise_random(factor, fcurves, range=1):
 
 
 def scale(factor, scale_type):
-    # global selected_keys, min_value, max_value, original_values, fcurve
-    # global original_values, left_neighbor, right_neighbor
+    '''
+    Increase or decrease the value of selected keys acording to the "scale_type"
+    L = use left neighboring key as anchor
+    R = use right neighboring key as anchor
+    Anything else =  use the average point as the anchor
+    '''
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
@@ -371,10 +397,58 @@ def scale(factor, scale_type):
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
 
+####### Sliders Tools
+
+
+def add_marker(name_a='marker', name_b='0', side='L', frame=0, overwrite_name=True):
+    '''
+    add reference frames marker
+    '''
+    if side in ['L', 'R']:
+        name = '%s%s%s' % (side, name_a, name_b)
+    else:
+        name = '%s%s' % (name_a, name_b)
+
+    markers = bpy.context.scene.timeline_markers
+    # if markers.keys != []:
+    if overwrite_name:
+        if name in markers.keys():
+            markers.remove(markers[name])
+    marker = markers.new(name=name, frame=frame)
+    # marker.select = False
+    return marker
+
+
+def modify_marker(marker, name='SAME', frame='SAME'):
+    if name != 'SAME':
+        marker.name = name
+
+    if frame != 'SAME':
+        marker.frame = frame
+
+
+def remove_marker(name_a='marker', name_b='0', side='L'):
+    if side in ['L', 'R']:
+        name = '%s%s%s' % (side, name_a, name_b)
+    else:
+        name = '%s%s' % (name_a, name_b)
+
+    markers = bpy.context.scene.timeline_markers
+
+    if name in markers.keys():
+        markers.remove(markers[name])
+
+    return
+
+
 ####### Functions for Operators
 
 
 def looper(self, context):
+    '''
+    Common actions used in the "execute" of the different slider operators
+    '''
+
     global min_value, max_value, global_fcurve, selected_keys
     global original_values, left_neighbor, right_neighbor, fcurve
 
@@ -400,8 +474,8 @@ def looper(self, context):
     else:
         objects = bpy.data.objects
 
-    selected_pose_bones = bpy.context.selected_pose_bones
-    usable_bones_names = []
+    # selected_pose_bones = bpy.context.selected_pose_bones
+    # usable_bones_names = []
 
     for obj in objects:
         # anim = obj.animation_data
@@ -518,6 +592,10 @@ def looper(self, context):
 
 
 def modal(self, context, event):
+    '''
+    Common actions used in the "modal" of the different slider operators
+    '''
+
     if event.type == 'MOUSEMOVE':  # Apply
 
         slider_from_zero = (event.mouse_x - self.init_mouse_x) / 100
@@ -564,6 +642,9 @@ def modal(self, context, event):
 
 
 def invoke(self, context, event):
+    '''
+    Common actions used in the "invoke" of the different slider operators
+    '''
 
     # self.animaide.slider.selector = self.slider_type
 
@@ -596,6 +677,10 @@ def invoke(self, context, event):
 
 
 def poll(context):
+    '''
+    Poll used on all the slider operators
+    '''
+
     objects = context.selected_objects
     animaide = context.scene.animaide
     anim_transform_active = animaide.anim_transform.active

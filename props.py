@@ -61,21 +61,16 @@ names = {'EASE_TO_EASE': 'Ease To Ease',
 
 
 def update_clone_move(self, context):
-    """
-     for internal use
-    """
+
     objects = context.selected_objects
 
     cur_utils.move_clone(objects)
 
-    print("In update func...")
     return
 
 
 def update_clone(self, context):
-    """
-     for internal use
-    """
+
     objects = context.selected_objects
     animaide = bpy.context.scene.animaide
     cycle_before = animaide.clone_data.cycle_before
@@ -83,11 +78,12 @@ def update_clone(self, context):
 
     cur_utils.add_clone(objects, cycle_before, cycle_after)
 
-    print("In update func...")
     return
 
 
 def update_overshoot(self, context):
+    # change values when overshoot property is changed
+
     if self.overshoot:
         self.min_value = -2.0
         self.max_value = 2.0
@@ -97,15 +93,15 @@ def update_overshoot(self, context):
 
 
 def update_selector(self, context):
-    """
-     for internal use
-    """
+    # change values when selector property is changed
+
     key_utils.get_sliders_globals()
     self.overshoot = False
     self.modal_switch = False
 
 
 def toggle_sliders_markers(self, context):
+    # Add a marker when a reference frame is created
 
     n = 0
     if self.use_markers:
@@ -306,11 +302,15 @@ def space_type_pref():
 
 
 def set_props():
+    # to be used when registering
+
     bpy.types.Scene.animaide = PointerProperty(type=AnimAideScene)
     # bpy.types.Object.animaide = PointerProperty(type=AnimAideObject)
 
 
 def del_props():
+    # to be used when unregistreing
+
     del bpy.types.Scene.animaide
 
 

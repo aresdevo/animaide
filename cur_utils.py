@@ -32,11 +32,7 @@ user_scene_range = {}
 
 def add_samples(fcurve, reference_fcurve, frequency=1):
         """
-
-        :param fcurve:
-        :param reference_fcurve:
-        :param frequency:
-        :return:
+        Add keys to an fcurve with the given frequency
         """
         key_list = fcurve.keyframe_points
 
@@ -56,11 +52,9 @@ def add_samples(fcurve, reference_fcurve, frequency=1):
 
 
 def get_selected(fcurves):
-    """
+    '''
     return selected fcurves in the current action with the exception of the reference fcurves
-    :param fcurves:
-    :return:
-    """
+    '''
     selected = []
 
     for fcurve in fcurves:
@@ -73,36 +67,6 @@ def get_selected(fcurves):
     print('selected fcurves: ', selected)
 
     return selected
-
-
-def find(fcurves, data_path, index=0):
-    """
-
-    :param fcurves:
-    :param data_path:
-    :param index:
-    :return:
-    """
-
-    for fcurve in fcurves:
-
-        if fcurve.data_path != data_path:
-            continue
-
-        if fcurve.index_array != index:
-            continue
-
-        return fcurve
-
-
-def update(fcurves):
-    """
-
-    :param fcurves:
-    :return:
-    """
-    for fcurve in fcurves:
-        fcurve.update()
 
 
 def remove_helpers(objects):
@@ -128,8 +92,6 @@ def remove_helpers(objects):
 def get_slope(fcurve):
     """
 
-    :param fcurve:
-    :return:
     """
     selected_keys = key_utils.get_selected(fcurve)
     first_key, last_key = key_utils.first_and_last_selected(fcurve, selected_keys)
@@ -139,11 +101,7 @@ def get_slope(fcurve):
 
 def add_cycle(fcurve, before='MIRROR', after='MIRROR'):
     """
-
-    :param fcurve:
-    :param before:
-    :param after:
-    :return:
+    Add cycle modifier to an fcurve
     """
     cycle = fcurve.modifiers.new('CYCLES')
 
@@ -153,9 +111,7 @@ def add_cycle(fcurve, before='MIRROR', after='MIRROR'):
 
 def add_noise(fcurve, strength=0.4, scale=1, phase=0):
     """
-
-    :param fcurve:
-    :return:
+    add noise modifier to an fcurve
     """
     noise = fcurve.modifiers.new('NOISE')
 
@@ -169,12 +125,7 @@ def add_noise(fcurve, strength=0.4, scale=1, phase=0):
 
 def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=False):
     """
-
-    :param fcurve:
-    :param new_data_path:
-    :param selected_keys:
-    :param lock:
-    :return:
+    Duploicates an fcurve
     """
     action = fcurve.id_data
     index = len(action.fcurves)
@@ -213,12 +164,7 @@ def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=Fals
 
 def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', after='NONE', lock=False):
     """
-
-    :param fcurve:
-    :param new_data_path:
-    :param selected_keys:
-    :param lock:
-    :return:
+    Duplicates a curve using the global values
     """
 
     index = len(fcurves)
@@ -254,10 +200,16 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
 
 
 def s_curve(x, slope=1.0, width=1.0, height=1.0, xshift=0.0, yshift=0.0):
+    '''
+    Formula for "s" curve
+    '''
     return height*((x-xshift)**slope/((x-xshift)**slope+(width-(x-xshift))**slope))+yshift
 
 
 def ramp_curve(x, slope=2.0, height=1.0, yshift=0.0, width=1.0, xshift=0.0, invert=False):
+    '''
+    Formula for ease-in or ease-out curve
+    '''
     if invert:
         slope = 1 / slope
 
@@ -265,14 +217,10 @@ def ramp_curve(x, slope=2.0, height=1.0, yshift=0.0, width=1.0, xshift=0.0, inve
     # return height * ((((x-xshift)/width)**slope)+yshift)
 
 
-def to_linear_curve(selected_keys, factor=1):
-    for k in selected_keys:
-        average_y = key_utils.linear_y(k)
-        delta = average_y - k.co.y
-        k.co.y = k.co.y + (delta * factor)
-
-
-def to_linear_curve_b(left_neighbor, right_neighbor, selected_keys, factor=1):
+def to_linear_curve(left_neighbor, right_neighbor, selected_keys, factor=1):
+    '''
+    Lineal transition between neighbors
+    '''
     local_y = right_neighbor.y - left_neighbor.y
     local_x = right_neighbor.x - left_neighbor.x
     ratio = local_y / local_x
@@ -281,65 +229,6 @@ def to_linear_curve_b(left_neighbor, right_neighbor, selected_keys, factor=1):
         average_y = ratio * x + left_neighbor.y
         delta = average_y - k.co.y
         k.co.y = k.co.y + (delta * factor)
-
-
-def blend(obj, fcurve, slope, factor, source, target, inout='OUT'):
-    if inout is not 'IN' or inout is not 'OUT':
-        return
-
-    selected_keys = key_utils.selected_keys_global[obj.name][fcurve.array_index]
-    original_keys = key_utils.original_keys_info[obj.name][fcurve.array_index]
-
-    if not selected_keys:
-        index = key_utils.on_current_frame(fcurve)
-        key = fcurve.keyframe_points[index]
-        selected_keys = [index]  # gets the current key if no key is selected
-        if key is None:
-            return
-
-    left_neighbor, right_neighbor = key_utils.get_selected_neigbors(fcurve, selected_keys)
-    local_y = right_neighbor.co.y - left_neighbor.co.y
-    local_x = right_neighbor.co.x - left_neighbor.co.x
-
-    slope = 1 + ((slope * 2) * abs(factor))
-
-    if inout == 'OUT':
-        height = 2
-        width = 2
-        yshift = 0
-        xshift = 0
-    else:
-        height = 2
-        width = 2
-        xshift = -1
-        yshift = -1
-
-    for index in selected_keys:
-        k = fcurve.keyframe_points[index]
-        average_y = key_utils.linear_y(left_neighbor, right_neighbor, k)
-        delta = original_keys[index]['y'] - average_y
-        x = k.co.x - left_neighbor.co.x
-        key_ratio = 1 / (local_x / x)
-
-        ease_y = s_curve(key_ratio,
-                         slope=slope,
-                         width=width,
-                         height=height,
-                         xshift=xshift,
-                         yshift=yshift)
-
-        if factor < 0:
-            # delta = right_neighbor.co.y - original_keys[index]['y']
-            delta = local_y * ease_y.real - original_keys[index]['y']
-        else:
-            # delta = original_keys[index]['y'] - left_neighbor.co.y
-            delta = original_keys[index]['y'] - local_y * ease_y.real
-
-        # ease_y_b = curveutils.s_curve(clamped_factor, slope=slope, width=2, height=2, xshift=-1, yshift=-1)
-
-        # k.co.y = original_keys[index]['y'] + delta * clamped_factor
-
-        k.co.y = left_neighbor.co.y + local_y * ease_y.real
 
 
 def from_clone_to_reference(objects, factor, clone_selected_keys=False):
@@ -415,12 +304,7 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
 
 def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=False):
     """
-
-    :param objects:
-    :param cycle_before:
-    :param cycle_after:
-    :param selected_keys:
-    :return:
+    Create an fcurve clone
     """
 
     for obj in objects:
@@ -443,9 +327,7 @@ def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=Fa
 
 def remove_clone(objects):
     """
-
-    :param objects:
-    :return:
+    Removes an fcurve clone
     """
     for obj in objects:
         action = obj.animation_data.action
@@ -467,9 +349,7 @@ def remove_clone(objects):
 
 def move_clone(objects):
     """
-
-    :param objects:
-    :return:
+    moves clone fcurve in time
     """
 
     for obj in objects:

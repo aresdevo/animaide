@@ -431,7 +431,7 @@ pie_menu-2: (alt-2)'''
 class AAT_OT_time_offset(Operator):
     '''
 Shift the value of selected keys - or current key -
-to the ones of the left or right in the seme fcurve
+to the ones of the left or right in the same fcurve
 
 shortcut:   7
 pie_menu-2: (alt-2)'''
@@ -753,7 +753,7 @@ Removes last slider of the list'''
         # if len(slots) > 1:
         index = len(slots) - 1
         slots.remove(index)
-        utils.remove_marker(index+2)
+        slider_tools.remove_marker(index+2)
 
         return {'FINISHED'}
 
@@ -808,13 +808,13 @@ one on the right sets the right reference'''
             slider.right_ref_frame = current_frame
 
         if slider.use_markers:
-            utils.add_marker(name_a='F',
+            slider_tools.add_marker(name_a='F',
                              name_b=slider_num,
                              side=self.side,
                              frame=current_frame)
         else:
             for side in ['L', 'R']:
-                utils.remove_marker(name_a='F',
+                slider_tools.remove_marker(name_a='F',
                                     name_b=slider_num,
                                     side=side)
             # utils.remove_marker(slider_num)
@@ -1073,6 +1073,9 @@ Opens Animaide manual'''
 
 
 class AAT_OT_clone(Operator):
+    '''
+    Creates a clone of an fcurve'''
+
     bl_idname = 'animaide.fcurve_clone'
     bl_label = "Clone Fcurve"
     bl_options = {'REGISTER'}
@@ -1096,6 +1099,9 @@ class AAT_OT_clone(Operator):
 
 
 class AAT_OT_clone_remove(Operator):
+    '''
+    Removes a clone of an fcurve'''
+
     bl_idname = 'animaide.remove_clone'
     bl_label = "Remove Clone"
     bl_options = {'REGISTER'}
@@ -1116,6 +1122,9 @@ class AAT_OT_clone_remove(Operator):
 
 
 class AAT_OT_move_key(Operator):
+    '''
+    Move selected keys'''
+
     bl_idname = 'animaide.move_key'
     bl_label = "Move Key"
     bl_options = {'REGISTER'}
@@ -1142,6 +1151,9 @@ class AAT_OT_move_key(Operator):
 
 
 class AAT_OT_modifier(Operator):
+    '''
+    Add noise to a curve using a modifier'''
+
     bl_idname = 'animaide.fcurve_modifier'
     bl_label = "Modifier"
     bl_options = {'REGISTER'}
@@ -1182,7 +1194,6 @@ classes = (
     AAT_OT_global_settings,
     AAT_OT_anim_transform_settings,
     AAT_OT_get_ref_frame,
-    # AAT_OT_sliders,
     AAT_OT_ease_to_ease,
     AAT_OT_ease,
     AAT_OT_blend_ease,

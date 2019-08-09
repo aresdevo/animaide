@@ -28,6 +28,8 @@ def step_button(row, slot, factor, icon='',
                 text='', emboss=True, active=True,
                 operator_context='EXEC_DEFAULT'):
 
+    # Slider buttons
+
     col = row.column(align=True)
     col.active = active
 
@@ -52,6 +54,7 @@ def step_button(row, slot, factor, icon='',
 
 
 def slider_box(layout, slot, index=-1):
+    # Animaide slider
 
     box = layout.box()
     row = box.row(align=True)

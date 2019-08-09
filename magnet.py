@@ -24,6 +24,7 @@ import bpy
 
 from . import cur_utils, key_utils, utils
 
+# Anim_transform global variables
 
 user_preview_range = {}
 user_scene_range = {}
@@ -34,6 +35,9 @@ user_auto_animate = False
 
 
 def anim_transform_handlers(scene):
+    '''
+    Function to be run by the anim_transform Handler
+    '''
 
     # global user_auto_animate
 
@@ -95,6 +99,9 @@ def anim_transform_handlers(scene):
 
 
 def anim_trans_mask_handlers(scene):
+    '''
+    function to be run by the mask handler. It will handle the mask dimensions
+    '''
 
     action = None
 
@@ -118,13 +125,10 @@ def anim_trans_mask_handlers(scene):
 
 
 def animation_transform(obj, fcurve):
-    """
-
-    :param objects:
-    :param interpolation:
-    :param go_to:
-    :return:
-    """
+    '''
+    Modify all the keys in every fcurve of the current object proportionally to the change in transformation
+    on the current frame by the user
+    '''
 
     if fcurve.lock is True:
         return
@@ -161,15 +165,15 @@ def animation_transform(obj, fcurve):
 
 
 def get_anim_transform_delta(obj, fcurve):
+    '''
+    Determine the transformation change by the user of the current object
+    '''
+
     cur_frame = bpy.context.scene.frame_current
 
     source = fcurve.evaluate(cur_frame)
 
     prop = obj.path_resolve(fcurve.data_path)
-
-    # print('fcurve path: ', fcurve.data_path)
-    # print('prop: ', prop)
-    # print('array index: ', fcurve.array_index)
 
     try:
         target = prop[fcurve.array_index]
@@ -179,7 +183,13 @@ def get_anim_transform_delta(obj, fcurve):
     return target - source
 
 
+########## Mask ############
+
+
 def set_animaide_action():
+    '''
+    Creates an "action" called "animaide"
+    '''
 
     if 'animaide' not in bpy.data.actions:
         action = bpy.data.actions.new('animaide')
@@ -190,6 +200,10 @@ def set_animaide_action():
 
 
 def add_animaide_fcurve(action_group, color=(1, 1, 1)):
+    '''
+    Adds and fcuve in the "animaide" action
+    '''
+
     action = bpy.data.actions['animaide']
 
     fcurve = action.fcurves.new(data_path='animaide', index=0, action_group=action_group)
@@ -199,16 +213,11 @@ def add_animaide_fcurve(action_group, color=(1, 1, 1)):
     return fcurve
 
 
-########## Mask ############
-
-
 def add_anim_trans_mask():
-    """
+    '''
+    Add a curve with 4 control pints to an action called "animaide" that would act as a mask for anim_transform
+    '''
 
-    :param fcurve:
-    :param interpolation:
-    :return:
-    """
     store_user_timeline_ranges()
 
     animaide = bpy.context.scene.animaide
@@ -234,6 +243,10 @@ def add_anim_trans_mask():
 
 
 def remove_anim_trans_mask():
+    '''
+    Removes the fcurve and action that are been used as a mask for anim_transform
+    '''
+
     scene = bpy.context.scene
     animaide = scene.animaide
 
@@ -253,6 +266,9 @@ def remove_anim_trans_mask():
 
 
 def modify_anim_trans_mask(mask_curve, keys):
+    '''
+    Modify the position of the fcurve 4 control points that is been used as mask to anim_transform
+    '''
 
     animaide = bpy.context.scene.animaide
 
@@ -262,6 +278,9 @@ def modify_anim_trans_mask(mask_curve, keys):
     right_blend = animaide.anim_transform.mask_blend_r
     interp = animaide.anim_transform.interp
     easing = animaide.anim_transform.easing
+
+    # when the value of the left_margin is higher than the right_margin then the left_margin becomes
+    # the right_margin
 
     always_left = left_margin
     always_right = right_margin
@@ -313,6 +332,10 @@ def modify_anim_trans_mask(mask_curve, keys):
 
 
 def set_timeline_ranges(left_blend, left_margin, right_margin, right_blend):
+    '''
+    Use the timeline playback and preview ranges to represent the mask
+    '''
+
     scene = bpy.context.scene
     scene.use_preview_range = True
 
@@ -323,6 +346,10 @@ def set_timeline_ranges(left_blend, left_margin, right_margin, right_blend):
 
 
 def reset_timeline_ranges():
+    '''
+    Resets the timeline playback and preview ranges to what the user had it as
+    '''
+
     scene = bpy.context.scene
 
     scene.frame_preview_start = user_preview_range['start']
@@ -333,6 +360,10 @@ def reset_timeline_ranges():
 
 
 def store_user_timeline_ranges():
+    '''
+    Stores the timeline playback and preview ranges
+    '''
+
     scene = bpy.context.scene
 
     user_preview_range['start'] = scene.frame_preview_start
@@ -346,6 +377,10 @@ def store_user_timeline_ranges():
 
 
 def poll(context):
+    '''
+    Poll for all the anim_transform related operators
+    '''
+
     objects = context.selected_objects
     obj = context.object
     # space = context.area.spaces.active.type
