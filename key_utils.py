@@ -25,16 +25,12 @@ from . import utils, cur_utils
 
 global_values = {}
 
-# selected_keys_global = {}
-# original_keys_info = {}
-# all_keys = {}
-# ref_frames_global = {}
-# smooth_keys_info = {}
-# left_neighbor_global = {}
-# right_neighbor_global = {}
-
 
 def set_type(objects, kind):
+    '''
+    Sets key type
+    '''
+
     if kind == 'KEYFRAME' or kind == 'BREAKDOWN' or kind == 'JITTER':
 
         print('test')
@@ -65,6 +61,10 @@ def set_type(objects, kind):
 
 
 def move_right_left(objects, amount, direction='RIGHT', lock=True):
+    '''
+    move keys horizontaly
+    '''
+
     if objects is None:
         return
 
@@ -127,6 +127,10 @@ def move_right_left(objects, amount, direction='RIGHT', lock=True):
 
 
 def move(fcurve, key, amount, direction='RIGHT'):
+    '''
+    moves keys
+    '''
+
     # left_neighbor, right_neighbor = get_current_key_neighbors(fcurve, key.co.x)
     selected_keys = get_selected(fcurve)
     left_neighbor, right_neighbor = get_selected_neigbors(fcurve, selected_keys)
@@ -157,6 +161,9 @@ def move(fcurve, key, amount, direction='RIGHT'):
 
 
 def swap(key1, key2):
+    '''
+    Keys1 become key2 and key2 becomes key1
+    '''
 
     def change_selection(keytochange, Bool):
         setattr(keytochange, 'select_control_point', Bool)
@@ -179,6 +186,11 @@ def swap(key1, key2):
 
 
 def set_frame(key, str):
+    '''
+    sets the time of the current key to the numeric value of "str"
+    if "+" or "-" is used the it will perform the corresponding math operation
+    '''
+
     key_frame = key.co.x
     if str.startswith('+'):
         rest = str[1:]
@@ -195,6 +207,12 @@ def set_frame(key, str):
 
 
 def set_value(key, str):
+    '''
+    sets the value of the current key to the numeric value of "str"
+    if "+" or "-" is used the it will perform the corresponding math operation
+    '''
+
+
     key_value = key.co.y
     if str.startswith('+'):
         rest = str[1:]
@@ -211,6 +229,9 @@ def set_value(key, str):
 
 
 def set_interpolation(objects, interpolation='BEZIER', easing='AUTO', back=2.0, period=1.0, amplitude=4.0):
+    '''
+    sets interpolation of the selected keys
+    '''
 
     for obj in objects:
         action = obj.animation_data.action
@@ -229,6 +250,10 @@ def set_interpolation(objects, interpolation='BEZIER', easing='AUTO', back=2.0, 
 
 
 def select_handle(key, left=None, right=None, control_point=None):
+    '''
+    selects handles of chosen key
+    '''
+
     animaide = bpy.context.scene.animaide
     key_helpers = animaide.key_helpers
 
@@ -248,6 +273,10 @@ def select_handle(key, left=None, right=None, control_point=None):
 
 
 def handles(objects, act_on='ALL', left=None, right=None, control_point=None, handle_type=None):
+    '''
+    lets you select or unselect either handel or control point of a key
+    '''
+
     animaide = bpy.context.scene.animaide
     key_helpers = animaide.key_helpers
 
@@ -314,6 +343,9 @@ def handles(objects, act_on='ALL', left=None, right=None, control_point=None, ha
 
 
 def handle_manipulate(key, left=None, right=None, length=None):
+    '''
+    set length of a key handles
+    '''
 
     if left is not None:
         if left is True:
@@ -327,6 +359,10 @@ def handle_manipulate(key, left=None, right=None, length=None):
 
 
 def handle_set_type(key, left=True, right=True, handle_type='AUTO_CLAMPED'):
+    '''
+    set "type" of a key handles
+    '''
+
     if left is not None:
         if left is True:
             key.handle_left_type = handle_type
@@ -337,17 +373,23 @@ def handle_set_type(key, left=True, right=True, handle_type='AUTO_CLAMPED'):
 
 
 def attach_selection_to_fcurve(fcurve, target_fcurve, factor=1.0, is_gradual=True):
+    '''
+    Match "y" value of selected keys to the value o target_fcurve
+    '''
 
-        selected_keys = get_selected(fcurve)
+    selected_keys = get_selected(fcurve)
 
-        for index in selected_keys:
+    for index in selected_keys:
 
-            key = fcurve.keyframe_points[index]
+        key = fcurve.keyframe_points[index]
 
-            attach_to_fcurve(key, key, target_fcurve, factor=factor, is_gradual=is_gradual)
+        attach_to_fcurve(key, key, target_fcurve, factor=factor, is_gradual=is_gradual)
 
 
 def attach_to_fcurve(key, source_key, target_fcurve, factor=1.0, is_gradual=True):
+    '''
+    Match "y" value of a key to the value o target_fcurve
+    '''
 
     target_y = target_fcurve.evaluate(key.co.x)
 
@@ -361,9 +403,10 @@ def attach_to_fcurve(key, source_key, target_fcurve, factor=1.0, is_gradual=True
 
 
 def get_selected(fcurve):
-    """
-    :return reversable list of complex keys that contains (index, key) on a tuple of the selected keys:
-    """
+    '''
+    Creates a list of selected keys index
+    '''
+
     keys = fcurve.keyframe_points
     keyframe_indexes = []
 
@@ -381,6 +424,10 @@ def get_selected(fcurve):
 
 
 def valid_anim(obj):
+    '''
+    checks if the obj has animation data
+    '''
+
     anim = obj.animation_data
 
     if anim is None:
@@ -397,6 +444,10 @@ def valid_anim(obj):
 
 
 def valid_fcurve(fcurve):
+    '''
+    Validates an fcurve to see if it can be used with animaide
+    '''
+
     animaide = bpy.context.scene.animaide
     if animaide.slider.affect_non_selected_fcurves is False:
         if fcurve.select is False:
@@ -419,9 +470,9 @@ def valid_fcurve(fcurve):
 
 
 def get_sliders_globals(selected=True, original=True, left_frame=None, right_frame=None):
-    """
-    :return reversable list of complex keys that contains (index, key) on a tuple of the selected keys:
-    """
+    '''
+    Gets all the global values needed to work with the sliders
+    '''
 
     animaide = bpy.context.scene.animaide
 
@@ -430,39 +481,22 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
     else:
         objects = bpy.data.objects
 
-    # objects = bpy.context.selected_objects
-
     for obj in objects:
-        # anim = obj.animation_data
-        # if anim is None:
-        #     continue
-        # if anim.action is None:
-        #     continue
-        # if anim.action.fcurves is None:
-        #     continue
 
         if not valid_anim(obj):
             continue
 
+        # Level 1 variables
         fcurves = obj.animation_data.action.fcurves
-
         curves = {}
 
         for fcurve_index, fcurve in fcurves.items():
-            curve_items = {}
-
-            # # if fcurve.select is False:
-            # #     continue
-            #
-            # if fcurve.hide is True:
-            #     continue
-            #
-            # if fcurve.group.name == cur_utils.group_name:
-            #     continue  # we don't want to select keys on reference fcurves
 
             if not valid_fcurve(fcurve):
                 continue
 
+            # level 2 variables
+            curve_items = {}
             keyframes = []
             values = {}
             every_key = []
@@ -471,15 +505,20 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
 
             for key_index, key in keys.items():
 
+                # stores coordinate of every key
                 co = {'x': key.co.x, 'y': key.co.y}
                 values[key_index] = co
 
+                # stores every key
                 every_key.append(key_index)
 
+                # stores only selected keys
                 if key.select_control_point:
                     keyframes.append(key_index)
 
             for key_index in keyframes:
+                # find smooth values (average) of the original keys
+
                 key = fcurve.keyframe_points[key_index]
 
                 if key_index - 1 not in keyframes:
@@ -498,6 +537,7 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
                 values[key_index]['sy'] = smooth
 
             if not keyframes:
+                # what to do if no key is selected
 
                 if animaide.slider.affect_non_selected_keys is True:
                     index = on_current_frame(fcurve)
@@ -517,25 +557,29 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
                 left_neighbor, right_neighbor = get_selected_neigbors(fcurve, keyframes)
 
             if selected:
+                # Store selected keys
                 curve_items['selected_keys'] = keyframes
 
             if left_neighbor is None:
                 curve_items['left_neighbor'] = None
             else:
+                # stores coordinates of left neighboring key
                 co = {'x': left_neighbor.co.x, 'y': left_neighbor.co.y}
                 curve_items['left_neighbor'] = co
 
             if right_neighbor is None:
                 curve_items['right_neighbor'] = None
             else:
+                # stores coordinates of right neighboring key
                 co = {'x': right_neighbor.co.x, 'y': right_neighbor.co.y}
                 curve_items['right_neighbor'] = co
 
             if original:
+                # stores original values of every key
                 curve_items['original_values'] = values
                 curve_items['every_key'] = every_key
 
-            if left_frame is not None or left_frame is not None:
+            if left_frame is not None or right_frame is not None:
                 frames = {'left_y': fcurve.evaluate(left_frame),
                           'right_y': fcurve.evaluate(right_frame)}
                 curve_items['ref_frames'] = frames
@@ -548,6 +592,9 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
 
 
 def get_ref_frame_globals(left_ref_frame, right_ref_frame):
+    '''
+    Get global values for the reference frames
+    '''
 
     objects = bpy.context.selected_objects
 
@@ -584,6 +631,9 @@ def get_ref_frame_globals(left_ref_frame, right_ref_frame):
 
 
 def get_anim_transform_globals(object):
+    '''
+    Get global values for the anim_transform
+    '''
 
     anim = object.animation_data
     if anim is None:
@@ -611,6 +661,9 @@ def get_anim_transform_globals(object):
 
 
 def reset_original():
+    '''
+    Set selected keys to the values in the global variables
+    '''
 
     objects = bpy.context.selected_objects
 
@@ -654,10 +707,10 @@ def reset_original():
 
 
 def first_and_last_selected(fcurve, keyframes):
-    """
+    '''
     Given a list of keys it returns the first and last keys.
     If an fcurve is supplied just the keys of that curve are taken into consideration
-    """
+    '''
 
     every_key = fcurve.keyframe_points
 
@@ -682,6 +735,9 @@ def first_and_last_selected(fcurve, keyframes):
 
 
 def set_mode(fcurve, mode='AUTO_CLAMPED'):
+    '''
+    Sets the handle type of the selected keys
+    '''
     selected_keys = get_selected(fcurve)
     if selected_keys is not None:
         for index in selected_keys:
@@ -691,6 +747,9 @@ def set_mode(fcurve, mode='AUTO_CLAMPED'):
 
 
 def delete(objects, kind=None):
+    '''
+    Deletes keys if they match the type in "kind"
+    '''
     # selected_keys = get_selected(fcurve, reverse=False)
     # selected_keys.sort(reverse=True)
     if objects is None:
@@ -748,11 +807,17 @@ def delete(objects, kind=None):
 
 
 def copy_value(keyframes, reference_key):
+    '''
+    Copy value of "referece_key" to "keyframes"
+    '''
     for index, key in keyframes:
         key.co.y = reference_key.co.y
 
 
 def flatten(objects, side):
+    '''
+    Match the value of the selected keys to the neighboring key to the "side"
+    '''
     for obj in objects:
         action = obj.animation_data.action
 
@@ -789,6 +854,9 @@ def flatten(objects, side):
 
 
 def on_current_frame(fcurve):
+    '''
+    returns the index of the key in the current frame
+    '''
     current_index = None
     cur_frame = bpy.context.scene.frame_current
     for index, key in fcurve.keyframe_points.items():
@@ -798,6 +866,10 @@ def on_current_frame(fcurve):
 
 
 def get_selected_neigbors(fcurve, keyframes):
+    '''
+    Get the left and right neighboring keys of the selected keys
+    '''
+
     left_neighbor = None
     right_neighbor = None
 
@@ -832,6 +904,9 @@ def get_selected_neigbors(fcurve, keyframes):
 
 
 def get_index_neighbors(fcurve, index, clamped=False):
+    '''
+    Get the neighboring keys of a key given index
+    '''
     left_neighbor = fcurve.keyframe_points[utils.floor(index - 1, 0)]
     right_neighbor = fcurve.keyframe_points[utils.ceiling(index + 1, len(fcurve.keyframe_points) - 1)]
 
@@ -845,6 +920,9 @@ def get_index_neighbors(fcurve, index, clamped=False):
 
 
 def get_frame_neighbors(fcurve, frame=None, clamped=False):
+    '''
+    Get neighboring keys of a frame
+    '''
     if frame is None:
         frame = bpy.context.scene.frame_current
     fcurve_keys = fcurve.keyframe_points
@@ -872,6 +950,9 @@ def get_frame_neighbors(fcurve, frame=None, clamped=False):
 
 
 def calculate_delta(key, previous_key, next_key):
+    '''
+
+    '''
 
     frames_gap = abs(next_key.co.x - previous_key.co.x)  # frames between keys
     key_pos = abs(key.co.x - previous_key.co.x)  # frame position of the key in question
@@ -883,33 +964,5 @@ def calculate_delta(key, previous_key, next_key):
     else:
         return ((key_pos * 100) / frames_gap) / 100
 
-
-def switch_aim(aim, factor):
-    if factor < 0.5:
-        aim = aim * -1
-    return aim
-
-
-def set_direction(factor, left_key, right_key):
-    if factor < 0:
-        next_key = left_key
-        previous_key = right_key
-    else:
-        next_key = right_key
-        previous_key = left_key
-
-    return previous_key, next_key
-
-
-def linear_y(left_neighbor, right_neighbor, key):
-    big_adjacent = right_neighbor['x'] - left_neighbor['x']
-    big_oposite = right_neighbor['y'] - left_neighbor['y']
-    if big_adjacent == 0:
-        return
-    tangent = big_oposite/big_adjacent
-
-    adjacent = key.co.x - left_neighbor['x']
-    oposite = tangent * adjacent
-    return left_neighbor['y'] + oposite
 
 
