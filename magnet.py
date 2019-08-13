@@ -31,7 +31,7 @@ user_scene_range = {}
 user_auto_animate = False
 
 
-########## Handlers ############
+# ######### Handlers ############
 
 
 def anim_transform_handlers(scene):
@@ -49,26 +49,19 @@ def anim_transform_handlers(scene):
 
     selected_objects = context.selected_objects
 
-
     # selected_pose_bones = bpy.context.selected_pose_bones
     # usable_bones_names = []
 
-
     for obj in selected_objects:
 
-        # obj = context.object
-        obj_anim = obj.animation_data
+        action = getattr(obj.animation_data, 'action', None)
+        fcurves = getattr(action, 'fcurves', None)
 
-        if obj_anim is None:
-            return
-
-        if obj_anim.action.fcurves is None:
+        if fcurves is None:
             return
 
         # if obj.type == 'ARMATURE':
         #     usable_bones_names = utils.get_selected_bones_names(obj, selected_pose_bones)
-
-        fcurves = obj_anim.action.fcurves
 
         for fcurve in fcurves:
 
@@ -83,15 +76,11 @@ def anim_transform_handlers(scene):
                 bone_name = split_data_path[1]
                 bone = obj.data.bones.get(bone_name)
 
-                if bone is None:
-                    return
-
-                if bone.hide:
+                if bone is None or bone.hide:
                     return
 
                 if bone.select or bone.parent or bone.children:
                     animation_transform(obj, fcurve)
-
             else:
                 animation_transform(obj, fcurve)
 
@@ -103,15 +92,9 @@ def anim_trans_mask_handlers(scene):
     function to be run by the mask handler. It will handle the mask dimensions
     '''
 
-    action = None
+    action = bpy.data.actions.get('animaide')
 
-    if 'animaide' in bpy.data.actions:
-        action = bpy.data.actions['animaide']
-
-    if action is None:
-        return
-
-    if action.fcurves.items() == []:
+    if action is None or not action.fcurves:
         return
 
     mask = action.fcurves[0]
@@ -121,7 +104,7 @@ def anim_trans_mask_handlers(scene):
     return
 
 
-########## Main tool ############
+# ######### Main tool ############
 
 
 def animation_transform(obj, fcurve):
@@ -130,23 +113,17 @@ def animation_transform(obj, fcurve):
     on the current frame by the user
     '''
 
-    if fcurve.lock is True:
+    if fcurve.lock:
         return
 
-    if fcurve.group is None:
-        return
-
-    if fcurve.group.name == cur_utils.group_name:
+    if getattr(fcurve.group, 'name', None) == cur_utils.group_name:
         return  # we don't want to select keys on reference fcurves
 
-    mask_curve = None
-
-    if 'animaide' in bpy.data.actions:
-
-        action = bpy.data.actions['animaide']
-
-        if action.fcurves.items() != []:
-            mask_curve = action.fcurves[0]
+    action = bpy.data.actions.get('animaide')
+    if action and not action.fcurves:
+        mask_curve = action.fcurves[0]
+    else:
+        mask_curve = None
 
     delta_y = get_anim_transform_delta(obj, fcurve)
 
@@ -183,7 +160,7 @@ def get_anim_transform_delta(obj, fcurve):
     return target - source
 
 
-########## Mask ############
+# ######### Mask ############
 
 
 def set_animaide_action():
@@ -224,14 +201,14 @@ def add_anim_trans_mask():
 
     action = set_animaide_action()
 
-    if action.fcurves.items() == []:
-        mask = add_animaide_fcurve(action_group='Magnet')
-        keys = mask.keyframe_points
-        keys.add(4)
-    else:
+    if action.fcurves:
         action = bpy.data.actions['animaide']
         mask = action.fcurves[0]
         keys = mask.keyframe_points
+    else:
+        mask = add_animaide_fcurve(action_group='Magnet')
+        keys = mask.keyframe_points
+        keys.add(4)
 
     modify_anim_trans_mask(mask, keys)
 
@@ -249,14 +226,12 @@ def remove_anim_trans_mask():
 
     scene = bpy.context.scene
     animaide = scene.animaide
+    action = bpy.data.actions.get('animaide')
 
-    if animaide.anim_transform.use_mask is False:
+    if action is None or animaide.anim_transform.use_mask is False:
         return
 
-    if 'animaide' not in bpy.data.actions.keys():
-        return
-
-    fcurves = bpy.data.actions['animaide'].fcurves
+    fcurves = action.fcurves
 
     fcurves.remove(fcurves[0])
 
@@ -271,13 +246,14 @@ def modify_anim_trans_mask(mask_curve, keys):
     '''
 
     animaide = bpy.context.scene.animaide
+    anim_transform = animaide.anim_transform
 
-    left_margin = animaide.anim_transform.mask_margin_l
-    left_blend = animaide.anim_transform.mask_blend_l
-    right_margin = animaide.anim_transform.mask_margin_r
-    right_blend = animaide.anim_transform.mask_blend_r
-    interp = animaide.anim_transform.interp
-    easing = animaide.anim_transform.easing
+    left_margin = anim_transform.mask_margin_l
+    left_blend = anim_transform.mask_blend_l
+    right_margin = anim_transform.mask_margin_r
+    right_blend = anim_transform.mask_blend_r
+    interp = anim_transform.interp
+    easing = anim_transform.easing
 
     # when the value of the left_margin is higher than the right_margin then the left_margin becomes
     # the right_margin
@@ -313,8 +289,7 @@ def modify_anim_trans_mask(mask_curve, keys):
 
     if easing == 'EASE_IN':
         easing_b = 'EASE_OUT'
-
-    if easing == 'EASE_OUT':
+    elif easing == 'EASE_OUT':
         easing_b = 'EASE_IN'
 
     keys[0].interpolation = interp
@@ -373,7 +348,7 @@ def store_user_timeline_ranges():
     user_scene_range['end'] = scene.frame_end
 
 
-########## Functions for Operators ############
+# ######### Functions for Operators ############
 
 
 def poll(context):
@@ -382,10 +357,9 @@ def poll(context):
     '''
 
     objects = context.selected_objects
-    obj = context.object
+    # obj = context.object
     # space = context.area.spaces.active.type
-    area = context.area.type
+    # area = context.area.type
     # return obj is not None and area == 'GRAPH_EDITOR' and anim is not None
     # return obj is not None and obj.animation_data is not None
     return objects is not None
-
