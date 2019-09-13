@@ -443,7 +443,7 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
     Gets all the global values needed to work with the sliders
     '''
 
-    context = bp.context
+    context = bpy.context
     animaide = context.scene.animaide
 
     if context.space_data.dopesheet.show_only_selected:
