@@ -19,7 +19,8 @@ Created by Ares Deveaux
 '''
 
 
-import bpy, os
+import bpy
+import os
 
 from . import utils, key_utils, cur_utils, slider_tools, magnet
 from bpy.props import StringProperty, EnumProperty, BoolProperty, \
@@ -27,7 +28,7 @@ from bpy.props import StringProperty, EnumProperty, BoolProperty, \
 from bpy.types import Operator
 
 
-################  SLIDERS  ###############
+# ###############  SLIDERS  ###############
 
 
 class AAT_OT_ease_to_ease(Operator):
@@ -753,7 +754,7 @@ Removes last slider of the list'''
         # if len(slots) > 1:
         index = len(slots) - 1
         slots.remove(index)
-        slider_tools.remove_marker(index+2)
+        slider_tools.remove_marker(index + 2)
 
         return {'FINISHED'}
 
@@ -808,15 +809,19 @@ one on the right sets the right reference'''
             slider.right_ref_frame = current_frame
 
         if slider.use_markers:
-            slider_tools.add_marker(name_a='F',
-                             name_b=slider_num,
-                             side=self.side,
-                             frame=current_frame)
+            slider_tools.add_marker(
+                name_a='F',
+                name_b=slider_num,
+                side=self.side,
+                frame=current_frame
+            )
         else:
             for side in ['L', 'R']:
-                slider_tools.remove_marker(name_a='F',
-                                    name_b=slider_num,
-                                    side=side)
+                slider_tools.remove_marker(
+                    name_a='F',
+                    name_b=slider_num,
+                    side=side
+                )
             # utils.remove_marker(slider_num)
 
         # key_utils.get_ref_frame_globals(slider.left_neighbor, slider.right_neighbor)
@@ -836,7 +841,7 @@ one on the right sets the right reference'''
         return {'FINISHED'}
 
 
-################  ANIM TRANSFORM  ###############
+# ###############  ANIM TRANSFORM  ###############
 
 
 class AAT_OT_create_anim_trans_mask(Operator):
@@ -992,7 +997,7 @@ Options related to the anim_transform'''
         # row.prop(animaide.anim_transform, 'interp', text='', icon_only=False)
 
 
-################  HELP  ###############
+# ###############  HELP  ###############
 
 
 class AAT_OT_help(Operator):
@@ -1069,7 +1074,7 @@ Opens Animaide manual'''
         return {'FINISHED'}
 
 
-################  OTHER TOOLS  ###############
+# ###############  OTHER TOOLS  ###############
 
 
 class AAT_OT_clone(Operator):
@@ -1213,9 +1218,3 @@ classes = (
     AAT_OT_create_anim_trans_mask,
     AAT_OT_delete_anim_trans_mask
 )
-
-
-
-
-
-

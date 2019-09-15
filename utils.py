@@ -34,7 +34,7 @@ def gradual(key_y, target_y, delta=1.0, factor=0.15):
     print('source: ', key_y)
     print('target: ', target_y)
     print('factor: ', factor)
-    step = abs(key_y - target_y)*(delta*factor)
+    step = abs(key_y - target_y) * (delta * factor)
     print('gap: ', key_y - target_y)
     print('step: ', step)
 
@@ -116,4 +116,3 @@ def toggle(to_toggle, value_a, value_b):
         return value_b
     elif to_toggle == value_b:
         return value_a
-

@@ -40,10 +40,10 @@ def step_button(row, slot, factor, icon='',
     # else:
     #     step = col.operator('animaide.sliders', text=text, icon=icon, emboss=emboss)
 
-    if icon == '':
-        step = col.operator('animaide.%s' % str(slot.selector).lower(), text=text, emboss=emboss)
-    else:
-        step = col.operator('animaide.%s' % str(slot.selector).lower(), text=text, icon=icon, emboss=emboss)
+    kwargs = dict(operator='animaide.%s' % str(slot.selector).lower(),
+                  text=text, emboss=emboss)
+    if icon: kwargs['icon'] = icon
+    step = col.operator(**kwargs)
 
     step.factor = factor
     step.slope = slot.slope
@@ -84,11 +84,11 @@ def slider_box(layout, slot, index=-1):
     row.active = True
     row.operator_context = 'EXEC_DEFAULT'
 
-    if slot.modal_switch == False:
+    if not slot.modal_switch:
         # when slider is not active
 
         # left overshoot extra buttons
-        if slot.overshoot == True:
+        if slot.overshoot:
             for f in [-2, -1.5]:
                 step_button(row, slot, factor=f, text=' ', icon='')
 
@@ -114,7 +114,7 @@ def slider_box(layout, slot, index=-1):
                     icon='CHECKBOX_DEHLT', emboss=False, active=True)
 
         # right overshoot extra buttons
-        if slot.overshoot == True:
+        if slot.overshoot:
             for f in [1.5, 2]:
                 step_button(row, slot, factor=f, text=' ', icon='')
 
@@ -335,8 +335,3 @@ classes = (
     AAT_MT_pie_menu_a,
     AAT_MT_pie_menu_b
 )
-
-
-
-
-

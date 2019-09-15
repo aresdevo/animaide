@@ -73,10 +73,7 @@ def move_right_left(objects, amount, direction='RIGHT', lock=True):
 
         for fcurve in action.fcurves:
 
-            if fcurve.select is False:
-                continue
-
-            if fcurve.hide is True:
+            if not fcurve.select or fcurve.hide:
                 continue
 
             selected_keys = get_selected(fcurve)
@@ -138,10 +135,10 @@ def move(fcurve, key, amount, direction='RIGHT'):
     if direction == 'UP':
         key.co.y = key.co.y + amount
 
-    if direction == 'DOWN':
+    elif direction == 'DOWN':
         key.co.y = key.co.y - amount
 
-    if direction == 'LEFT':
+    elif direction == 'LEFT':
         key.co.x = key.co.x - int(amount)
         if left_neighbor is not None:
             if key.co.x == left_neighbor.co.x:
@@ -211,7 +208,6 @@ def set_value(key, str):
     sets the value of the current key to the numeric value of "str"
     if "+" or "-" is used the it will perform the corresponding math operation
     '''
-
 
     key_value = key.co.y
     if str.startswith('+'):
@@ -317,27 +313,22 @@ def handles(objects, act_on='ALL', left=None, right=None, control_point=None, ha
                     if handle_type is not None:
                         handle_set_type(key, left=left, right=right, handle_type=handle_type)
 
-            elif act_on == 'ALL':
-                for index, key in fcurve.keyframe_points.items():
-                    print('all')
-                    if handle_type is not None:
-                        handle_set_type(key, left=True, right=True, handle_type=handle_type)
-
-            elif act_on == 'FIRST':
-                print('first')
-                if handle_type is not None:
-                    handle_set_type(first_key, left=True, right=True, handle_type=handle_type)
-
-            elif act_on == 'LAST':
-                print('last')
-                if handle_type is not None:
-                    handle_set_type(last_key, left=True, right=True, handle_type=handle_type)
-
-            elif act_on == 'BOTH':
-                print('both')
-                if handle_type is not None:
-                    handle_set_type(last_key, left=True, right=True, handle_type=handle_type)
-                    handle_set_type(first_key, left=True, right=True, handle_type=handle_type)
+            elif handle_type is not None:
+                kwargs = dict(left=True, right=True, handle_type=handle_type)
+                if act_on == 'ALL':
+                    for index, key in fcurve.keyframe_points.items():
+                        print('all')
+                        handle_set_type(key, **kwargs)
+                elif act_on == 'FIRST':
+                    print('first')
+                    handle_set_type(first_key, **kwargs)
+                elif act_on == 'LAST':
+                    print('last')
+                    handle_set_type(last_key, **kwargs)
+                elif act_on == 'BOTH':
+                    print('both')
+                    handle_set_type(last_key, **kwargs)
+                    handle_set_type(first_key, **kwargs)
 
             fcurve.update()
 
@@ -347,15 +338,14 @@ def handle_manipulate(key, left=None, right=None, length=None):
     set length of a key handles
     '''
 
-    if left is not None:
-        if left is True:
-            if length is not None:
-                key.handle_left.length = length
+    if length is None:
+        return
 
-    if right is not None:
-        if right is True:
-            if length is not None:
-                key.handle_right.length = length
+    if left is True:
+        key.handle_left.length = length
+
+    if right is True:
+        key.handle_right.length = length
 
 
 def handle_set_type(key, left=True, right=True, handle_type='AUTO_CLAMPED'):
@@ -363,13 +353,11 @@ def handle_set_type(key, left=True, right=True, handle_type='AUTO_CLAMPED'):
     set "type" of a key handles
     '''
 
-    if left is not None:
-        if left is True:
-            key.handle_left_type = handle_type
+    if left is True:
+        key.handle_left_type = handle_type
 
-    if left is not None:
-        if right is True:
-            key.handle_right_type = handle_type
+    if right is True:
+        key.handle_right_type = handle_type
 
 
 def attach_selection_to_fcurve(fcurve, target_fcurve, factor=1.0, is_gradual=True):
@@ -410,10 +398,7 @@ def get_selected(fcurve):
     keys = fcurve.keyframe_points
     keyframe_indexes = []
 
-    if fcurve.group is None:
-        return
-
-    if fcurve.group.name == cur_utils.group_name:
+    if getattr(fcurve.group, 'name', None) == cur_utils.group_name:
         return []  # we don't want to select keys on reference fcurves
 
     for index, key in keys.items():
@@ -425,22 +410,14 @@ def get_selected(fcurve):
 
 def valid_anim(obj):
     '''
-    checks if the obj has animation data
+    checks if the obj has an active action
     '''
 
     anim = obj.animation_data
+    action = getattr(anim, 'action', None)
+    fcurves = getattr(action, 'fcurves', None)
 
-    if anim is None:
-        return False
-
-    elif anim.action is None:
-        return False
-
-    elif anim.action.fcurves is None:
-        return False
-
-    else:
-        return True
+    return bool(fcurves)
 
 
 def valid_fcurve(fcurve):
@@ -453,18 +430,10 @@ def valid_fcurve(fcurve):
         if fcurve.select is False:
             return False
 
-    if fcurve.lock is True:
+    if fcurve.lock or fcurve.hide:
         return False
-
-    if fcurve.hide is True:
-        return False
-
-    if fcurve.group is None:
-        return False
-
-    if fcurve.group.name == cur_utils.group_name:
+    elif getattr(fcurve.group, 'name', None) == cur_utils.group_name:
         return False  # we don't want to select keys on reference fcurves
-
     else:
         return True
 
@@ -474,10 +443,11 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
     Gets all the global values needed to work with the sliders
     '''
 
-    animaide = bpy.context.scene.animaide
+    context = bpy.context
+    animaide = context.scene.animaide
 
-    if bpy.context.space_data.dopesheet.show_only_selected == True:
-        objects = bpy.context.selected_objects
+    if context.space_data.dopesheet.show_only_selected:
+        objects = context.selected_objects
     else:
         objects = bpy.data.objects
 
@@ -533,7 +503,7 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
                 else:
                     nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
 
-                smooth = (prevkey_value + key.co.y + nextkey_value)/3
+                smooth = (prevkey_value + key.co.y + nextkey_value) / 3
                 values[key_index]['sy'] = smooth
 
             if not keyframes:
@@ -788,9 +758,9 @@ def delete(objects, kind=None):
                 if kind is None:
                     print('delete for None')
                     obj.keyframe_delete(fcurve.data_path,
-                                           fcurve.array_index,
-                                           key.co.x,
-                                           fcurve.group.name)
+                                        fcurve.array_index,
+                                        key.co.x,
+                                        fcurve.group.name)
                 elif \
                         kind == 'KEYFRAME' or \
                         kind == 'BREAKDOWN' or \
@@ -798,9 +768,9 @@ def delete(objects, kind=None):
                     if key.type == kind:
                         print('delete for ', kind)
                         obj.keyframe_delete(fcurve.data_path,
-                                               fcurve.array_index,
-                                               key.co.x,
-                                               fcurve.group.name)
+                                            fcurve.array_index,
+                                            key.co.x,
+                                            fcurve.group.name)
                     else:
                         index += 1
                 fcurve.update()
@@ -823,10 +793,7 @@ def flatten(objects, side):
 
         for fcurve in action.fcurves:
 
-            if fcurve.group is None:
-                continue
-
-            if fcurve.group.name == cur_utils.group_name:
+            if getattr(fcurve.group, 'name', None) == cur_utils.group_name:
                 continue  # we don't want to add to the list the helper curves we have created
 
             if fcurve.select is False:
@@ -927,7 +894,7 @@ def get_frame_neighbors(fcurve, frame=None, clamped=False):
         frame = bpy.context.scene.frame_current
     fcurve_keys = fcurve.keyframe_points
     left_neighbor = fcurve_keys[0]
-    right_neighbor = fcurve_keys[len(fcurve_keys)-1]
+    right_neighbor = fcurve_keys[len(fcurve_keys) - 1]
 
     for key in fcurve.keyframe_points:
         dif = key.co.x - frame
@@ -950,9 +917,6 @@ def get_frame_neighbors(fcurve, frame=None, clamped=False):
 
 
 def calculate_delta(key, previous_key, next_key):
-    '''
-
-    '''
 
     frames_gap = abs(next_key.co.x - previous_key.co.x)  # frames between keys
     key_pos = abs(key.co.x - previous_key.co.x)  # frame position of the key in question
@@ -963,6 +927,3 @@ def calculate_delta(key, previous_key, next_key):
         return 0.25     # in the case of the fist or last key
     else:
         return ((key_pos * 100) / frames_gap) / 100
-
-
-

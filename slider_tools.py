@@ -354,18 +354,16 @@ def noise_random(factor, fcurves, range=1):
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
     noise = []
-    half_range = range/2
+    half_range = range / 2
     for index in selected_keys:
         k = fcurve.keyframe_points[index]
         random_y = rd.uniform(k.co.y - half_range, k.co.y + half_range)
         noise.append(random_y)
 
-    n = 0
-    for index in selected_keys:
+    for n, index in enumerate(selected_keys):
         k = fcurve.keyframe_points[index]
         delta = noise[n] - original_values[index]['y']
         k.co.y = original_values[index]['y'] + delta * clamped_factor
-        n += 1
 
     # fcurves.remove(clone)
 
@@ -397,7 +395,7 @@ def scale(factor, scale_type):
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
 
-####### Sliders Tools
+# ###### Sliders Tools
 
 
 def add_marker(name_a='marker', name_b='0', side='L', frame=0, overwrite_name=True):
@@ -441,7 +439,7 @@ def remove_marker(name_a='marker', name_b='0', side='L'):
     return
 
 
-####### Functions for Operators
+# ###### Functions for Operators
 
 
 def looper(self, context):
@@ -469,10 +467,10 @@ def looper(self, context):
     min_value = slider.min_value
     max_value = slider.max_value
 
-    if bpy.context.space_data.dopesheet.show_only_selected is True:
+    if context.space_data.dopesheet.show_only_selected is True:
         objects = context.selected_objects
     else:
-        objects = bpy.data.objects
+        objects = context.scene.objects
 
     # selected_pose_bones = bpy.context.selected_pose_bones
     # usable_bones_names = []
@@ -485,10 +483,8 @@ def looper(self, context):
 
         visible = obj.visible_get()
 
-        if bpy.context.space_data.dopesheet.show_hidden is not True:
-
-            if not visible:
-                continue
+        if not context.space_data.dopesheet.show_hidden and not visible:
+            continue
 
         # if obj.type == 'ARMATURE':
         #     usable_bones_names = utils.get_usable_bone(obj, selected_pose_bones)
@@ -505,34 +501,38 @@ def looper(self, context):
                 # bone_name = utils.get_bone_name(obj, fcurve)
                 #
 
-                if fcurve.group is None:
+                if getattr(fcurve.group, 'name', None) == 'Object Transforms':
+                    # When animating an object, by default its fcurves grouped with this name.
                     continue
-
-                if fcurve.group.name != 'Object Transforms':
-                    split_data_path = fcurve.data_path.split(sep='"')
-                    bone_name = split_data_path[1]
-                    bone = obj.data.bones.get(bone_name)
-
-                    if bone is None:
+                elif not fcurve.group:
+                    transforms = (
+                        'location', 'rotation_euler', 'scale',
+                        'rotation_quaternion', 'rotation_axis_angle',
+                        '[\"',  # custom property
+                    )
+                    if fcurve.data_path.startswith(transforms):
+                        # fcurve belongs to the  object, so skip it
                         continue
 
-                    if bpy.context.space_data.dopesheet.show_only_selected is True:
-                        if bone.select is False:
-                            continue
+                split_data_path = fcurve.data_path.split(sep='"')
+                bone_name = split_data_path[1]
+                bone = obj.data.bones.get(bone_name)
 
-                    if bone.hide:
-                        continue
+                only_selected = context.space_data.dopesheet.show_only_selected
+
+                if bone is None or bone.hide or (only_selected and not bone.select):
+                    continue
 
                 # if bone_name is None:
                 #     continue
 
-            if fcurve.group.name == cur_utils.group_name:
+            if getattr(fcurve.group, 'name', None) == cur_utils.group_name:
                 continue  # we don't want to select keys on reference fcurves
 
             global_fcurve = key_utils.global_values[obj.name][fcurve_index]
             selected_keys = global_fcurve['selected_keys']
 
-            if selected_keys == []:
+            if not selected_keys:
                 continue
 
             original_values = global_fcurve['original_values']
@@ -542,45 +542,46 @@ def looper(self, context):
             if self.slider_type == 'EASE_TO_EASE':
                 ease_to_ease(self.factor, self.slope)
 
-            if self.slider_type == 'EASE':
+            elif self.slider_type == 'EASE':
                 ease(self.factor, self.slope)
 
-            if self.slider_type == 'BLEND_NEIGHBOR':
+            elif self.slider_type == 'BLEND_NEIGHBOR':
                 blend_neighbor(self.factor)
 
-            if self.slider_type == 'BLEND_FRAME':
-                left_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['left_y']
-                right_y_ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']['right_y']
+            elif self.slider_type == 'BLEND_FRAME':
+                ref = key_utils.global_values[obj.name][fcurve_index]['ref_frames']
+                left_y_ref = ref['left_y']
+                right_y_ref = ref['right_y']
                 blend_frame(self.factor, left_y_ref, right_y_ref)
 
-            if self.slider_type == 'BLEND_EASE':
+            elif self.slider_type == 'BLEND_EASE':
                 blend_ease(self.factor, self.slope)
 
-            if self.slider_type == 'BLEND_OFFSET':
+            elif self.slider_type == 'BLEND_OFFSET':
                 blend_offset(self.factor)
 
-            if self.slider_type == 'TWEEN':
+            elif self.slider_type == 'TWEEN':
                 tween(self.factor)
 
-            if self.slider_type == 'PUSH_PULL':
+            elif self.slider_type == 'PUSH_PULL':
                 push_pull(self.factor)
 
-            if self.slider_type == 'SCALE_LEFT':
+            elif self.slider_type == 'SCALE_LEFT':
                 scale(self.factor, 'L')
 
-            if self.slider_type == 'SCALE_RIGHT':
+            elif self.slider_type == 'SCALE_RIGHT':
                 scale(self.factor, 'R')
 
-            if self.slider_type == 'SCALE_AVERAGE':
+            elif self.slider_type == 'SCALE_AVERAGE':
                 scale(self.factor, '')
 
-            if self.slider_type == 'SMOOTH':
+            elif self.slider_type == 'SMOOTH':
                 smooth(self.factor)
 
-            if self.slider_type == 'TIME_OFFSET':
+            elif self.slider_type == 'TIME_OFFSET':
                 time_offset(self.factor, fcurves)
 
-            if self.slider_type == 'NOISE':
+            elif self.slider_type == 'NOISE':
                 noise(self.factor, fcurves, fcurve_index)
 
             fcurve.update()
@@ -596,17 +597,18 @@ def modal(self, context, event):
     Common actions used in the "modal" of the different slider operators
     '''
 
+    if self.slot_index == -1:
+        prop = self.animaide.slider
+    else:
+        prop = self.slots[self.slot_index]
+
     if event.type == 'MOUSEMOVE':  # Apply
 
         slider_from_zero = (event.mouse_x - self.init_mouse_x) / 100
         self.factor = slider_from_zero
 
-        if self.slot_index == -1:
-            self.item.factor = slider_from_zero
-            self.item.factor_overshoot = slider_from_zero
-        else:
-            self.slots[self.slot_index].factor = slider_from_zero
-            self.slots[self.slot_index].factor_overshoot = slider_from_zero
+        prop.factor = slider_from_zero
+        prop.factor_overshoot = slider_from_zero
 
         self.execute(context)
 
@@ -614,28 +616,22 @@ def modal(self, context, event):
         if context.area.type == 'GRAPH_EDITOR':
             context.area.tag_redraw()
         key_utils.get_sliders_globals()
-        if self.slot_index == -1:
-            self.animaide.slider.modal_switch = False
-            self.animaide.slider.factor = 0.0
-            self.animaide.slider.factor_overshoot = 0.0
-        else:
-            self.slots[self.slot_index].modal_switch = False
-            self.slots[self.slot_index].factor = 0.0
-            self.slots[self.slot_index].factor_overshoot = 0.0
+
+        prop.modal_switch = False
+        prop.factor = 0.0
+        prop.factor_overshoot = 0.0
+
         return {'FINISHED'}
 
-    if event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
+    elif event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
         if context.area.type == 'GRAPH_EDITOR':
             context.area.tag_redraw()
         key_utils.reset_original()
-        if self.slot_index == -1:
-            self.animaide.slider.modal_switch = False
-            self.animaide.slider.factor = 0.0
-            self.animaide.slider.factor_overshoot = 0.0
-        else:
-            self.slots[self.slot_index].modal_switch = False
-            self.slots[self.slot_index].factor = 0.0
-            self.slots[self.slot_index].factor_overshoot = 0.0
+
+        prop.modal_switch = False
+        prop.factor = 0.0
+        prop.factor_overshoot = 0.0
+
         return {'CANCELLED'}
 
     return {'RUNNING_MODAL'}
@@ -687,5 +683,4 @@ def poll(context):
     # space = context.area.spaces.active.type
     area = context.area.type
     # return objects != [] and area == 'GRAPH_EDITOR'
-    return anim_transform_active is False and area == 'GRAPH_EDITOR' and objects is not None
-
+    return bool(not anim_transform_active and area == 'GRAPH_EDITOR' and objects)
