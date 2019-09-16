@@ -19,7 +19,8 @@ Created by Ares Deveaux
 '''
 
 
-import bpy, os
+import bpy
+import os
 
 from . import utils, key_utils, cur_utils, slider_tools, magnet
 from bpy.props import StringProperty, EnumProperty, BoolProperty, \
@@ -27,7 +28,7 @@ from bpy.props import StringProperty, EnumProperty, BoolProperty, \
 from bpy.types import Operator
 
 
-################  SLIDERS  ###############
+# ###############  SLIDERS  ###############
 
 
 class AAT_OT_ease_to_ease(Operator):
@@ -753,7 +754,7 @@ Removes last slider of the list'''
         # if len(slots) > 1:
         index = len(slots) - 1
         slots.remove(index)
-        slider_tools.remove_marker(index+2)
+        slider_tools.remove_marker(index + 2)
 
         return {'FINISHED'}
 
@@ -808,15 +809,19 @@ one on the right sets the right reference'''
             slider.right_ref_frame = current_frame
 
         if slider.use_markers:
-            slider_tools.add_marker(name_a='F',
-                             name_b=slider_num,
-                             side=self.side,
-                             frame=current_frame)
+            slider_tools.add_marker(
+                name_a='F',
+                name_b=slider_num,
+                side=self.side,
+                frame=current_frame
+            )
         else:
             for side in ['L', 'R']:
-                slider_tools.remove_marker(name_a='F',
-                                    name_b=slider_num,
-                                    side=side)
+                slider_tools.remove_marker(
+                    name_a='F',
+                    name_b=slider_num,
+                    side=side
+                )
             # utils.remove_marker(slider_num)
 
         # key_utils.get_ref_frame_globals(slider.left_neighbor, slider.right_neighbor)
@@ -836,7 +841,7 @@ one on the right sets the right reference'''
         return {'FINISHED'}
 
 
-################  ANIM TRANSFORM  ###############
+# ###############  ANIM TRANSFORM  ###############
 
 
 class AAT_OT_create_anim_trans_mask(Operator):
@@ -896,52 +901,6 @@ This tool desables auto-key'''
         # bpy.ops.wm.redraw_timer()
         # bpy.data.window_managers['WinMan'].windows.update()
 
-
-        for obj in context.scene.objects:
-
-            if obj.animation_data is None:
-                continue
-
-            anim_data = obj.animation_data
-            action = getattr(anim_data, "action", None)
-            fcurves = getattr(action, "fcurves", None)
-
-            if fcurves is None:
-                continue
-
-            # Save delta value that layers contribute
-            fcurve_values = {}
-            key_delta = {}
-
-            f = 0
-            for fcurve in fcurves:
-                k = 0
-                for key in fcurve.keyframe_points:
-
-                    delta_y = magnet.get_anim_transform_delta(obj, fcurve, key=key)
-
-                    key_delta[k] = delta_y
-
-                    k += 1
-
-                fcurve_values[f] = key_delta
-
-                f += 1
-
-            magnet.layers_transform_delta[obj.name] = fcurve_values
-
-            print("magnet.layers_transform_delta:", magnet.layers_transform_delta)
-
-            # Turn all tracks to mute before activating animTransform
-            tracks = obj.animation_data.nla_tracks
-            n = 0
-            track_values = {}
-            for track in tracks:
-                track_values[n] = track.mute
-                track.mute = True
-            magnet.tracks_mute[obj.name] = track_values
-
-        # Activate animTransform
         if magnet.anim_transform_handlers not in bpy.app.handlers.depsgraph_update_pre:
             bpy.app.handlers.depsgraph_update_pre.append(magnet.anim_transform_handlers)
 
@@ -970,36 +929,6 @@ class AAT_OT_anim_transform_off(Operator):
 
         if magnet.anim_trans_mask_handlers in bpy.app.handlers.depsgraph_update_pre:
             bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_trans_mask_handlers)
-
-        # Return all tracks mute to original status
-        for obj_name in magnet.tracks_mute:
-            obj = bpy.data.objects.get(obj_name)
-
-            for track_id in magnet.tracks_mute[obj_name]:
-                track = obj.animation_data.nla_tracks[track_id]
-                track.mute = magnet.tracks_mute[obj_name][track_id]
-
-            # Takes away the delta added by the layers
-            if obj.animation_data is None:
-                continue
-
-            anim_data = obj.animation_data
-            action = getattr(anim_data, "action", None)
-            fcurves = getattr(action, "fcurves", None)
-
-            if fcurves is None:
-                continue
-
-            for f in magnet.layers_transform_delta[obj_name]:
-                print("fcurve: ", f)
-                fcurve = fcurves[f]
-                for k in magnet.layers_transform_delta[obj_name][f]:
-                    print("key: ", k)
-                    key = fcurve.keyframe_points[k]
-                    delta_y = magnet.layers_transform_delta[obj_name][f][k]
-                    print("delta: ", delta_y)
-
-                    key.co.y = key.co.y + delta_y
 
         magnet.remove_anim_trans_mask()
 
@@ -1068,7 +997,7 @@ Options related to the anim_transform'''
         # row.prop(animaide.anim_transform, 'interp', text='', icon_only=False)
 
 
-################  HELP  ###############
+# ###############  HELP  ###############
 
 
 class AAT_OT_help(Operator):
@@ -1145,7 +1074,7 @@ Opens Animaide manual'''
         return {'FINISHED'}
 
 
-################  OTHER TOOLS  ###############
+# ###############  OTHER TOOLS  ###############
 
 
 class AAT_OT_clone(Operator):
@@ -1289,9 +1218,3 @@ classes = (
     AAT_OT_create_anim_trans_mask,
     AAT_OT_delete_anim_trans_mask
 )
-
-
-
-
-
-

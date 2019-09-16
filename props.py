@@ -72,7 +72,7 @@ def update_clone_move(self, context):
 def update_clone(self, context):
 
     objects = context.selected_objects
-    animaide = bpy.context.scene.animaide
+    animaide = context.scene.animaide
     cycle_before = animaide.clone_data.cycle_before
     cycle_after = animaide.clone_data.cycle_after
 
@@ -100,32 +100,6 @@ def update_selector(self, context):
     self.modal_switch = False
 
 
-def toggle_sliders_markers(self, context):
-    # Add a marker when a reference frame is created
-
-    n = 0
-    if self.use_markers:
-        for side in ['L', 'R']:
-            if side == 'L':
-                frame = self.left_ref_frame
-            else:
-                frame = self.right_ref_frame
-
-            utils.add_marker(name_a='F',
-                             name_b=0,
-                             side=side,
-                             frame=frame,
-                             overwrite_name=False)
-            n += 1
-    else:
-        for side in ['L', 'R']:
-            utils.remove_marker(name_a='F',
-                                name_b=0,
-                                side=side)
-
-    return
-
-
 class AnimAideAnimTransform(PropertyGroup):
 
     active: BoolProperty()
@@ -137,13 +111,13 @@ class AnimAideAnimTransform(PropertyGroup):
     #                           update=toggle_anim_trans_markers)
 
     mask_margin_l: IntProperty(default=0,
-                          description="Margin for the mask")
+                               description="Margin for the mask")
     mask_blend_l: IntProperty(default=0, max=0,
-                         description="Fade value for the left margin")
+                              description="Fade value for the left margin")
     mask_margin_r: IntProperty(default=0,
-                          description="Margin for the mask")
+                               description="Margin for the mask")
     mask_blend_r: IntProperty(default=0, min=0,
-                         description="Fade value for the right margin")
+                              description="Fade value for the right margin")
 
     mask_blend_mapping: FloatProperty()
 
@@ -174,9 +148,9 @@ class AnimAideClone(PropertyGroup):
                                update=update_clone_move)
 
     cycle_options = [('NONE', 'None', '', '', 1),
-                    ('REPEAT', 'Repeat', '', '', 2),
-                    ('REPEAT_OFFSET', 'Repeat with Offset', '', '', 3),
-                    ('MIRROR', 'Mirrored', '', '', 4)]
+                     ('REPEAT', 'Repeat', '', '', 2),
+                     ('REPEAT_OFFSET', 'Repeat with Offset', '', '', 3),
+                     ('MIRROR', 'Mirrored', '', '', 4)]
 
     cycle_before: EnumProperty(
         items=cycle_options,
@@ -197,10 +171,10 @@ class AnimSlider(PropertyGroup):
                               description='use markers for the reference frames')
 
     affect_non_selected_fcurves: BoolProperty(default=True,
-                                           description='Affect non-selected fcurves')
+                                              description='Affect non-selected fcurves')
 
     affect_non_selected_keys: BoolProperty(default=False,
-                                            description='Affect non-selected keys when cursor is over them')
+                                           description='Affect non-selected keys when cursor is over them')
 
     min_value: FloatProperty(default=-1)
 
@@ -319,5 +293,5 @@ classes = (
     AnimAideAnimTransform,
     AnimAideClone,
     AnimSlider,
-    AnimAideScene
+    AnimAideScene,
 )

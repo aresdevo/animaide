@@ -58,7 +58,7 @@ def get_selected(fcurves):
     selected = []
 
     for fcurve in fcurves:
-        if fcurve.group.name == group_name:
+        if getattr(fcurve.group, 'name', None) == group_name:
             continue        # we don't want to add to the list the helper curves we have created
 
         if fcurve.select:
@@ -84,7 +84,7 @@ def remove_helpers(objects):
         # arefe.fcurve.index = -1
 
         for fcurve in action.fcurves:     # delete the first of the clones left
-            if fcurve.group.name == group_name:
+            if getattr(fcurve.group, 'name', None) == group_name:
                 action.fcurves.remove(fcurve)
                 # aclones.remove(0)
 
@@ -148,12 +148,8 @@ def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=Fals
     action.groups[group_name].lock = lock
     action.groups[group_name].color_set = 'THEME10'
 
-    i = 0
-
-    for index, key in selected_keys:
+    for i, (index, key) in enumerate(selected_keys):
         dup.keyframe_points[i].co = key.co
-
-        i += 1
 
     add_cycle(dup, before=before, after=after)
 
@@ -203,7 +199,7 @@ def s_curve(x, slope=1.0, width=1.0, height=1.0, xshift=0.0, yshift=0.0):
     '''
     Formula for "s" curve
     '''
-    return height*((x-xshift)**slope/((x-xshift)**slope+(width-(x-xshift))**slope))+yshift
+    return height * ((x - xshift) ** slope / ((x - xshift) ** slope + (width - (x - xshift)) ** slope)) + yshift
 
 
 def ramp_curve(x, slope=2.0, height=1.0, yshift=0.0, width=1.0, xshift=0.0, invert=False):
@@ -249,10 +245,7 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
         aclone_index = 0
         for fcurve in action.fcurves:
 
-            if fcurve.select is False:
-                continue
-
-            if fcurve.hide:
+            if not fcurve.select or fcurve.hide:
                 continue
 
             if 'clone' in fcurve.data_path:
@@ -282,8 +275,7 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
                 if key is None:
                     return
 
-            n = 0
-            for index in selected_keys:
+            for n, index in enumerate(selected_keys):
                 key = fcurve.keyframe_points[index]
                 if clone_selected_keys is True:
                     i = n
@@ -295,7 +287,6 @@ def from_clone_to_reference(objects, factor, clone_selected_keys=False):
                 # target_y = reference.evaluate(key.co.x)
                 # diference = target_y - key.co.y
                 # key.co.y = key.co.y + diference * ((factor + 1)/2)
-                n += 1
 
             fcurve.update()
             refe.remove(action, reference)
@@ -310,14 +301,11 @@ def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=Fa
     for obj in objects:
         fcurves = obj.animation_data.action.fcurves
 
-        for fcurve_index, fcurve in fcurves.items():
-            if fcurve.group.name == group_name:
+        for fcurve in fcurves:
+            if getattr(fcurve.group, 'name', None) == group_name:
                 continue  # we don't want to add to the list the helper curves we have created
 
-            if fcurve.hide is True:
-                continue
-
-            if fcurve.select is False:
+            if fcurve.hide or not fcurve.select:
                 continue
 
             duplicate(fcurve, selected_keys=selected_keys, before=cycle_before, after=cycle_after)
