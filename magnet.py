@@ -120,7 +120,7 @@ def animation_transform(obj, fcurve):
         return  # we don't want to select keys on reference fcurves
 
     action = bpy.data.actions.get('animaide')
-    if action and not action.fcurves:
+    if action and action.fcurves:
         mask_curve = action.fcurves[0]
     else:
         mask_curve = None
