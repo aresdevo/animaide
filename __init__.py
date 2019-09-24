@@ -28,7 +28,7 @@ bl_info = {
     "author": "Ares Deveaux",
     "version": (0, 1, 0),
     "blender": (2, 80, 0),
-    "location": "Graph Editor > Side Panel",
+    "location": "Graph Editor > Sidebar",
     "warning": "This addon is still in development.",
     "category": "Animation",
     "wiki_url": "https://github.com/aresdevo/animaide",
