@@ -683,8 +683,8 @@ Options related to the current tool on the slider'''
         #     slider.selector == 'BLEND_EASE':
         if 'EASE' in slider.selector:
             col.prop(slider, 'slope', text='Slope', slider=False)
-        if 'BLEND' not in slider.selector and slider.selector != 'SMOOTH':
-            col.prop(slider, 'overshoot', text='Overshoot', toggle=False)
+        # if 'BLEND' not in slider.selector and slider.selector != 'SMOOTH':
+        col.prop(slider, 'overshoot', text='Overshoot', toggle=False)
         if slider.selector == 'BLEND_FRAME':
             col.prop(slider, 'use_markers', text='Use Markers', toggle=False)
         if slider.selector == 'NOISE':
