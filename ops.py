@@ -132,7 +132,7 @@ pie_menu-1: (alt-1)'''
     bl_idname = "animaide.blend_neighbor"
     bl_label = "Blend Neighbor"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -176,7 +176,7 @@ pie_menu-1: (alt-1)'''
     bl_idname = "animaide.blend_frame"
     bl_label = "Blend Frame"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -264,7 +264,7 @@ pie_menu-2: (alt-2)'''
     bl_idname = "animaide.blend_offset"
     bl_label = "Blend Offset"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -309,7 +309,7 @@ pie_menu-1: (alt-1)'''
     bl_idname = "animaide.tween"
     bl_label = "Tween"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -353,7 +353,7 @@ pie_menu-1: (alt-1)'''
     bl_idname = "animaide.push_pull"
     bl_label = "Push Pull"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -396,7 +396,7 @@ pie_menu-2: (alt-2)'''
     bl_idname = "animaide.smooth"
     bl_label = "Smooth"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -439,7 +439,7 @@ pie_menu-2: (alt-2)'''
     bl_idname = "animaide.time_offset"
     bl_label = "Time Offset"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -481,7 +481,7 @@ pie_menu-2: (alt-2)'''
     bl_idname = "animaide.noise"
     bl_label = "Noise"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -524,7 +524,8 @@ pie_menu-2: (alt-2)'''
     bl_idname = "animaide.scale_left"
     bl_label = "Scale Left"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
+    phase: IntProperty(default=1)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -567,7 +568,7 @@ pie_menu-2: (alt-2)'''
     bl_idname = "animaide.scale_right"
     bl_label = "Scale Right"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -611,7 +612,7 @@ pie_menu-1: (alt-1)'''
     bl_idname = "animaide.scale_average"
     bl_label = "Scale Average"
 
-    slope: FloatProperty(default=2.0)
+    # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
@@ -677,10 +678,18 @@ Options related to the current tool on the slider'''
         layout = self.layout
         col = layout.column(align=False)
         col.label(text='Settings')
-        col.prop(slider, 'slope', text='Slope', slider=False)
-        col.prop(slider, 'overshoot', text='Overshoot', toggle=False)
+        # if slider.selector == 'EASE_TO_EASE' or
+        #     slider.selector == 'EASE' or
+        #     slider.selector == 'BLEND_EASE':
+        if 'EASE' in slider.selector:
+            col.prop(slider, 'slope', text='Slope', slider=False)
+        if 'BLEND' not in slider.selector and slider.selector != 'SMOOTH':
+            col.prop(slider, 'overshoot', text='Overshoot', toggle=False)
         if slider.selector == 'BLEND_FRAME':
             col.prop(slider, 'use_markers', text='Use Markers', toggle=False)
+        if slider.selector == 'NOISE':
+            col.prop(slider, 'noise_phase', text='Phase', slider=True)
+
         # col.prop(animaide.slider, 'affect_non_selected_frame', text='Not selected frames', toggle=False)
 
 

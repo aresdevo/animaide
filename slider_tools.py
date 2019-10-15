@@ -38,6 +38,20 @@ min_value = None
 max_value = None
 
 
+def set_handle(key, side, delta):
+
+    handle = getattr(key, 'handle_%s' % side, None)
+    handle_type = getattr(key, 'handle_%s_type' % side, None)
+
+    if handle_type == 'FREE' or handle_type == 'ALIGNED':
+        handle.y = key.co.y - delta
+
+
+def set_handles(key, lh_delta, rh_delta):
+    set_handle(key, 'left', lh_delta)
+    set_handle(key, 'right', rh_delta)
+
+
 def ease_to_ease(factor, slope):
     '''
     Transition selected keys from the neighboring ones in an "S" shape manner (ease-in and ease-out simultaneously)
@@ -51,6 +65,8 @@ def ease_to_ease(factor, slope):
     for index in selected_keys:
 
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
         x = k.co.x - left_neighbor['x']
         try:
             key_ratio = 1 / (local_x / x)
@@ -62,6 +78,8 @@ def ease_to_ease(factor, slope):
         ease_y = cur_utils.s_curve(key_ratio, slope=slope, xshift=clamped_move)
 
         k.co.y = left_neighbor['y'] + local_y * ease_y
+
+        set_handles(k, lh_delta, rh_delta)
 
 
 def ease(factor, slope):
@@ -90,6 +108,8 @@ def ease(factor, slope):
     for index in selected_keys:
 
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
         x = k.co.x - left_neighbor['x']
         try:
             key_ratio = 1 / (local_x / x)
@@ -105,6 +125,8 @@ def ease(factor, slope):
 
         k.co.y = left_neighbor['y'] + local_y * ease_y.real
 
+        set_handles(k, lh_delta, rh_delta)
+
 
 def blend_neighbor(factor):
     '''
@@ -114,6 +136,8 @@ def blend_neighbor(factor):
     for index in selected_keys:
 
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
 
         if factor < 0:
             delta = left_neighbor['y'] - original_values[index]['y']
@@ -124,6 +148,8 @@ def blend_neighbor(factor):
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
+        set_handles(k, lh_delta, rh_delta)
+
 
 def blend_frame(factor, left_y_ref, right_y_ref):
     '''
@@ -133,6 +159,8 @@ def blend_frame(factor, left_y_ref, right_y_ref):
     for index in selected_keys:
 
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
 
         if factor < 0:
             delta = left_y_ref - original_values[index]['y']
@@ -142,6 +170,8 @@ def blend_frame(factor, left_y_ref, right_y_ref):
         clamped_factor = utils.clamp(abs(factor), 0, max_value)
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor
+
+        set_handles(k, lh_delta, rh_delta)
 
 
 def blend_ease(factor, slope):
@@ -155,6 +185,8 @@ def blend_ease(factor, slope):
     for index in selected_keys:
 
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
         x = k.co.x - left_neighbor['x']
 
         if factor < 0:
@@ -201,6 +233,8 @@ def blend_ease(factor, slope):
         # k.co.y = original_values[index]['y'] + delta * blend.real
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
+        set_handles(k, lh_delta, rh_delta)
+
 
 def blend_offset(factor):
     '''
@@ -222,7 +256,12 @@ def blend_offset(factor):
 
     for index in selected_keys:
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
+
         k.co.y = original_values[index]['y'] + delta * clamped_factor
+
+        set_handles(k, lh_delta, rh_delta)
 
 
 def tween(factor):
@@ -238,7 +277,12 @@ def tween(factor):
 
     for index in selected_keys:
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
+
         k.co.y = mid + delta * clamped_factor
+
+        set_handles(k, lh_delta, rh_delta)
 
 
 def push_pull(factor):
@@ -250,12 +294,17 @@ def push_pull(factor):
 
     for index in selected_keys:
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
+
         average_y = key_utils.linear_y(left_neighbor, right_neighbor, k)
         if average_y is None:
             continue
         delta = original_values[index]['y'] - average_y
 
-        k.co.y = original_values[index]['y'] + delta * clamped_factor * 2
+        k.co.y = original_values[index]['y'] + delta * clamped_factor
+
+        set_handles(k, lh_delta, rh_delta)
 
 
 def smooth(factor):
@@ -266,22 +315,31 @@ def smooth(factor):
     # factor = (self.factor/2) + 0.5
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
+    print('first: ', selected_keys[0])
+    print('original: ', original_values[selected_keys[0]]['sy'])
 
     for index in selected_keys:
 
+
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
 
         if 'sy' not in original_values[index]:
             continue
 
         smooth_y = original_values[index]['sy']
+        # print('smooth_y: ', smooth_y)
 
         if smooth_y == 'book end':
+            print('bookend')
             delta = 0
         else:
             delta = original_values[index]['y'] - smooth_y
 
-        k.co.y = original_values[index]['y'] - delta * clamped_factor
+        k.co.y = original_values[index]['y'] - delta * clamped_factor * 0.5
+
+        set_handles(k, lh_delta, rh_delta)
 
 
 def time_offset(factor, fcurves):
@@ -305,12 +363,17 @@ def time_offset(factor, fcurves):
 
     for index in selected_keys:
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
+
         k.co.y = clone.evaluate(k.co.x - 20 * clamped_factor)
+
+        set_handles(k, lh_delta, rh_delta)
 
     fcurves.remove(clone)
 
 
-def noise(factor, fcurves, fcurve_index):
+def noise(factor, fcurves, fcurve_index, phase):
     '''
     Set random values to the selected keys
     '''
@@ -324,14 +387,20 @@ def noise(factor, fcurves, fcurve_index):
                                           global_fcurve,
                                           clone_name)
 
-    cur_utils.add_noise(clone, strength=1, scale=0.2, phase=rd.uniform(0, 1))
+    # cur_utils.add_noise(clone, strength=1, scale=0.2, phase=rd.uniform(0, 1))
+    cur_utils.add_noise(clone, strength=1, scale=0.2, phase=phase + fcurve_index)
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
 
     for index in selected_keys:
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
+
         delta = clone.evaluate(k.co.x) - original_values[index]['y']
         k.co.y = original_values[index]['y'] + delta * clamped_factor
+
+        set_handles(k, lh_delta, rh_delta)
 
     fcurves.remove(clone)
 
@@ -357,13 +426,21 @@ def noise_random(factor, fcurves, range=1):
     half_range = range / 2
     for index in selected_keys:
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
+
         random_y = rd.uniform(k.co.y - half_range, k.co.y + half_range)
         noise.append(random_y)
 
     for n, index in enumerate(selected_keys):
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
+
         delta = noise[n] - original_values[index]['y']
         k.co.y = original_values[index]['y'] + delta * clamped_factor
+
+        set_handles(k, lh_delta, rh_delta)
 
     # fcurves.remove(clone)
 
@@ -385,14 +462,19 @@ def scale(factor, scale_type):
 
     for index in selected_keys:
         k = fcurve.keyframe_points[index]
+        lh_delta = k.co.y - k.handle_left.y
+        rh_delta = k.co.y - k.handle_right.y
+
         if scale_type == 'L':
             delta = original_values[index]['y'] - left_neighbor['y']
         elif scale_type == 'R':
-            delta = right_neighbor['y'] - original_values[index]['y']
+            delta = original_values[index]['y'] - right_neighbor['y']
         else:
             delta = original_values[index]['y'] - y_average
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor
+
+        set_handles(k, lh_delta, rh_delta)
 
 
 # ###### Sliders Tools
@@ -582,7 +664,8 @@ def looper(self, context):
                 time_offset(self.factor, fcurves)
 
             elif self.slider_type == 'NOISE':
-                noise(self.factor, fcurves, fcurve_index)
+                # noise_random(self.factor, fcurves, fcurve_index)
+                noise(self.factor, fcurves, fcurve_index, animaide.slider.noise_phase)
 
             fcurve.update()
 
@@ -659,6 +742,7 @@ def invoke(self, context, event):
     slider.factor = 0.0
     slider.factor_overshoot = 0.0
     self.slope = slider.slope
+    self.phase = slider.noise_phase
 
     self.factor = 0.0
     self.init_mouse_x = event.mouse_x

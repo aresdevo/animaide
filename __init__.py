@@ -26,7 +26,7 @@ bl_info = {
     "name": "AnimAide",
     "description": "",
     "author": "Ares Deveaux",
-    "version": (0, 1, 0),
+    "version": (0, 2, 0),
     "blender": (2, 80, 0),
     "location": "Graph Editor > Sidebar",
     "warning": "This addon is still in development.",
@@ -83,13 +83,13 @@ def register_keymaps():
         kmi = km.keymap_items.new('animaide.blend_neighbor', 'MINUS', 'PRESS')
         kmi.properties.op_context = 'EXEC_DEFAULT'
         kmi.properties.factor = -0.15
-        kmi.properties.slope = 1
+        # kmi.properties.slope = 1
         addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new('animaide.blend_neighbor', 'EQUAL', 'PRESS')
         kmi.properties.op_context = 'EXEC_DEFAULT'
         kmi.properties.factor = 0.15
-        kmi.properties.slope = 1
+        # kmi.properties.slope = 1
         addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new('animaide.blend_neighbor', 'MINUS', 'PRESS')

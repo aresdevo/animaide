@@ -184,6 +184,11 @@ class AnimSlider(PropertyGroup):
 
     modal_switch: BoolProperty()
 
+    noise_phase: IntProperty(default=1,
+                             min=1,
+                             max=10,
+                             description='Change noise shape')
+
     slope: FloatProperty(default=2.0,
                          min=1.0,
                          max=10.0,

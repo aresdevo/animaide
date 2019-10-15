@@ -461,6 +461,7 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
         curves = {}
 
         for fcurve_index, fcurve in fcurves.items():
+            print('fcurve: ', fcurve_index)
 
             if not valid_fcurve(fcurve):
                 continue
@@ -493,17 +494,20 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
 
                 if key_index - 1 not in keyframes:
                     values[key_index]['sy'] = 'book end'
+                    print('%s: %s' % (key_index, values[key_index]['sy']))
                     prevkey_value = key.co.y
                 else:
                     prevkey_value = fcurve.keyframe_points[key_index - 1].co.y
 
                 if key_index + 1 not in keyframes:
                     values[key_index]['sy'] = 'book end'
+                    print('%s: %s' % (key_index, values[key_index]['sy']))
                     nextkey_value = key.co.y
                 else:
                     nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
 
-                smooth = (prevkey_value + key.co.y + nextkey_value) / 3
+                # smooth = (prevkey_value + key.co.y + nextkey_value) / 3
+                smooth = (prevkey_value + nextkey_value) / 2
                 values[key_index]['sy'] = smooth
 
             if not keyframes:
@@ -557,6 +561,7 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
             curves[fcurve_index] = curve_items
 
         global_values[obj.name] = curves
+        print(values)
 
     return
 
