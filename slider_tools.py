@@ -315,8 +315,8 @@ def smooth(factor):
     # factor = (self.factor/2) + 0.5
 
     clamped_factor = utils.clamp(factor, min_value, max_value)
-    print('first: ', selected_keys[0])
-    print('original: ', original_values[selected_keys[0]]['sy'])
+    # print('first: ', selected_keys[0])
+    # print('original: ', original_values[selected_keys[0]]['sy'])
 
     for index in selected_keys:
 
@@ -332,7 +332,7 @@ def smooth(factor):
         # print('smooth_y: ', smooth_y)
 
         if smooth_y == 'book end':
-            print('bookend')
+            # print('bookend')
             delta = 0
         else:
             delta = original_values[index]['y'] - smooth_y
