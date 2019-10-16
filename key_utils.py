@@ -641,21 +641,13 @@ def reset_original():
 
     for obj in objects:
         anim = obj.animation_data
-        if anim is None:
-            pass
-        if anim.action.fcurves is None:
-            pass
-        fcurves = obj.animation_data.action.fcurves
+        action = getattr(anim, 'action', None)
+        if not action:
+            continue
 
-        for fcurve_index, fcurve in fcurves.items():
+        for fcurve_index, fcurve in action.fcurves.items():
 
-            if fcurve.select is False:
-                continue
-
-            if fcurve.lock is True:
-                continue
-
-            if fcurve.hide is True:
+            if any((not fcurve.select, fcurve.lock, fcurve.hide)):
                 continue
 
             selected_keys = global_values[obj.name][fcurve_index]['selected_keys']
@@ -953,10 +945,8 @@ def linear_y(left_neighbor, right_neighbor, key):
     big_oposite = right_neighbor['y'] - left_neighbor['y']
     if big_adjacent == 0:
         return
-    tangent = big_oposite/big_adjacent
+    tangent = big_oposite / big_adjacent
 
     adjacent = key.co.x - left_neighbor['x']
     oposite = tangent * adjacent
     return left_neighbor['y'] + oposite
-
-

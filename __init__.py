@@ -166,4 +166,3 @@ def unregister():
         bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_trans_mask_handlers)
 
     unregister_keymaps()
-
