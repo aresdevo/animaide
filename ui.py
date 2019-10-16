@@ -46,7 +46,10 @@ def step_button(row, slot, factor, icon='',
     step = col.operator(**kwargs)
 
     step.factor = factor
-    step.slope = slot.slope
+    if getattr(step, 'slope', None):
+        step.slope = slot.slope
+    if getattr(step, 'phase', None):
+        step.phase = slot.noise_phase
     # step.slider_type = slot.selector
     step.slot_index = slot.index
     # step.is_collection = is_collection

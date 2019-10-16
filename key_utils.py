@@ -33,8 +33,6 @@ def set_type(objects, kind):
 
     if kind == 'KEYFRAME' or kind == 'BREAKDOWN' or kind == 'JITTER':
 
-        print('test')
-
         if objects is None:
             return
 
@@ -387,7 +385,7 @@ def attach_to_fcurve(key, source_key, target_fcurve, factor=1.0, is_gradual=True
     else:
         key.co.y = target_y
 
-    print('key "y" value:', key.co.y)
+    # print('key "y" value:', key.co.y)
 
 
 def get_selected(fcurve):
@@ -461,6 +459,7 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
         curves = {}
 
         for fcurve_index, fcurve in fcurves.items():
+            # print('fcurve: ', fcurve_index)
 
             if not valid_fcurve(fcurve):
                 continue
@@ -493,17 +492,20 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
 
                 if key_index - 1 not in keyframes:
                     values[key_index]['sy'] = 'book end'
+                    # print('%s: %s' % (key_index, values[key_index]['sy']))
                     prevkey_value = key.co.y
                 else:
                     prevkey_value = fcurve.keyframe_points[key_index - 1].co.y
 
                 if key_index + 1 not in keyframes:
                     values[key_index]['sy'] = 'book end'
+                    # print('%s: %s' % (key_index, values[key_index]['sy']))
                     nextkey_value = key.co.y
                 else:
                     nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
 
-                smooth = (prevkey_value + key.co.y + nextkey_value) / 3
+                # smooth = (prevkey_value + key.co.y + nextkey_value) / 3
+                smooth = (prevkey_value + nextkey_value) / 2
                 values[key_index]['sy'] = smooth
 
             if not keyframes:
