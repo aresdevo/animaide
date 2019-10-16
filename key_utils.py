@@ -927,3 +927,34 @@ def calculate_delta(key, previous_key, next_key):
         return 0.25     # in the case of the fist or last key
     else:
         return ((key_pos * 100) / frames_gap) / 100
+
+
+def switch_aim(aim, factor):
+    if factor < 0.5:
+        aim = aim * -1
+    return aim
+
+
+def set_direction(factor, left_key, right_key):
+    if factor < 0:
+        next_key = left_key
+        previous_key = right_key
+    else:
+        next_key = right_key
+        previous_key = left_key
+
+    return previous_key, next_key
+
+
+def linear_y(left_neighbor, right_neighbor, key):
+    big_adjacent = right_neighbor['x'] - left_neighbor['x']
+    big_oposite = right_neighbor['y'] - left_neighbor['y']
+    if big_adjacent == 0:
+        return
+    tangent = big_oposite/big_adjacent
+
+    adjacent = key.co.x - left_neighbor['x']
+    oposite = tangent * adjacent
+    return left_neighbor['y'] + oposite
+
+
