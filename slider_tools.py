@@ -685,6 +685,11 @@ def modal(self, context, event):
     else:
         prop = self.slots[self.slot_index]
 
+    context.window.workspace.status_text_set(
+        f"{prop.selector.title().replace('_', ' ')}: "
+        f"{self.factor*100:0.0f}%"
+    )
+
     if event.type == 'MOUSEMOVE':  # Apply
 
         slider_from_zero = (event.mouse_x - self.init_mouse_x) / 100
@@ -704,6 +709,7 @@ def modal(self, context, event):
         prop.factor = 0.0
         prop.factor_overshoot = 0.0
 
+        context.window.workspace.status_text_set(None)
         return {'FINISHED'}
 
     elif event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
@@ -715,6 +721,7 @@ def modal(self, context, event):
         prop.factor = 0.0
         prop.factor_overshoot = 0.0
 
+        context.window.workspace.status_text_set(None)
         return {'CANCELLED'}
 
     return {'RUNNING_MODAL'}
