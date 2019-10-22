@@ -436,6 +436,20 @@ def valid_fcurve(fcurve):
         return True
 
 
+def set_handle(key, side, delta):
+
+    handle = getattr(key, 'handle_%s' % side, None)
+    handle_type = getattr(key, 'handle_%s_type' % side, None)
+
+    if handle_type == 'FREE' or handle_type == 'ALIGNED':
+        handle.y = key.co.y - delta
+
+
+def set_handles(key, lh_delta, rh_delta):
+    set_handle(key, 'left', lh_delta)
+    set_handle(key, 'right', rh_delta)
+
+
 def get_sliders_globals(selected=True, original=True, left_frame=None, right_frame=None):
     '''
     Gets all the global values needed to work with the sliders
@@ -455,6 +469,9 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
             continue
 
         # Level 1 variables
+        # if object.type == 'ARMATURE':
+        #     bones = context.selected_pose_bones
+
         fcurves = obj.animation_data.action.fcurves
         curves = {}
 
@@ -475,8 +492,10 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
             for key_index, key in keys.items():
 
                 # stores coordinate of every key
+                handles = {'l': key.handle_left.y, 'r': key.handle_right.y}
                 co = {'x': key.co.x, 'y': key.co.y}
                 values[key_index] = co
+                values[key_index]['handles'] = handles
 
                 # stores every key
                 every_key.append(key_index)
@@ -485,28 +504,26 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
                 if key.select_control_point:
                     keyframes.append(key_index)
 
-            for key_index in keyframes:
-                # find smooth values (average) of the original keys
+                    # find smooth values (average) of the original keys
+            # for key_index in keyframes:
 
-                key = fcurve.keyframe_points[key_index]
+                    key = fcurve.keyframe_points[key_index]
 
-                if key_index - 1 not in keyframes:
-                    values[key_index]['sy'] = 'book end'
-                    # print('%s: %s' % (key_index, values[key_index]['sy']))
-                    prevkey_value = key.co.y
-                else:
-                    prevkey_value = fcurve.keyframe_points[key_index - 1].co.y
+                    if key_index - 1 not in keyframes:
+                        values[key_index]['sy'] = 'book end'
+                        prevkey_value = key.co.y
+                    else:
+                        prevkey_value = fcurve.keyframe_points[key_index - 1].co.y
 
-                if key_index + 1 not in keyframes:
-                    values[key_index]['sy'] = 'book end'
-                    # print('%s: %s' % (key_index, values[key_index]['sy']))
-                    nextkey_value = key.co.y
-                else:
-                    nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
+                    if key_index + 1 not in keyframes:
+                        values[key_index]['sy'] = 'book end'
+                        nextkey_value = key.co.y
+                    else:
+                        nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
 
-                # smooth = (prevkey_value + key.co.y + nextkey_value) / 3
-                smooth = (prevkey_value + nextkey_value) / 2
-                values[key_index]['sy'] = smooth
+                    # smooth = (prevkey_value + key.co.y + nextkey_value) / 3
+                    smooth = (prevkey_value + nextkey_value) / 2
+                    values[key_index]['sy'] = smooth
 
             if not keyframes:
                 # what to do if no key is selected
@@ -664,6 +681,8 @@ def reset_original():
                     continue
                 k = fcurve.keyframe_points[index]
                 k.co.y = original_values[index]['y']
+                k.handle_left.y = original_values[index]['handles']['l']
+                k.handle_right.y = original_values[index]['handles']['r']
 
             fcurve.update()
 
