@@ -38,20 +38,6 @@ min_value = None
 max_value = None
 
 
-def set_handle(key, side, delta):
-
-    handle = getattr(key, 'handle_%s' % side, None)
-    handle_type = getattr(key, 'handle_%s_type' % side, None)
-
-    if handle_type == 'FREE' or handle_type == 'ALIGNED':
-        handle.y = key.co.y - delta
-
-
-def set_handles(key, lh_delta, rh_delta):
-    set_handle(key, 'left', lh_delta)
-    set_handle(key, 'right', rh_delta)
-
-
 def ease_to_ease(factor, slope):
     '''
     Transition selected keys from the neighboring ones in an "S" shape manner (ease-in and ease-out simultaneously)
@@ -79,7 +65,7 @@ def ease_to_ease(factor, slope):
 
         k.co.y = left_neighbor['y'] + local_y * ease_y
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 def ease(factor, slope):
@@ -125,7 +111,7 @@ def ease(factor, slope):
 
         k.co.y = left_neighbor['y'] + local_y * ease_y.real
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 def blend_neighbor(factor):
@@ -148,7 +134,7 @@ def blend_neighbor(factor):
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 def blend_frame(factor, left_y_ref, right_y_ref):
@@ -171,7 +157,7 @@ def blend_frame(factor, left_y_ref, right_y_ref):
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 def blend_ease(factor, slope):
@@ -233,7 +219,7 @@ def blend_ease(factor, slope):
         # k.co.y = original_values[index]['y'] + delta * blend.real
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 def blend_offset(factor):
@@ -261,7 +247,7 @@ def blend_offset(factor):
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 def tween(factor):
@@ -282,7 +268,7 @@ def tween(factor):
 
         k.co.y = mid + delta * clamped_factor
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 def push_pull(factor):
@@ -304,7 +290,7 @@ def push_pull(factor):
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 def smooth(factor):
@@ -339,7 +325,7 @@ def smooth(factor):
 
         k.co.y = original_values[index]['y'] - delta * clamped_factor * 0.5
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 def time_offset(factor, fcurves):
@@ -368,7 +354,7 @@ def time_offset(factor, fcurves):
 
         k.co.y = clone.evaluate(k.co.x - 20 * clamped_factor)
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
     fcurves.remove(clone)
 
@@ -400,49 +386,9 @@ def noise(factor, fcurves, fcurve_index, phase):
         delta = clone.evaluate(k.co.x) - original_values[index]['y']
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
     fcurves.remove(clone)
-
-
-def noise_random(factor, fcurves, range=1):
-    '''
-    Set random values to the selected keys
-    '''
-
-    # factor = (self.factor/2) + 0.5
-    # animaide = bpy.context.scene.animaide
-
-    # clone_name = '%s.%d.clone' % (fcurve.data_path, fcurve.array_index)
-    # clone = cur_utils.duplicate_from_data(fcurves,
-    #                                       global_fcurve,
-    #                                       clone_name)
-
-    # cur_utils.add_noise(clone, strength=1, scale=0.5, phase=fcurve_index * left_neighbor['y'])
-
-    clamped_factor = utils.clamp(factor, min_value, max_value)
-
-    noise = []
-    half_range = range / 2
-    for index in selected_keys:
-        k = fcurve.keyframe_points[index]
-        lh_delta = k.co.y - k.handle_left.y
-        rh_delta = k.co.y - k.handle_right.y
-
-        random_y = rd.uniform(k.co.y - half_range, k.co.y + half_range)
-        noise.append(random_y)
-
-    for n, index in enumerate(selected_keys):
-        k = fcurve.keyframe_points[index]
-        lh_delta = k.co.y - k.handle_left.y
-        rh_delta = k.co.y - k.handle_right.y
-
-        delta = noise[n] - original_values[index]['y']
-        k.co.y = original_values[index]['y'] + delta * clamped_factor
-
-        set_handles(k, lh_delta, rh_delta)
-
-    # fcurves.remove(clone)
 
 
 def scale(factor, scale_type):
@@ -474,7 +420,7 @@ def scale(factor, scale_type):
 
         k.co.y = original_values[index]['y'] + delta * clamped_factor
 
-        set_handles(k, lh_delta, rh_delta)
+        key_utils.set_handles(k, lh_delta, rh_delta)
 
 
 # ###### Sliders Tools
@@ -569,6 +515,10 @@ def looper(self, context):
             continue
 
         # if obj.type == 'ARMATURE':
+        #     selected_bones = context.selected_pose_bones
+        #     bones_names = [bone.name for bone in selected_bones]
+
+        # if obj.type == 'ARMATURE':
         #     usable_bones_names = utils.get_usable_bone(obj, selected_pose_bones)
 
         fcurves = obj.animation_data.action.fcurves
@@ -595,6 +545,9 @@ def looper(self, context):
                     if fcurve.data_path.startswith(transforms):
                         # fcurve belongs to the  object, so skip it
                         continue
+
+                # if fcurve.group.name not in bones_names:
+                #     continue
 
                 split_data_path = fcurve.data_path.split(sep='"')
                 bone_name = split_data_path[1]
@@ -664,7 +617,6 @@ def looper(self, context):
                 time_offset(self.factor, fcurves)
 
             elif self.slider_type == 'NOISE':
-                # noise_random(self.factor, fcurves, fcurve_index)
                 noise(self.factor, fcurves, fcurve_index, animaide.slider.noise_phase)
 
             fcurve.update()
