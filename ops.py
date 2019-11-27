@@ -42,6 +42,7 @@ pie_menu-1:  (alt-1)'''
 
     bl_idname = "animaide.ease_to_ease"
     bl_label = "Ease To Ease"
+    bl_options = {'UNDO_GROUPED'}
 
     slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -87,6 +88,7 @@ pie_menu-1:  (alt-1)'''
 
     bl_idname = "animaide.ease"
     bl_label = "Ease"
+    bl_options = {'UNDO_GROUPED'}
 
     slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -131,6 +133,7 @@ pie_menu-1: (alt-1)'''
 
     bl_idname = "animaide.blend_neighbor"
     bl_label = "Blend Neighbor"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -175,6 +178,7 @@ pie_menu-1: (alt-1)'''
 
     bl_idname = "animaide.blend_frame"
     bl_label = "Blend Frame"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -219,6 +223,7 @@ pie_menu-1: (alt-1)'''
 
     bl_idname = "animaide.blend_ease"
     bl_label = "Blend Ease"
+    bl_options = {'UNDO_GROUPED'}
 
     slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -263,6 +268,7 @@ pie_menu-2: (alt-2)'''
 
     bl_idname = "animaide.blend_offset"
     bl_label = "Blend Offset"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -308,6 +314,7 @@ pie_menu-1: (alt-1)'''
 
     bl_idname = "animaide.tween"
     bl_label = "Tween"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -352,6 +359,7 @@ pie_menu-1: (alt-1)'''
 
     bl_idname = "animaide.push_pull"
     bl_label = "Push Pull"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -438,6 +446,7 @@ shortcut:   7
 pie_menu-2: (alt-2)'''
     bl_idname = "animaide.time_offset"
     bl_label = "Time Offset"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -480,6 +489,7 @@ shortcut:   shift-6
 pie_menu-2: (alt-2)'''
     bl_idname = "animaide.noise"
     bl_label = "Noise"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -523,6 +533,7 @@ shortcut:   5
 pie_menu-2: (alt-2)'''
     bl_idname = "animaide.scale_left"
     bl_label = "Scale Left"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     phase: IntProperty(default=1)
@@ -567,6 +578,7 @@ shortcut:   shift-5
 pie_menu-2: (alt-2)'''
     bl_idname = "animaide.scale_right"
     bl_label = "Scale Right"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
@@ -611,6 +623,7 @@ pie_menu-1: (alt-1)'''
 
     bl_idname = "animaide.scale_average"
     bl_label = "Scale Average"
+    bl_options = {'UNDO_GROUPED'}
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
