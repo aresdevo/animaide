@@ -41,6 +41,12 @@ from . import utils, key_utils, cur_utils, magnet, props, ops, ui
 
 classes = props.classes + ops.classes + ui.classes
 
+
+def draw_graph_menu(self, context):
+    layout = self.layout
+    layout.menu('AAT_MT_menu_operators')
+
+
 # register
 ##################################
 
@@ -147,6 +153,8 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
+    bpy.types.GRAPH_MT_key.append(draw_graph_menu)
+
     props.set_props()
 
     register_keymaps()
@@ -156,6 +164,8 @@ def unregister():
 
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
+    bpy.types.GRAPH_MT_key.remove(draw_graph_menu)
 
     props.del_props()
 

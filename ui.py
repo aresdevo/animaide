@@ -332,9 +332,49 @@ class AAT_MT_pie_menu_b(Menu):
         col = pie.column(align=True)
 
 
+class ANIMAIDE_MT_operators(Menu):
+    bl_idname = 'AAT_MT_menu_operators'
+    bl_label = "AnimAide"
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator('wm.call_menu_pie', text="Sliders A").name = 'AAT_MT_pie_menu_a'
+        layout.operator('wm.call_menu_pie', text="Sliders B").name = 'AAT_MT_pie_menu_b'
+        layout.separator()
+
+        layout.operator('animaide.ease_to_ease')
+        layout.operator('animaide.tween')  # Shift
+        layout.operator('animaide.ease')
+        layout.operator('animaide.blend_ease')  # Shift
+
+        layout.operator('animaide.blend_neighbor')
+        layout.operator_context = 'EXEC_DEFAULT'
+        layout.operator('animaide.blend_neighbor', text="Blend Neighbor Left (15%)").factor = -0.15
+        layout.operator('animaide.blend_neighbor', text="Blend Neighbor Right (15%)").factor = 0.15
+        layout.operator('animaide.blend_neighbor', text="Blend Neighbor Left (100%)").factor = -1  # Shift
+        layout.operator('animaide.blend_neighbor', text="Blend Neighbor Right (100%)").factor = 1  # Shift
+        layout.operator_context = 'INVOKE_DEFAULT'
+
+        layout.operator('animaide.blend_frame')  # Shift
+        layout.operator('animaide.push_pull')
+        layout.operator('animaide.scale_left')
+        layout.operator('animaide.scale_average')  # Shift
+        layout.operator('animaide.scale_right')  # Shift
+        layout.operator('animaide.smooth')
+        layout.operator('animaide.noise')  # Shift
+        layout.operator('animaide.time_offset')
+        layout.operator('animaide.blend_offset')  # Shift
+
+
 classes = (
     AAT_PT_sliders,
     AAT_PT_anim_transform,
     AAT_MT_pie_menu_a,
-    AAT_MT_pie_menu_b
+    AAT_MT_pie_menu_b,
+    ANIMAIDE_MT_operators,
 )
