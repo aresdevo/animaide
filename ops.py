@@ -32,14 +32,9 @@ from bpy.types import Operator
 
 
 class AAT_OT_ease_to_ease(Operator):
-    '''
-Transition selected keys - or current key - from the neighboring
-ones with a "S" shape manner (ease-in and ease-out simultaneously).
-It doesn't take into consideration the current key values.
-
-shortcut:   1
-pie_menu-1:  (alt-1)'''
-
+    """Transition selected keys - or current key - from the neighboring\n""" \
+    """ones with a "S" shape manner (ease-in and ease-out simultaneously).\n""" \
+    """It doesn't take into consideration the current key values."""
     bl_idname = "animaide.ease_to_ease"
     bl_label = "Ease To Ease"
     bl_options = {'UNDO_GROUPED'}
@@ -78,14 +73,9 @@ pie_menu-1:  (alt-1)'''
 
 
 class AAT_OT_ease(Operator):
-    '''
-Transition selected keys - or current key - from the neighboring
-ones with a "C" shape manner (ease-in or ease-out). It doesn't
-take into consideration the current key values.
-
-shortcut:   2
-pie_menu-1:  (alt-1)'''
-
+    """Transition selected keys - or current key - from the neighboring\n""" \
+    """ones with a "C" shape manner (ease-in or ease-out). It doesn't\n""" \
+    """take into consideration the current key values."""
     bl_idname = "animaide.ease"
     bl_label = "Ease"
     bl_options = {'UNDO_GROUPED'}
@@ -124,13 +114,8 @@ pie_menu-1:  (alt-1)'''
 
 
 class AAT_OT_blend_neighbor(Operator):
-    '''
-Blend selected keys - or current key - to the value of the neighboring
-left and right keys.
-
-shortcut:   3
-pie_menu-1: (alt-1)'''
-
+    """Blend selected keys - or current key - to the value of the neighboring\n""" \
+    """left and right keys."""
     bl_idname = "animaide.blend_neighbor"
     bl_label = "Blend Neighbor"
     bl_options = {'UNDO_GROUPED'}
@@ -169,13 +154,8 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_blend_frame(Operator):
-    '''
-Blend selected keys - or current key - to the value of the chosen
-left and right frames.
-
-shortcut:   shift-3
-pie_menu-1: (alt-1)'''
-
+    """Blend selected keys - or current key - to the value of the chosen\n""" \
+    """left and right frames."""
     bl_idname = "animaide.blend_frame"
     bl_label = "Blend Frame"
     bl_options = {'UNDO_GROUPED'}
@@ -214,13 +194,8 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_blend_ease(Operator):
-    '''
-Blend selected keys - or current key - to the ease-in or ease-out
-curve using the neighboring keys.
-
-shortcut:   shift-2
-pie_menu-1: (alt-1)'''
-
+    """Blend selected keys - or current key - to the ease-in or ease-out\n""" \
+    """curve using the neighboring keys."""
     bl_idname = "animaide.blend_ease"
     bl_label = "Blend Ease"
     bl_options = {'UNDO_GROUPED'}
@@ -259,13 +234,8 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_blend_offset(Operator):
-    '''
-Blend selected keys - or current key - to the
-value of the chosen left and right frames.
-
-shortcut:   shift-7
-pie_menu-2: (alt-2)'''
-
+    """Blend selected keys - or current key - to the\n""" \
+    """value of the chosen left and right frames."""
     bl_idname = "animaide.blend_offset"
     bl_label = "Blend Offset"
     bl_options = {'UNDO_GROUPED'}
@@ -304,14 +274,9 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_tween(Operator):
-    '''
-Set lineal relative value of the selected keys - or current key -
-in relationship to the neighboring ones. It doesn't take into
-consideration the current key values.
-
-shortcut:   shift-1
-pie_menu-1: (alt-1)'''
-
+    """Set lineal relative value of the selected keys - or current key -\n""" \
+    """in relationship to the neighboring ones. It doesn't take into\n""" \
+    """consideration the current key values."""
     bl_idname = "animaide.tween"
     bl_label = "Tween"
     bl_options = {'UNDO_GROUPED'}
@@ -350,13 +315,7 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_push_pull(Operator):
-    '''
-Exagerates or decreases the value of the selected keys
-- or current key -
-
-shortcut:   4
-pie_menu-1: (alt-1)'''
-
+    """Exagerates or decreases the value of the selected keys - or current key -"""
     bl_idname = "animaide.push_pull"
     bl_label = "Push Pull"
     bl_options = {'UNDO_GROUPED'}
@@ -395,12 +354,7 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_smooth(Operator):
-    '''
-Averages values of selected keys creating
-a smoother fcurve
-
-shortcut:   6
-pie_menu-2: (alt-2)'''
+    """Averages values of selected keys creating a smoother fcurve"""
     bl_idname = "animaide.smooth"
     bl_label = "Smooth"
 
@@ -438,12 +392,8 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_time_offset(Operator):
-    '''
-Shift the value of selected keys - or current key -
-to the ones of the left or right in the same fcurve
-
-shortcut:   7
-pie_menu-2: (alt-2)'''
+    """Shift the value of selected keys - or current key -\n""" \
+    """to the ones of the left or right in the same fcurve"""
     bl_idname = "animaide.time_offset"
     bl_label = "Time Offset"
     bl_options = {'UNDO_GROUPED'}
@@ -482,11 +432,7 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_noise(Operator):
-    '''
-Set random values to the selected keys - or current key -
-
-shortcut:   shift-6
-pie_menu-2: (alt-2)'''
+    """Set random values to the selected keys - or current key -"""
     bl_idname = "animaide.noise"
     bl_label = "Noise"
     bl_options = {'UNDO_GROUPED'}
@@ -525,12 +471,8 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_scale_left(Operator):
-    '''
-Increase or decrease the value of selected keys - or current key -
-in relationship to the left neighboring one.
-
-shortcut:   5
-pie_menu-2: (alt-2)'''
+    """Increase or decrease the value of selected keys - or current key -\n""" \
+    """in relationship to the left neighboring one."""
     bl_idname = "animaide.scale_left"
     bl_label = "Scale Left"
     bl_options = {'UNDO_GROUPED'}
@@ -570,12 +512,8 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_scale_right(Operator):
-    '''
-Increase or decrease the value of selected keys - or current key -
-in relationship to the right neighboring one.
-
-shortcut:   shift-5
-pie_menu-2: (alt-2)'''
+    """Increase or decrease the value of selected keys - or current key -\n""" \
+    """in relationship to the right neighboring one."""
     bl_idname = "animaide.scale_right"
     bl_label = "Scale Right"
     bl_options = {'UNDO_GROUPED'}
@@ -614,13 +552,8 @@ pie_menu-2: (alt-2)'''
 
 
 class AAT_OT_scale_average(Operator):
-    '''
-Increase or decrease the value of selected keys - or current key -
-in relationship to the average point of those affected.
-
-shortcut:   shift-4
-pie_menu-1: (alt-1)'''
-
+    """Increase or decrease the value of selected keys - or current key -\n""" \
+    """in relationship to the average point of those affected"""
     bl_idname = "animaide.scale_average"
     bl_label = "Scale Average"
     bl_options = {'UNDO_GROUPED'}
@@ -662,9 +595,7 @@ pie_menu-1: (alt-1)'''
 
 
 class AAT_OT_sliders_settings(Operator):
-    '''
-Options related to the current tool on the slider'''
-
+    """Options related to thezcurrent tool on the slider"""
     bl_idname = "animaide.sliders_settings"
     bl_label = "Sliders Settings"
 
@@ -707,9 +638,7 @@ Options related to the current tool on the slider'''
 
 
 class AAT_OT_global_settings(Operator):
-    '''
-Options for the entire sliders tool'''
-
+    """Options for the entire sliders tool"""
     bl_idname = "animaide.global_settings"
     bl_label = "Global Settings"
 
@@ -737,9 +666,7 @@ Options for the entire sliders tool'''
 
 
 class AAT_OT_add_slider(Operator):
-    '''
-Add aditional slider to the panel'''
-
+    """Add aditional slider to the panel"""
     bl_idname = 'animaide.add_slider'
     bl_label = "add_slider"
     bl_options = {'REGISTER'}
@@ -759,9 +686,7 @@ Add aditional slider to the panel'''
 
 
 class AAT_OT_remove_slider(Operator):
-    '''
-Removes last slider of the list'''
-
+    """Removes last slider of the list"""
     bl_idname = 'animaide.remove_slider'
     bl_label = "remove_slider"
     bl_options = {'REGISTER'}
@@ -782,11 +707,9 @@ Removes last slider of the list'''
 
 
 class AAT_OT_get_ref_frame(Operator):
-    '''
-Sets a refernce frame that will be use by the BLEND FRAME
-slider. The one at the left sets the left reference, and the
-one on the right sets the right reference'''
-
+    """Sets a refernce frame that will be use by the BLEND FRAME\n""" \
+    """slider. The one at the left sets the left reference, and the\n""" \
+    """one on the right sets the right reference"""
     bl_idname = 'animaide.get_ref_frame'
     bl_label = "get_ref_frames"
     bl_options = {'REGISTER'}
@@ -867,9 +790,8 @@ one on the right sets the right reference'''
 
 
 class AAT_OT_create_anim_trans_mask(Operator):
-    ''' Adds a mask to the AnimTransform. It determins the influence
-over the keys in the object being manipulated in the 3D View'''
-
+    """Adds a mask to the AnimTransform. It determins the influence\n""" \
+    """over the keys in the object being manipulated in the 3D View"""
     bl_idname = "animaide.create_anim_trans_mask"
     bl_label = "Create Mask"
     # bl_options = {'REGISTER'}
@@ -902,10 +824,9 @@ over the keys in the object being manipulated in the 3D View'''
 
 
 class AAT_OT_anim_transform_on(Operator):
-    '''Enables AnimTransform. Modify the entire animation
-based on the object manipulation in the 3D View.
-This tool desables auto-key'''
-
+    """Enables AnimTransform. Modify the entire animation\n""" \
+    """based on the object manipulation in the 3D View.\n""" \
+    """This tool desables auto-key"""
     bl_idname = "animaide.anim_transform_on"
     bl_label = "Activate"
     # bl_options = {'REGISTER'}
@@ -932,8 +853,7 @@ This tool desables auto-key'''
 
 
 class AAT_OT_anim_transform_off(Operator):
-    '''Disable AnimTransform. Objects can be animated again'''
-
+    """Disable AnimTransform. Objects can be animated again"""
     bl_idname = "animaide.anim_transform_off"
     bl_label = "Deactivate"
     # bl_options = {'REGISTER'}
@@ -964,8 +884,7 @@ class AAT_OT_anim_transform_off(Operator):
 
 
 class AAT_OT_delete_anim_trans_mask(Operator):
-    '''Removes the anim_trans_mask from the scene'''
-
+    """Removes the anim_trans_mask from the scene"""
     bl_idname = "animaide.delete_anim_trans_mask"
     bl_label = "Delete Mask"
     # bl_options = {'REGISTER'}
@@ -985,9 +904,7 @@ class AAT_OT_delete_anim_trans_mask(Operator):
 
 
 class AAT_OT_anim_transform_settings(Operator):
-    '''
-Options related to the anim_transform'''
-
+    """Options related to the anim_transform"""
     bl_idname = "animaide.anim_transform_settings"
     bl_label = "Anim Transform Settings"
     # bl_options = {'REGISTER'}
@@ -1023,9 +940,7 @@ Options related to the anim_transform'''
 
 
 class AAT_OT_help(Operator):
-    '''
-Shows all the shortuts for the tool'''
-
+    """Shows all the shortuts for the tool"""
     bl_idname = "animaide.help"
     bl_label = "Shortcuts"
 
@@ -1075,9 +990,7 @@ Shows all the shortuts for the tool'''
 
 
 class AAT_OT_manual(Operator):
-    '''
-Opens Animaide manual'''
-
+    """Opens Animaide manual"""
     bl_idname = "animaide.manual"
     bl_label = "Manual"
 
@@ -1100,12 +1013,11 @@ Opens Animaide manual'''
 
 
 class AAT_OT_clone(Operator):
-    '''
-    Creates a clone of an fcurve'''
-
+    """Creates a clone of an fcurve"""
     bl_idname = 'animaide.fcurve_clone'
     bl_label = "Clone Fcurve"
     bl_options = {'REGISTER'}
+
     # cycle_before: StringProperty()
     # cycle_after: StringProperty()
 
@@ -1126,9 +1038,7 @@ class AAT_OT_clone(Operator):
 
 
 class AAT_OT_clone_remove(Operator):
-    '''
-    Removes a clone of an fcurve'''
-
+    """Removes a clone of an fcurve"""
     bl_idname = 'animaide.remove_clone'
     bl_label = "Remove Clone"
     bl_options = {'REGISTER'}
@@ -1149,12 +1059,11 @@ class AAT_OT_clone_remove(Operator):
 
 
 class AAT_OT_move_key(Operator):
-    '''
-    Move selected keys'''
-
+    """Move selected keys"""
     bl_idname = 'animaide.move_key'
     bl_label = "Move Key"
     bl_options = {'REGISTER'}
+
     amount: FloatProperty(default=1.0)
     direction: EnumProperty(
         items=[('RIGHT', ' ', 'Move right', 'TRIA_RIGHT', 1),
@@ -1178,9 +1087,7 @@ class AAT_OT_move_key(Operator):
 
 
 class AAT_OT_modifier(Operator):
-    '''
-    Add noise to a curve using a modifier'''
-
+    """Add noise to a curve using a modifier"""
     bl_idname = 'animaide.fcurve_modifier'
     bl_label = "Modifier"
     bl_options = {'REGISTER'}

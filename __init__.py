@@ -42,110 +42,14 @@ from . import utils, key_utils, cur_utils, magnet, props, ops, ui
 classes = props.classes + ops.classes + ui.classes
 
 
+# register
+##################################
+
+
 def draw_graph_menu(self, context):
     layout = self.layout
     layout.menu('AAT_MT_menu_operators')
 
-
-# register
-##################################
-
-# store keymaps here to access after registration
-
-
-addon_keymaps = []
-
-
-def register_keymaps():
-    wm = bpy.context.window_manager
-
-    if wm.keyconfigs.addon:
-        km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
-
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'ONE', 'PRESS', alt=True)
-        kmi.properties.name = 'AAT_MT_pie_menu_a'
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'TWO', 'PRESS', alt=True)
-        kmi.properties.name = 'AAT_MT_pie_menu_b'
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.ease_to_ease', 'ONE', 'PRESS')
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.tween', 'ONE', 'PRESS', shift=True)
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.ease', 'TWO', 'PRESS')
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.blend_ease', 'TWO', 'PRESS', shift=True)
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.blend_neighbor', 'THREE', 'PRESS')
-        kmi.properties.op_context = 'INVOKE_DEFAULT'
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.blend_neighbor', 'MINUS', 'PRESS')
-        kmi.properties.op_context = 'EXEC_DEFAULT'
-        kmi.properties.factor = -0.15
-        # kmi.properties.slope = 1
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.blend_neighbor', 'EQUAL', 'PRESS')
-        kmi.properties.op_context = 'EXEC_DEFAULT'
-        kmi.properties.factor = 0.15
-        # kmi.properties.slope = 1
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.blend_neighbor', 'MINUS', 'PRESS')
-        kmi.shift = True
-        kmi.properties.op_context = 'EXEC_DEFAULT'
-        kmi.properties.factor = -1
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.blend_neighbor', 'EQUAL', 'PRESS')
-        kmi.shift = True
-        kmi.properties.op_context = 'EXEC_DEFAULT'
-        kmi.properties.factor = 1
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.blend_frame', 'THREE', 'PRESS', shift=True)
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.push_pull', 'FOUR', 'PRESS')
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.scale_average', 'FOUR', 'PRESS', shift=True)
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.scale_left', 'FIVE', 'PRESS')
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.scale_right', 'FIVE', 'PRESS', shift=True)
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.smooth', 'SIX', 'PRESS')
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.noise', 'SIX', 'PRESS', shift=True)
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.time_offset', 'SEVEN', 'PRESS')
-        addon_keymaps.append((km, kmi))
-
-        kmi = km.keymap_items.new('animaide.blend_offset', 'SEVEN', 'PRESS', shift=True)
-        addon_keymaps.append((km, kmi))
-
-
-def unregister_keymaps():
-    wm = bpy.context.window_manager
-    kc = wm.keyconfigs.addon
-    if kc:
-        for km, kmi in addon_keymaps:
-            km.keymap_items.remove(kmi)
-
-    addon_keymaps.clear()
 
 
 def register():
@@ -156,8 +60,6 @@ def register():
     bpy.types.GRAPH_MT_key.append(draw_graph_menu)
 
     props.set_props()
-
-    register_keymaps()
 
 
 def unregister():
@@ -174,5 +76,3 @@ def unregister():
 
     if magnet.anim_trans_mask_handlers in bpy.app.handlers.depsgraph_update_pre:
         bpy.app.handlers.depsgraph_update_pre.remove(magnet.anim_trans_mask_handlers)
-
-    unregister_keymaps()
