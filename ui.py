@@ -352,13 +352,16 @@ class ANIMAIDE_MT_operators(Menu):
         layout.operator('animaide.ease')
         layout.operator('animaide.blend_ease')  # Shift
 
+        def blend(text, fac):
+            op = layout.operator('animaide.blend_neighbor', text=text)
+            op.op_context = 'EXEC_DEFAULT'
+            op.factor = fac
+
         layout.operator('animaide.blend_neighbor')
-        layout.operator_context = 'EXEC_DEFAULT'
-        layout.operator('animaide.blend_neighbor', text="Blend Neighbor Left (15%)").factor = -0.15
-        layout.operator('animaide.blend_neighbor', text="Blend Neighbor Right (15%)").factor = 0.15
-        layout.operator('animaide.blend_neighbor', text="Blend Neighbor Left (100%)").factor = -1  # Shift
-        layout.operator('animaide.blend_neighbor', text="Blend Neighbor Right (100%)").factor = 1  # Shift
-        layout.operator_context = 'INVOKE_DEFAULT'
+        blend("Blend Neighbor Left (15%)", -0.15)
+        blend("Blend Neighbor Right (15%)", 0.15)
+        blend("Blend Neighbor Left (100%)", -1)  # Shift
+        blend("Blend Neighbor Right (100%)", 1)  # Shift
 
         layout.operator('animaide.blend_frame')  # Shift
         layout.operator('animaide.push_pull')
