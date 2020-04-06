@@ -607,112 +607,6 @@ class AAT_OT_manual(Operator):
         return {'FINISHED'}
 
 
-# ###############  OTHER TOOLS  ###############
-
-
-class AAT_OT_clone(Operator):
-    """Creates a clone of an fcurve"""
-    bl_idname = 'animaide.fcurve_clone'
-    bl_label = "Clone Fcurve"
-    bl_options = {'REGISTER'}
-
-    # cycle_before: StringProperty()
-    # cycle_after: StringProperty()
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-        animaide = context.scene.animaide
-        cycle_before = animaide.clone.cycle_before
-        cycle_after = animaide.clone.cycle_after
-
-        objects = context.selected_objects
-
-        cur_utils.add_clone(objects, cycle_before, cycle_after)
-
-        return {'FINISHED'}
-
-
-class AAT_OT_clone_remove(Operator):
-    """Removes a clone of an fcurve"""
-    bl_idname = 'animaide.remove_clone'
-    bl_label = "Remove Clone"
-    bl_options = {'REGISTER'}
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-
-        objects = context.selected_objects
-
-        cur_utils.remove_helpers(objects)
-
-        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
-
-        return {'FINISHED'}
-
-
-class AAT_OT_move_key(Operator):
-    """Move selected keys"""
-    bl_idname = 'animaide.move_key'
-    bl_label = "Move Key"
-    bl_options = {'REGISTER'}
-
-    amount: FloatProperty(default=1.0)
-    direction: EnumProperty(
-        items=[('RIGHT', ' ', 'Move right', 'TRIA_RIGHT', 1),
-               ('LEFT', ' ', 'Move left', 'TRIA_LEFT', 2),
-               ('UP', ' ', 'Move up', 'TRIA_UP', 3),
-               ('DOWN', ' ', 'Move down', 'TRIA_DOWN', 4)],
-        name="Direction",
-        default='RIGHT'
-    )
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-        objects = context.selected_objects
-
-        key_utils.move_right_left(objects, self.amount, self.direction)
-
-        return {'FINISHED'}
-
-
-class AAT_OT_modifier(Operator):
-    """Add noise to a curve using a modifier"""
-    bl_idname = 'animaide.fcurve_modifier'
-    bl_label = "Modifier"
-    bl_options = {'REGISTER'}
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-
-        objects = context.selected_objects
-        for obj in objects:
-            action = obj.animation_data.action
-
-            for curve in action.fcurves:
-                if curve.select is not True:
-                    continue
-                noise = curve.modifiers.new('NOISE')
-
-                noise.strength = 5
-                noise.scale = 3
-                curve.convert_to_samples(0, 100)
-                curve.convert_to_keyframes(0, 100)
-                curve.modifiers.remove(noise)
-        return {'FINISHED'}
-
-
 # Variable to register Classes
 
 classes = (
@@ -740,8 +634,6 @@ classes = (
     AAT_OT_noise,
     AAT_OT_time_offset,
     AAT_OT_tween,
-    AAT_OT_clone,
-    AAT_OT_clone_remove,
     AAT_OT_create_anim_trans_mask,
     AAT_OT_delete_anim_trans_mask
 )

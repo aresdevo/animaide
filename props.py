@@ -69,18 +69,6 @@ def update_clone_move(self, context):
     return
 
 
-def update_clone(self, context):
-
-    objects = context.selected_objects
-    animaide = context.scene.animaide
-    cycle_before = animaide.clone_data.cycle_before
-    cycle_after = animaide.clone_data.cycle_after
-
-    cur_utils.add_clone(objects, cycle_before, cycle_after)
-
-    return
-
-
 def update_overshoot(self, context):
     # change values when overshoot property is changed
 
@@ -239,47 +227,6 @@ class AnimAideScene(PropertyGroup):
     slider_slots: CollectionProperty(type=AnimSlider)
 
 
-class myPreferences(AddonPreferences):
-    # this must match the addon name, use '__package__'
-    # when defining this in a submodule of a python package.
-    bl_idname = __package__
-
-    view_3d: BoolProperty(
-        name="3D View",
-        default=True,
-    )
-
-    sliders: BoolProperty(
-        name="Sliders",
-        default=True,
-    )
-
-    magnet: BoolProperty(
-        name="Magnet",
-        default=True,
-    )
-
-    def draw(self, context):
-        layout = self.layout
-        # layout.label(text="Choose the area where the sliders will be:")
-        layout.prop(self, "sliders", text="Use Sliders")
-        layout.prop(self, "anim_transform", text="Use AnimTransform")
-        layout.prop(self, "view_3d", text="Side panel in the '3D View' instead of the 'Graph Editor'")
-
-
-def space_type_pref():
-
-    preferences = bpy.context.preferences
-    pref = preferences.addons[__package__].preferences
-
-    if pref.view_3d:
-        space_type = 'VIEW_3D'
-    else:
-        space_type = 'GRAPH_EDITOR'
-
-    return space_type
-
-
 def set_props():
     # to be used when registering
 
@@ -294,7 +241,6 @@ def del_props():
 
 
 classes = (
-    # props.myPreferences,
     AnimAideAnimTransform,
     AnimAideClone,
     AnimSlider,
