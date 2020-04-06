@@ -31,564 +31,163 @@ from bpy.types import Operator
 # ###############  SLIDERS  ###############
 
 
-class AAT_OT_ease_to_ease(Operator):
+class AAT_OT:
+    """Slider Operators Preset"""
+    bl_options = {'UNDO_GROUPED'}
+
+    slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=0.0)
+    slider_type: StringProperty()
+    slot_index: IntProperty(default=-1)
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
+
+    @classmethod
+    def poll(cls, context):
+        return slider_tools.poll(context)
+
+    def __init__(self):
+        self.animaide = bpy.context.scene.animaide
+        self.slots = self.animaide.slider_slots
+        self.item = self.animaide.slider
+        self.init_mouse_x = None
+
+    def __del__(self):
+        pass
+
+    def execute(self, context):
+        return slider_tools.looper(self, context)
+
+    def modal(self, context, event):
+        return slider_tools.modal(self, context, event)
+
+    def invoke(self, context, event):
+        return slider_tools.invoke(self, context, event)
+
+
+class AAT_OT_ease_to_ease(Operator, AAT_OT):
     """Transition selected keys - or current key - from the neighboring\n""" \
     """ones with a "S" shape manner (ease-in and ease-out simultaneously).\n""" \
     """It doesn't take into consideration the current key values."""
     bl_idname = "animaide.ease_to_ease"
     bl_label = "Ease To Ease"
-    bl_options = {'UNDO_GROUPED'}
 
-    slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'EASE_TO_EASE'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_ease(Operator):
+class AAT_OT_ease(Operator, AAT_OT):
     """Transition selected keys - or current key - from the neighboring\n""" \
     """ones with a "C" shape manner (ease-in or ease-out). It doesn't\n""" \
     """take into consideration the current key values."""
     bl_idname = "animaide.ease"
     bl_label = "Ease"
-    bl_options = {'UNDO_GROUPED'}
 
-    slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'EASE'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_blend_neighbor(Operator):
+class AAT_OT_blend_neighbor(Operator, AAT_OT):
     """Blend selected keys - or current key - to the value of the neighboring\n""" \
     """left and right keys."""
     bl_idname = "animaide.blend_neighbor"
     bl_label = "Blend Neighbor"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'BLEND_NEIGHBOR'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_blend_frame(Operator):
+class AAT_OT_blend_frame(Operator, AAT_OT):
     """Blend selected keys - or current key - to the value of the chosen\n""" \
     """left and right frames."""
     bl_idname = "animaide.blend_frame"
     bl_label = "Blend Frame"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'BLEND_FRAME'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_blend_ease(Operator):
+class AAT_OT_blend_ease(Operator, AAT_OT):
     """Blend selected keys - or current key - to the ease-in or ease-out\n""" \
     """curve using the neighboring keys."""
     bl_idname = "animaide.blend_ease"
     bl_label = "Blend Ease"
-    bl_options = {'UNDO_GROUPED'}
 
-    slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'BLEND_EASE'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_blend_offset(Operator):
+class AAT_OT_blend_offset(Operator, AAT_OT):
     """Blend selected keys - or current key - to the\n""" \
     """value of the chosen left and right frames."""
     bl_idname = "animaide.blend_offset"
     bl_label = "Blend Offset"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'BLEND_OFFSET'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_tween(Operator):
+class AAT_OT_tween(Operator, AAT_OT):
     """Set lineal relative value of the selected keys - or current key -\n""" \
     """in relationship to the neighboring ones. It doesn't take into\n""" \
     """consideration the current key values."""
     bl_idname = "animaide.tween"
     bl_label = "Tween"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'TWEEN'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_push_pull(Operator):
+class AAT_OT_push_pull(Operator, AAT_OT):
     """Exagerates or decreases the value of the selected keys - or current key -"""
     bl_idname = "animaide.push_pull"
     bl_label = "Push Pull"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'PUSH_PULL'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_smooth(Operator):
+class AAT_OT_smooth(Operator, AAT_OT):
     """Averages values of selected keys creating a smoother fcurve"""
     bl_idname = "animaide.smooth"
     bl_label = "Smooth"
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'SMOOTH'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_time_offset(Operator):
+class AAT_OT_time_offset(Operator, AAT_OT):
     """Shift the value of selected keys - or current key -\n""" \
     """to the ones of the left or right in the same fcurve"""
     bl_idname = "animaide.time_offset"
     bl_label = "Time Offset"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'TIME_OFFSET'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_noise(Operator):
+class AAT_OT_noise(Operator, AAT_OT):
     """Set random values to the selected keys - or current key -"""
     bl_idname = "animaide.noise"
     bl_label = "Noise"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'NOISE'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_scale_left(Operator):
+class AAT_OT_scale_left(Operator, AAT_OT):
     """Increase or decrease the value of selected keys - or current key -\n""" \
     """in relationship to the left neighboring one."""
     bl_idname = "animaide.scale_left"
     bl_label = "Scale Left"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    phase: IntProperty(default=1)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'SCALE_LEFT'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_scale_right(Operator):
+class AAT_OT_scale_right(Operator, AAT_OT):
     """Increase or decrease the value of selected keys - or current key -\n""" \
     """in relationship to the right neighboring one."""
     bl_idname = "animaide.scale_right"
     bl_label = "Scale Right"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'SCALE_RIGHT'
 
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
 
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
-
-
-class AAT_OT_scale_average(Operator):
+class AAT_OT_scale_average(Operator, AAT_OT):
     """Increase or decrease the value of selected keys - or current key -\n""" \
     """in relationship to the average point of those affected"""
     bl_idname = "animaide.scale_average"
     bl_label = "Scale Average"
-    bl_options = {'UNDO_GROUPED'}
 
-    # slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slider_type: StringProperty()
-    slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'SCALE_AVERAGE'
-
-    @classmethod
-    def poll(cls, context):
-        return slider_tools.poll(context)
-
-    def __init__(self):
-        self.animaide = bpy.context.scene.animaide
-        self.slots = self.animaide.slider_slots
-        self.item = self.animaide.slider
-        self.init_mouse_x = None
-
-    def __del__(self):
-        pass
-
-    def execute(self, context):
-
-        return slider_tools.looper(self, context)
-
-    def modal(self, context, event):
-
-        return slider_tools.modal(self, context, event)
-
-    def invoke(self, context, event):
-
-        return slider_tools.invoke(self, context, event)
 
 
 # ------- sliders extra operators ------
