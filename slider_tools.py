@@ -684,6 +684,11 @@ def invoke(self, context, event):
 
     # self.animaide.slider.selector = self.slider_type
 
+    # The select operator(s) are bugged, and can fail to update selected keys, so
+    # When you change the frame, then select keys, the previous keys will stay marked as selected
+    from zpy import utils
+    utils.update_keyframe_points(context)
+
     if self.op_context == 'EXEC_DEFAULT':
         return self.execute(context)
 
