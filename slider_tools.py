@@ -522,45 +522,8 @@ def looper(self, context):
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, fcurve in fcurves.items():
-
-            if not key_utils.valid_fcurve(fcurve):
+            if not key_utils.poll_fcurve(context, obj, fcurve):
                 continue
-
-            if obj.type == 'ARMATURE':
-                # bone_name = utils.get_bone_name(fcurve, usable_bones_names)
-                # bone_name = utils.get_bone_name(obj, fcurve)
-                #
-
-                if getattr(fcurve.group, 'name', None) == 'Object Transforms':
-                    # When animating an object, by default its fcurves grouped with this name.
-                    continue
-                elif not fcurve.group:
-                    transforms = (
-                        'location', 'rotation_euler', 'scale',
-                        'rotation_quaternion', 'rotation_axis_angle',
-                        '[\"',  # custom property
-                    )
-                    if fcurve.data_path.startswith(transforms):
-                        # fcurve belongs to the  object, so skip it
-                        continue
-
-                # if fcurve.group.name not in bones_names:
-                #     continue
-
-                split_data_path = fcurve.data_path.split(sep='"')
-                bone_name = split_data_path[1]
-                bone = obj.data.bones.get(bone_name)
-
-                only_selected = context.space_data.dopesheet.show_only_selected
-
-                if bone is None or bone.hide or (only_selected and not bone.select):
-                    continue
-
-                # if bone_name is None:
-                #     continue
-
-            if getattr(fcurve.group, 'name', None) == cur_utils.group_name:
-                continue  # we don't want to select keys on reference fcurves
 
             global_fcurve = key_utils.global_values[obj.name][fcurve_index]
             selected_keys = global_fcurve['selected_keys']

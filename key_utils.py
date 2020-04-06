@@ -653,21 +653,33 @@ def reset_original():
     Set selected keys to the values in the global variables
     '''
 
-    objects = bpy.context.selected_objects
+    context = bpy.context
+
+    if context.space_data.dopesheet.show_only_selected is True:
+        objects = context.selected_objects
+    else:
+        objects = context.scene.objects
 
     for obj in objects:
-        anim = obj.animation_data
-        action = getattr(anim, 'action', None)
-        if not action:
+
+        if not valid_anim(obj):
             continue
 
-        for fcurve_index, fcurve in action.fcurves.items():
+        visible = obj.visible_get()
 
-            if any((not fcurve.select, fcurve.lock, fcurve.hide)):
+        if not context.space_data.dopesheet.show_hidden and not visible:
+            continue
+
+        fcurves = obj.animation_data.action.fcurves
+
+        for fcurve_index, fcurve in fcurves.items():
+            if not poll_fcurve(context, obj, fcurve):
                 continue
 
-            selected_keys = global_values[obj.name][fcurve_index]['selected_keys']
-            original_values = global_values[obj.name][fcurve_index]['original_values']
+            global_fcurve = global_values[obj.name][fcurve_index]
+
+            selected_keys = global_fcurve['selected_keys']
+            original_values = global_fcurve['original_values']
 
             if not selected_keys:
                 index = on_current_frame(fcurve)
@@ -940,31 +952,44 @@ def calculate_delta(key, previous_key, next_key):
     else:
         return ((key_pos * 100) / frames_gap) / 100
 
-
-def switch_aim(aim, factor):
-    if factor < 0.5:
-        aim = aim * -1
-    return aim
-
-
-def set_direction(factor, left_key, right_key):
-    if factor < 0:
-        next_key = left_key
-        previous_key = right_key
-    else:
-        next_key = right_key
-        previous_key = left_key
-
-    return previous_key, next_key
-
-
-def linear_y(left_neighbor, right_neighbor, key):
-    big_adjacent = right_neighbor['x'] - left_neighbor['x']
-    big_oposite = right_neighbor['y'] - left_neighbor['y']
-    if big_adjacent == 0:
+def poll_fcurve(context, obj, fcurve):
+    if not valid_fcurve(fcurve):
         return
-    tangent = big_oposite / big_adjacent
 
-    adjacent = key.co.x - left_neighbor['x']
-    oposite = tangent * adjacent
-    return left_neighbor['y'] + oposite
+    if (obj.type == 'ARMATURE'):
+        # bone_name = utils.get_bone_name(fcurve, usable_bones_names)
+        # bone_name = utils.get_bone_name(obj, fcurve)
+        #
+
+        if getattr(fcurve.group, 'name', None) == 'Object Transforms':
+            # When animating an object, by default its fcurves grouped with this name.
+            return
+        elif not fcurve.group:
+            transforms = (
+                'location', 'rotation_euler', 'scale',
+                'rotation_quaternion', 'rotation_axis_angle',
+                '[\"',  # custom property
+            )
+            if fcurve.data_path.startswith(transforms):
+                # fcurve belongs to the  object, so skip it
+                return
+
+        # if fcurve.group.name not in bones_names:
+            # return
+
+        split_data_path = fcurve.data_path.split(sep='"')
+        bone_name = split_data_path[1]
+        bone = obj.data.bones.get(bone_name)
+
+        only_selected = context.space_data.dopesheet.show_only_selected
+
+        if bone is None or bone.hide or (only_selected and not bone.select):
+            return
+
+        # if bone_name is None:
+            # return
+
+    if getattr(fcurve.group, 'name', None) == cur_utils.group_name:
+        return  # we don't want to select keys on reference fcurves
+
+    return True
