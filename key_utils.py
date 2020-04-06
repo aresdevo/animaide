@@ -525,7 +525,9 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
                     smooth = (prevkey_value + nextkey_value) / 2
                     values[key_index]['sy'] = smooth
 
-            if not keyframes:
+            if keyframes:
+                left_neighbor, right_neighbor = get_selected_neigbors(fcurve, keyframes)
+            else:
                 # what to do if no key is selected
 
                 if animaide.slider.affect_non_selected_keys is True:
@@ -541,9 +543,6 @@ def get_sliders_globals(selected=True, original=True, left_frame=None, right_fra
                     keyframes = []
                     left_neighbor = None
                     right_neighbor = None
-
-            else:
-                left_neighbor, right_neighbor = get_selected_neigbors(fcurve, keyframes)
 
             if selected:
                 # Store selected keys
