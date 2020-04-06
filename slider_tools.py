@@ -305,8 +305,6 @@ def smooth(factor):
     # print('original: ', original_values[selected_keys[0]]['sy'])
 
     for index in selected_keys:
-
-
         k = fcurve.keyframe_points[index]
         lh_delta = k.co.y - k.handle_left.y
         rh_delta = k.co.y - k.handle_right.y
