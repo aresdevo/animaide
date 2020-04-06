@@ -30,25 +30,25 @@ user_preview_range = {}
 user_scene_range = {}
 
 
-def add_samples(fcurve, reference_fcurve, frequency=1):
-        """
-        Add keys to an fcurve with the given frequency
-        """
-        key_list = fcurve.keyframe_points
+# def add_samples(fcurve, reference_fcurve, frequency=1):
+        # """
+        # Add keys to an fcurve with the given frequency
+        # """
+        # key_list = fcurve.keyframe_points
 
-        selected_keys = key_utils.get_selected(fcurve)
-        first_key, last_key = key_utils.first_and_last_selected(fcurve, selected_keys)
+        # selected_keys = key_utils.get_selected(fcurve)
+        # first_key, last_key = key_utils.first_and_last_selected(fcurve, selected_keys)
 
-        amount = int(abs(last_key.co.x - first_key.co.x) / frequency)
-        frame = first_key.co.x
+        # amount = int(abs(last_key.co.x - first_key.co.x) / frequency)
+        # frame = first_key.co.x
 
-        for n in range(amount):
-            target = reference_fcurve.evaluate(frame)
-            key_list.insert(frame, target)
-            frame += frequency
+        # for n in range(amount):
+            # target = reference_fcurve.evaluate(frame)
+            # key_list.insert(frame, target)
+            # frame += frequency
 
-        target = reference_fcurve.evaluate(last_key.co.x)
-        key_list.insert(last_key.co.x, target)
+        # target = reference_fcurve.evaluate(last_key.co.x)
+        # key_list.insert(last_key.co.x, target)
 
 
 def get_selected(fcurves):
@@ -89,14 +89,14 @@ def remove_helpers(objects):
                 # aclones.remove(0)
 
 
-def get_slope(fcurve):
-    """
+# def get_slope(fcurve):
+    # """
 
-    """
-    selected_keys = key_utils.get_selected(fcurve)
-    first_key, last_key = key_utils.first_and_last_selected(fcurve, selected_keys)
-    slope = (first_key.co.y**2 - last_key.co.y**2) / (first_key.co.x**2 - last_key.co.x**2)
-    return slope
+    # """
+    # selected_keys = key_utils.get_selected(fcurve)
+    # first_key, last_key = key_utils.first_and_last_selected(fcurve, selected_keys)
+    # slope = (first_key.co.y**2 - last_key.co.y**2) / (first_key.co.x**2 - last_key.co.x**2)
+    # return slope
 
 
 def add_cycle(fcurve, before='MIRROR', after='MIRROR'):

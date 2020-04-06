@@ -26,36 +26,36 @@ from . import utils, cur_utils
 global_values = {}
 
 
-def set_type(objects, kind):
-    '''
-    Sets key type
-    '''
+# def set_type(objects, kind):
+    # '''
+    # Sets key type
+    # '''
 
-    if kind == 'KEYFRAME' or kind == 'BREAKDOWN' or kind == 'JITTER':
+    # if kind == 'KEYFRAME' or kind == 'BREAKDOWN' or kind == 'JITTER':
 
-        if objects is None:
-            return
+        # if objects is None:
+            # return
 
-        for obj in objects:
-            action = obj.animation_data.action
+        # for obj in objects:
+            # action = obj.animation_data.action
 
-            for fcurve in action.fcurves:
+            # for fcurve in action.fcurves:
 
-                # if fcurve.select is False:
-                #     continue
-                #
-                # if fcurve.hide is True:
-                #     continue
+                # # if fcurve.select is False:
+                # #     continue
+                # #
+                # # if fcurve.hide is True:
+                # #     continue
 
-                selected_keys = get_selected(fcurve)
+                # selected_keys = get_selected(fcurve)
 
-                if not selected_keys:
-                    continue
+                # if not selected_keys:
+                    # continue
 
-                for index in selected_keys:
-                    key = fcurve.keyframe_points[index]
-                    print(kind)
-                    key.type = kind
+                # for index in selected_keys:
+                    # key = fcurve.keyframe_points[index]
+                    # print(kind)
+                    # key.type = kind
 
 
 def move_right_left(objects, amount, direction='RIGHT', lock=True):
@@ -222,25 +222,25 @@ def set_value(key, str):
         return key_value
 
 
-def set_interpolation(objects, interpolation='BEZIER', easing='AUTO', back=2.0, period=1.0, amplitude=4.0):
-    '''
-    sets interpolation of the selected keys
-    '''
+# def set_interpolation(objects, interpolation='BEZIER', easing='AUTO', back=2.0, period=1.0, amplitude=4.0):
+    # '''
+    # sets interpolation of the selected keys
+    # '''
 
-    for obj in objects:
-        action = obj.animation_data.action
+    # for obj in objects:
+        # action = obj.animation_data.action
 
-        for fcurve in action.fcurves:
+        # for fcurve in action.fcurves:
 
-            selected_keys = get_selected(fcurve)
+            # selected_keys = get_selected(fcurve)
 
-            for index in selected_keys:
-                key = fcurve.keyframe_points[index]
-                key.interpolation = interpolation
-                key.easing = easing
-                key.back = back
-                key.period = period
-                key.amplitude = amplitude
+            # for index in selected_keys:
+                # key = fcurve.keyframe_points[index]
+                # key.interpolation = interpolation
+                # key.easing = easing
+                # key.back = back
+                # key.period = period
+                # key.amplitude = amplitude
 
 
 def select_handle(key, left=None, right=None, control_point=None):
@@ -266,69 +266,69 @@ def select_handle(key, left=None, right=None, control_point=None):
         key.select_control_point = control_point
 
 
-def handles(objects, act_on='ALL', left=None, right=None, control_point=None, handle_type=None):
-    '''
-    lets you select or unselect either handel or control point of a key
-    '''
+# def handles(objects, act_on='ALL', left=None, right=None, control_point=None, handle_type=None):
+    # '''
+    # lets you select or unselect either handel or control point of a key
+    # '''
 
-    animaide = bpy.context.scene.animaide
-    key_helpers = animaide.key_helpers
+    # animaide = bpy.context.scene.animaide
+    # key_helpers = animaide.key_helpers
 
-    for obj in objects:
-        action = obj.animation_data.action
+    # for obj in objects:
+        # action = obj.animation_data.action
 
-        for fcurve in action.fcurves:
+        # for fcurve in action.fcurves:
 
-            # first_key, last_key = first_and_last_selected(fcurve)
-            first_key = fcurve.keyframe_points[0]
-            last_index = len(fcurve.keyframe_points) - 1
-            last_key = fcurve.keyframe_points[last_index]
+            # # first_key, last_key = first_and_last_selected(fcurve)
+            # first_key = fcurve.keyframe_points[0]
+            # last_index = len(fcurve.keyframe_points) - 1
+            # last_key = fcurve.keyframe_points[last_index]
 
-            selected_keys = get_selected(fcurve)
+            # selected_keys = get_selected(fcurve)
 
-            print(selected_keys)
+            # print(selected_keys)
 
-            if act_on == 'SELECTION':
-                if not selected_keys:
-                    if key_helpers.tmp_cps is not []:
-                        selected_keys = key_helpers.tmp_cps
-                    else:
-                        continue
+            # if act_on == 'SELECTION':
+                # if not selected_keys:
+                    # if key_helpers.tmp_cps is not []:
+                        # selected_keys = key_helpers.tmp_cps
+                    # else:
+                        # continue
 
-                for index in selected_keys:
-                    key = fcurve.keyframe_points[index]
-                    print('Selection')
-                    if left is not None:
-                        select_handle(key, left=left)
+                # for index in selected_keys:
+                    # key = fcurve.keyframe_points[index]
+                    # print('Selection')
+                    # if left is not None:
+                        # select_handle(key, left=left)
 
-                    if right is not None:
-                        select_handle(key, right=right)
-                    print('key_helpers.control_point in main function:', key_helpers.control_point)
-                    print('control_point in main function:', control_point)
-                    if control_point is not None:
-                        select_handle(key, control_point=control_point)
+                    # if right is not None:
+                        # select_handle(key, right=right)
+                    # print('key_helpers.control_point in main function:', key_helpers.control_point)
+                    # print('control_point in main function:', control_point)
+                    # if control_point is not None:
+                        # select_handle(key, control_point=control_point)
 
-                    if handle_type is not None:
-                        handle_set_type(key, left=left, right=right, handle_type=handle_type)
+                    # if handle_type is not None:
+                        # handle_set_type(key, left=left, right=right, handle_type=handle_type)
 
-            elif handle_type is not None:
-                kwargs = dict(left=True, right=True, handle_type=handle_type)
-                if act_on == 'ALL':
-                    for index, key in fcurve.keyframe_points.items():
-                        print('all')
-                        handle_set_type(key, **kwargs)
-                elif act_on == 'FIRST':
-                    print('first')
-                    handle_set_type(first_key, **kwargs)
-                elif act_on == 'LAST':
-                    print('last')
-                    handle_set_type(last_key, **kwargs)
-                elif act_on == 'BOTH':
-                    print('both')
-                    handle_set_type(last_key, **kwargs)
-                    handle_set_type(first_key, **kwargs)
+            # elif handle_type is not None:
+                # kwargs = dict(left=True, right=True, handle_type=handle_type)
+                # if act_on == 'ALL':
+                    # for index, key in fcurve.keyframe_points.items():
+                        # print('all')
+                        # handle_set_type(key, **kwargs)
+                # elif act_on == 'FIRST':
+                    # print('first')
+                    # handle_set_type(first_key, **kwargs)
+                # elif act_on == 'LAST':
+                    # print('last')
+                    # handle_set_type(last_key, **kwargs)
+                # elif act_on == 'BOTH':
+                    # print('both')
+                    # handle_set_type(last_key, **kwargs)
+                    # handle_set_type(first_key, **kwargs)
 
-            fcurve.update()
+            # fcurve.update()
 
 
 def handle_manipulate(key, left=None, right=None, length=None):
@@ -716,16 +716,16 @@ def first_and_last_selected(fcurve, keyframes):
     return first_key, last_key
 
 
-def set_mode(fcurve, mode='AUTO_CLAMPED'):
-    '''
-    Sets the handle type of the selected keys
-    '''
-    selected_keys = get_selected(fcurve)
-    if selected_keys is not None:
-        for index in selected_keys:
-            key = fcurve.keyframe_points[index]
-            key.handle_right_type = mode
-            key.handle_left_type = mode
+# def set_mode(fcurve, mode='AUTO_CLAMPED'):
+    # '''
+    # Sets the handle type of the selected keys
+    # '''
+    # selected_keys = get_selected(fcurve)
+    # if selected_keys is not None:
+        # for index in selected_keys:
+            # key = fcurve.keyframe_points[index]
+            # key.handle_right_type = mode
+            # key.handle_left_type = mode
 
 
 def delete(objects, kind=None):
@@ -796,40 +796,40 @@ def copy_value(keyframes, reference_key):
         key.co.y = reference_key.co.y
 
 
-def flatten(objects, side):
-    '''
-    Match the value of the selected keys to the neighboring key to the "side"
-    '''
-    for obj in objects:
-        action = obj.animation_data.action
+# def flatten(objects, side):
+    # '''
+    # Match the value of the selected keys to the neighboring key to the "side"
+    # '''
+    # for obj in objects:
+        # action = obj.animation_data.action
 
-        for fcurve in action.fcurves:
+        # for fcurve in action.fcurves:
 
-            if getattr(fcurve.group, 'name', None) == cur_utils.group_name:
-                continue  # we don't want to add to the list the helper curves we have created
+            # if getattr(fcurve.group, 'name', None) == cur_utils.group_name:
+                # continue  # we don't want to add to the list the helper curves we have created
 
-            if fcurve.select is False:
-                continue
+            # if fcurve.select is False:
+                # continue
 
-            selected_keys = get_selected(fcurve)
+            # selected_keys = get_selected(fcurve)
 
-            if not selected_keys:
-                index = on_current_frame(fcurve)
-                selected_keys = [index]
+            # if not selected_keys:
+                # index = on_current_frame(fcurve)
+                # selected_keys = [index]
 
-            left_neighbor, right_neighbor = get_selected_neigbors(fcurve, selected_keys)
+            # left_neighbor, right_neighbor = get_selected_neigbors(fcurve, selected_keys)
 
-            if side == 'LEFT':
-                # this fixes the problem of the fist key moving (just happens with this one)
-                # if selected_keys[0][1] != fcurve.keyframe_points[0]:
-                #     copy_value(selected_keys, left_neighbor)  # if there is no key on the left then it uses itself
-                # else:
-                copy_value(selected_keys, fcurve.keyframe_points[0])
+            # if side == 'LEFT':
+                # # this fixes the problem of the fist key moving (just happens with this one)
+                # # if selected_keys[0][1] != fcurve.keyframe_points[0]:
+                # #     copy_value(selected_keys, left_neighbor)  # if there is no key on the left then it uses itself
+                # # else:
+                # copy_value(selected_keys, fcurve.keyframe_points[0])
 
-            elif side == 'RIGHT':
-                copy_value(selected_keys, right_neighbor)
+            # elif side == 'RIGHT':
+                # copy_value(selected_keys, right_neighbor)
 
-            fcurve.update()
+            # fcurve.update()
 
 
 def on_current_frame(fcurve):
@@ -882,20 +882,20 @@ def get_selected_neigbors(fcurve, keyframes):
     return left_neighbor, right_neighbor
 
 
-def get_index_neighbors(fcurve, index, clamped=False):
-    '''
-    Get the neighboring keys of a key given index
-    '''
-    left_neighbor = fcurve.keyframe_points[utils.floor(index - 1, 0)]
-    right_neighbor = fcurve.keyframe_points[utils.ceiling(index + 1, len(fcurve.keyframe_points) - 1)]
+# def get_index_neighbors(fcurve, index, clamped=False):
+    # '''
+    # Get the neighboring keys of a key given index
+    # '''
+    # left_neighbor = fcurve.keyframe_points[utils.floor(index - 1, 0)]
+    # right_neighbor = fcurve.keyframe_points[utils.ceiling(index + 1, len(fcurve.keyframe_points) - 1)]
 
-    # if clamped is False:
-    #     if left_neighbor == fcurve.keyframe_points[0]:
-    #         left_neighbor = None
-    #     if right_neighbor == fcurve.keyframe_points[len(fcurve.keyframe_points) - 1]:
-    #         right_neighbor = None
+    # # if clamped is False:
+    # #     if left_neighbor == fcurve.keyframe_points[0]:
+    # #         left_neighbor = None
+    # #     if right_neighbor == fcurve.keyframe_points[len(fcurve.keyframe_points) - 1]:
+    # #         right_neighbor = None
 
-    return left_neighbor, right_neighbor
+    # return left_neighbor, right_neighbor
 
 
 def get_frame_neighbors(fcurve, frame=None, clamped=False):
