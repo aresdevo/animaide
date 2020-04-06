@@ -349,6 +349,18 @@ def get_frame_neighbors(fcurve, frame=None, clamped=False):
     return left_neighbor, right_neighbor
 
 
+def linear_y(left_neighbor, right_neighbor, key):
+    big_adjacent = right_neighbor['x'] - left_neighbor['x']
+    big_oposite = right_neighbor['y'] - left_neighbor['y']
+    if big_adjacent == 0:
+        return
+    tangent = big_oposite / big_adjacent
+
+    adjacent = key.co.x - left_neighbor['x']
+    oposite = tangent * adjacent
+    return left_neighbor['y'] + oposite
+
+
 def poll_fcurve(context, obj, fcurve):
     if not valid_fcurve(fcurve):
         return
