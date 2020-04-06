@@ -37,7 +37,6 @@ class AAT_OT:
 
     slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=0.0)
-    slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
     op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
 
