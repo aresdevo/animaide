@@ -43,7 +43,7 @@ class AAT_OT_ease_to_ease(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'EASE_TO_EASE'
 
     @classmethod
@@ -84,7 +84,7 @@ class AAT_OT_ease(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'EASE'
 
     @classmethod
@@ -124,7 +124,7 @@ class AAT_OT_blend_neighbor(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'BLEND_NEIGHBOR'
 
     @classmethod
@@ -164,7 +164,7 @@ class AAT_OT_blend_frame(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'BLEND_FRAME'
 
     @classmethod
@@ -204,7 +204,7 @@ class AAT_OT_blend_ease(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'BLEND_EASE'
 
     @classmethod
@@ -244,7 +244,7 @@ class AAT_OT_blend_offset(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'BLEND_OFFSET'
 
     @classmethod
@@ -285,7 +285,7 @@ class AAT_OT_tween(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'TWEEN'
 
     @classmethod
@@ -324,7 +324,7 @@ class AAT_OT_push_pull(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'PUSH_PULL'
 
     @classmethod
@@ -362,7 +362,7 @@ class AAT_OT_smooth(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'SMOOTH'
 
     @classmethod
@@ -402,7 +402,7 @@ class AAT_OT_time_offset(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'TIME_OFFSET'
 
     @classmethod
@@ -441,7 +441,7 @@ class AAT_OT_noise(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'NOISE'
 
     @classmethod
@@ -482,7 +482,7 @@ class AAT_OT_scale_left(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'SCALE_LEFT'
 
     @classmethod
@@ -522,7 +522,7 @@ class AAT_OT_scale_right(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'SCALE_RIGHT'
 
     @classmethod
@@ -562,7 +562,7 @@ class AAT_OT_scale_average(Operator):
     factor: FloatProperty(default=0.0)
     # slider_type: StringProperty()
     slot_index: IntProperty(default=-1)
-    op_context: StringProperty(default='INVOKE_DEFAULT')
+    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     slider_type = 'SCALE_AVERAGE'
 
     @classmethod
