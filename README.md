@@ -14,7 +14,7 @@ This kind of tools is standard in the game and film industry.
 
 ## Instalation
 
-Go to this online address: <https://github.com/aresdevo/animaide>  
+Go to this online address: <https://github.com/aresdevo/animaide/archive/master.zip>  
 and download the addon to a chosen folder on your computer.
 
 Then in Blender, go to "Add-ons" tab on the preference window. There click on the "Install" button and navigate to the folder where you downloaded the addon. Choose the AnimAide file and it will be installed.
