@@ -640,6 +640,29 @@ def modal(self, context, event):
     return {'RUNNING_MODAL'}
 
 
+def update_keyframe_points(context):
+    """# The select operator(s) are bugged, and can fail to update selected keys, so"""
+
+    # if (context.area.type == 'DOPESHEET_EDITOR'):
+        # bpy.ops.transform.transform(mode='TIME_TRANSLATE')
+    # else:
+        # bpy.ops.transform.transform()
+
+    # Dopesheet's operator doesn't work, so always use graph's
+    area = context.area.type
+    if area != 'GRAPH_EDITOR':
+        context.area.type = 'GRAPH_EDITOR'
+
+    snap = context.space_data.auto_snap
+    context.space_data.auto_snap = 'NONE'
+
+    bpy.ops.transform.transform()
+
+    context.space_data.auto_snap = snap
+    if area != 'GRAPH_EDITOR':
+        context.area.type = area
+
+
 def invoke(self, context, event):
     '''
     Common actions used in the "invoke" of the different slider operators
@@ -649,8 +672,7 @@ def invoke(self, context, event):
 
     # The select operator(s) are bugged, and can fail to update selected keys, so
     # When you change the frame, then select keys, the previous keys will stay marked as selected
-    from zpy import utils
-    utils.update_keyframe_points(context)
+    update_keyframe_points(context)
 
     if self.op_context == 'EXEC_DEFAULT':
         return self.execute(context)
