@@ -305,8 +305,6 @@ def smooth(factor):
     # print('original: ', original_values[selected_keys[0]]['sy'])
 
     for index in selected_keys:
-
-
         k = fcurve.keyframe_points[index]
         lh_delta = k.co.y - k.handle_left.y
         rh_delta = k.co.y - k.handle_right.y
@@ -524,45 +522,8 @@ def looper(self, context):
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, fcurve in fcurves.items():
-
-            if not key_utils.valid_fcurve(fcurve):
+            if not key_utils.poll_fcurve(context, obj, fcurve):
                 continue
-
-            if obj.type == 'ARMATURE':
-                # bone_name = utils.get_bone_name(fcurve, usable_bones_names)
-                # bone_name = utils.get_bone_name(obj, fcurve)
-                #
-
-                if getattr(fcurve.group, 'name', None) == 'Object Transforms':
-                    # When animating an object, by default its fcurves grouped with this name.
-                    continue
-                elif not fcurve.group:
-                    transforms = (
-                        'location', 'rotation_euler', 'scale',
-                        'rotation_quaternion', 'rotation_axis_angle',
-                        '[\"',  # custom property
-                    )
-                    if fcurve.data_path.startswith(transforms):
-                        # fcurve belongs to the  object, so skip it
-                        continue
-
-                # if fcurve.group.name not in bones_names:
-                #     continue
-
-                split_data_path = fcurve.data_path.split(sep='"')
-                bone_name = split_data_path[1]
-                bone = obj.data.bones.get(bone_name)
-
-                only_selected = context.space_data.dopesheet.show_only_selected
-
-                if bone is None or bone.hide or (only_selected and not bone.select):
-                    continue
-
-                # if bone_name is None:
-                #     continue
-
-            if getattr(fcurve.group, 'name', None) == cur_utils.group_name:
-                continue  # we don't want to select keys on reference fcurves
 
             global_fcurve = key_utils.global_values[obj.name][fcurve_index]
             selected_keys = global_fcurve['selected_keys']
@@ -637,6 +598,11 @@ def modal(self, context, event):
     else:
         prop = self.slots[self.slot_index]
 
+    context.window.workspace.status_text_set(
+        f"{prop.selector.title().replace('_', ' ')}: "
+        f"{self.factor*100:0.0f}%"
+    )
+
     if event.type == 'MOUSEMOVE':  # Apply
 
         slider_from_zero = (event.mouse_x - self.init_mouse_x) / 100
@@ -656,6 +622,7 @@ def modal(self, context, event):
         prop.factor = 0.0
         prop.factor_overshoot = 0.0
 
+        context.window.workspace.status_text_set(None)
         return {'FINISHED'}
 
     elif event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
@@ -667,9 +634,33 @@ def modal(self, context, event):
         prop.factor = 0.0
         prop.factor_overshoot = 0.0
 
+        context.window.workspace.status_text_set(None)
         return {'CANCELLED'}
 
     return {'RUNNING_MODAL'}
+
+
+def update_keyframe_points(context):
+    """# The select operator(s) are bugged, and can fail to update selected keys, so"""
+
+    # if (context.area.type == 'DOPESHEET_EDITOR'):
+        # bpy.ops.transform.transform(mode='TIME_TRANSLATE')
+    # else:
+        # bpy.ops.transform.transform()
+
+    # Dopesheet's operator doesn't work, so always use graph's
+    area = context.area.type
+    if area != 'GRAPH_EDITOR':
+        context.area.type = 'GRAPH_EDITOR'
+
+    snap = context.space_data.auto_snap
+    context.space_data.auto_snap = 'NONE'
+
+    bpy.ops.transform.transform()
+
+    context.space_data.auto_snap = snap
+    if area != 'GRAPH_EDITOR':
+        context.area.type = area
 
 
 def invoke(self, context, event):
@@ -678,6 +669,10 @@ def invoke(self, context, event):
     '''
 
     # self.animaide.slider.selector = self.slider_type
+
+    # The select operator(s) are bugged, and can fail to update selected keys, so
+    # When you change the frame, then select keys, the previous keys will stay marked as selected
+    update_keyframe_points(context)
 
     if self.op_context == 'EXEC_DEFAULT':
         return self.execute(context)
