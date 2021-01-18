@@ -9,7 +9,8 @@ focused on bug fixes and addressing some design issues. It looks and works a bit
 Here is the summary of the changes:
 
 - Hopefully a large amount of bugs has been addressed.
-- Aside from the Graph editor, now it's also available in the DopeSheet, Timeline and 3D View editors.
+- Aside from the Graph editor, now it's also available in the DopeSheet, Timeline and 3D View editors.\
+  The only tool in the graph editor is curveTools. AnimOffset has to live in an animation area.
 - All the tools can now be found on a Menu on each of the editors.
 - You can add your own shortcuts.
 - Sliders are now called **curveTools**. Now use buttons instead of the pseudo sliders it used before 
@@ -51,7 +52,6 @@ Then in Blender, go to the "Add-ons" tab in the preference window. There click o
 folder where you downloaded the addon. After you select the file and click "Install Add-on", AnimAide will be installed 
 under the animation category.
 
-![Installing 1](images/installing1.jpg)
 ![Installing 2](images/installing2.gif)
 
 Make sure the addon check-mark is active.
@@ -117,7 +117,7 @@ Just to make it a bit clearer what it does.
 ## animOffset
 
 With this tool you can modify any animated object, and the change will propagate to the animation range filter by
-the mask.
+the mask. You can find the panel in all the animation editors we support but not on the 3D View.
 
 ![AnimOffset](images/anim_offset.gif)
 
@@ -171,7 +171,8 @@ These panel gives you helpful tools to simultaneously manipulate keys across
 multiple f-curves from either animated objects or animated bones in an armature.
 
 In most cases these tools affect the selected keys using the neighboring
-unselected keys as reference.
+unselected keys as reference. When activated from the 3D View it will act on all the fcurves in the selected object or
+bone, but when is activated in one of the 3 animation editors we support it will only act on the selected channels.
 
 ### How the interface works:
 
