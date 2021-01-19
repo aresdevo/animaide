@@ -38,7 +38,7 @@ Here is the summary of the changes:
 >If you are coming from the previous version, you might have some issues with the shortcuts. The reason is that
 **AnimAide** had its oun built-in shortcuts, and they might still live in your preferences.
 If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel.\
-![Shortcut Trobleshooting](images/shortcut_trobleshoot.gif)
+![Shortcut Troubleshoot](images/shortcut_troubleshoot.gif)
 
 In the information that follows I expand on these points.
 
@@ -65,7 +65,7 @@ under the animation category.
 
 Make sure the addon check-mark is active.
 
-![Instaling 3](images/installing3.jpg)
+![Installing 3](images/installing3.jpg)
 
 ### Where to find the tools
 
@@ -96,13 +96,13 @@ All the tools are also available in a new **Animaide** menu under the Graph, Dop
 To do so find the tools on the "AnimAide" menu and right-click on one of them. You will then get an option to 
 add a shortcut to it.
 
-![Sortcut Creation](images/shortcut_creation.jpg)
+![Shortcut Creation](images/shortcut_creation.jpg)
 
 >### IMPORTANT
 >If you are coming from the previous version, you might have some issues with the shortcuts. The reason is that 
 **AnimAide** had its oun built-in shortcuts, and they might still live in your preferences.
 If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel.\
-![Shortcut Trobleshooting](images/shortcut_trobleshoot.gif)
+![Shortcut Troubleshoot](images/shortcut_troubleshoot.gif)
 
 At the moment, Animaide has two main panels:  **curveTools** and **animOffset**.
 
@@ -180,7 +180,7 @@ These panel gives you helpful tools to simultaneously manipulate keys across
 multiple f-curves from either animated objects or animated bones in an armature.
 
 In most cases these tools affect the selected keys using the neighboring
-unselected keys as reference. When activated from the 3D View it will act on all the fcurves in the selected object or
+unselected keys as reference. When activated from the 3D View it will act on all the f-curves in the selected object or
 bone, but when is activated in one of the 3 animation editors we support it will only act on the selected channels.
 
 ### How the interface works:
@@ -223,7 +223,7 @@ previous version
 ![Installing 2](images/active_on_release.gif)
 
 - **Activate on release:** When this option is selected tools will behave similar to previous version
-  in the sence that they will become active as soon as you select them. If you unselect it  tools will become 
+  in the sense that they will become active as soon as you select them. If you unselect it  tools will become 
   active only after you left-click and drag.
 
 ![Curve Tools Preferences](images/curve_tools_preferences.gif)

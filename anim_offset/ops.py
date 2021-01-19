@@ -89,6 +89,7 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
     def finish_mask(self, context):
         context.window.cursor_set("DEFAULT")
         context.window.workspace.status_text_set(None)
+        context.scene.animaide.anim_offset.in_use = True
         context.area.tag_redraw()
         # bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
 
@@ -161,7 +162,8 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
             )
 
     def modal(self, context, event):
-        anim_offset = context.scene.animaide.anim_offset
+        scene = context.scene
+        anim_offset = scene.animaide.anim_offset
 
         x = event.mouse_region_x
         y = event.mouse_region_y
@@ -184,20 +186,21 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                 self.leftmouse = True
                 self.init_mouse_x = event.mouse_x
                 self.leftmouse_frame = frame
-                self.delta_start = context.scene.frame_start - context.scene.frame_preview_start
-                self.delta_end = context.scene.frame_preview_end - context.scene.frame_end
-                self.end_distance = abs(self.leftmouse_frame - context.scene.frame_end)
-                self.start_distance = abs(self.leftmouse_frame - context.scene.frame_start)
-                self.init_preview_start = context.scene.frame_preview_start
-                self.init_start = context.scene.frame_start
-                self.init_end = context.scene.frame_end
-                self.init_preview_end = context.scene.frame_preview_end
+                self.delta_start = scene.frame_start - scene.frame_preview_start
+                self.delta_end = scene.frame_preview_end - scene.frame_end
+                self.end_distance = abs(self.leftmouse_frame - scene.frame_end)
+                self.start_distance = abs(self.leftmouse_frame - scene.frame_start)
+                self.init_preview_start = scene.frame_preview_start
+                self.init_start = scene.frame_start
+                self.init_end = scene.frame_end
+                self.init_preview_end = scene.frame_preview_end
+                # anim_offset.in_use = True
 
             elif event.value == 'RELEASE':
                 # ----------- center cursor ----------
-                start = context.scene.frame_start
-                end = context.scene.frame_end
-                context.scene.frame_current = (end + start)/2
+                start = scene.frame_start
+                end = scene.frame_end
+                scene.frame_current = (end + start)/2
 
                 self.leftmouse = False
                 self.created = True
@@ -205,28 +208,29 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
 
         elif event.type == 'MOUSEMOVE':
 
-            anim_offset = context.scene.animaide.anim_offset
+            anim_offset = scene.animaide.anim_offset
 
             if not anim_offset.in_use:
                 # ------------ fill timeline -----------
-                context.scene.frame_start = -100
-                context.scene.frame_preview_start = -100
-                context.scene.frame_end = -100
-                context.scene.frame_preview_end = -100
+                scene.use_preview_range = True
+                scene.frame_start = -100
+                scene.frame_end = -100
+                scene.frame_preview_start = -100
+                scene.frame_preview_end = -100
 
             if self.leftmouse:
-                if anim_offset.in_use:
+                if anim_offset.in_use and scene.frame_start != scene.frame_end:
                     if event.ctrl:
                         # ----------- blends ------------
                         if self.end_distance < self.start_distance:
-                            context.scene.frame_preview_end = self.constraint(context.scene.frame_end, 'L', frame)
+                            scene.frame_preview_end = self.constraint(scene.frame_end, 'L', frame)
                             context.window.workspace.status_text_set(
-                                f"Right Blend: {context.scene.frame_preview_end}"
+                                f"Right Blend: {scene.frame_preview_end}"
                             )
                         else:
-                            context.scene.frame_preview_start = self.constraint(context.scene.frame_start, 'R', frame)
+                            scene.frame_preview_start = self.constraint(scene.frame_start, 'R', frame)
                             context.window.workspace.status_text_set(
-                                f"Left Blend: {context.scene.frame_preview_start}     "
+                                f"Left Blend: {scene.frame_preview_start}     "
                             )
 
                         support.set_blend_values()
@@ -238,25 +242,25 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                         context.window.workspace.status_text_set(left_info + right_info)
 
                         distance = frame - self.leftmouse_frame
-                        context.scene.frame_preview_start = self.init_preview_start + distance
-                        context.scene.frame_start = self.init_start + distance
-                        context.scene.frame_end = self.init_end + distance
-                        context.scene.frame_preview_end = self.init_preview_end + distance
+                        scene.frame_preview_start = self.init_preview_start + distance
+                        scene.frame_start = self.init_start + distance
+                        scene.frame_end = self.init_end + distance
+                        scene.frame_preview_end = self.init_preview_end + distance
                         support.set_blend_values()
 
                     else:
                         # -------------- Move margins -------------
-                        end_distance = abs(self.leftmouse_frame - context.scene.frame_end)
-                        start_distance = abs(self.leftmouse_frame - context.scene.frame_start)
+                        end_distance = abs(self.leftmouse_frame - scene.frame_end)
+                        start_distance = abs(self.leftmouse_frame - scene.frame_start)
 
                         if end_distance < start_distance:
-                            context.scene.frame_end = self.constraint(context.scene.frame_start, 'L', frame, gap=1)
-                            context.scene.frame_preview_end = context.scene.frame_end + self.delta_end
+                            scene.frame_end = self.constraint(scene.frame_start, 'L', frame, gap=1)
+                            scene.frame_preview_end = scene.frame_end + self.delta_end
                             info = self.marign_blend_info(context, 'Right')
                             context.window.workspace.status_text_set(info)
                         else:
-                            context.scene.frame_start = self.constraint(context.scene.frame_end, 'R', frame, gap=1)
-                            context.scene.frame_preview_start = context.scene.frame_start - self.delta_start
+                            scene.frame_start = self.constraint(scene.frame_end, 'R', frame, gap=1)
+                            scene.frame_preview_start = scene.frame_start - self.delta_start
                             info = self.marign_blend_info(context, 'Left')
                             context.window.workspace.status_text_set(info)
 
@@ -265,8 +269,8 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                 else:
                     # --------------- Add mask ----------------
                     context.window.workspace.status_text_set(
-                        f"Left Margin: {context.scene.frame_start}     "
-                        f"Right Margin: {context.scene.frame_end}     "
+                        f"Left Margin: {scene.frame_start}     "
+                        f"Right Margin: {scene.frame_end}     "
                     )
                     direction = None
                     if event.mouse_x > self.init_mouse_x:
@@ -275,18 +279,18 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                         direction = 'L'
 
                     if direction == 'R':
-                        context.scene.frame_end = frame
-                        context.scene.frame_preview_end = frame
+                        scene.frame_end = frame
+                        scene.frame_preview_end = frame
 
-                        context.scene.frame_start = self.leftmouse_frame
-                        context.scene.frame_preview_start = self.leftmouse_frame
+                        scene.frame_start = self.leftmouse_frame
+                        scene.frame_preview_start = self.leftmouse_frame
 
                     elif direction == 'L':
-                        context.scene.frame_start = frame
-                        context.scene.frame_preview_start = frame
+                        scene.frame_start = frame
+                        scene.frame_preview_start = frame
 
-                        context.scene.frame_end = self.leftmouse_frame
-                        context.scene.frame_preview_end = self.leftmouse_frame
+                        scene.frame_end = self.leftmouse_frame
+                        scene.frame_preview_end = self.leftmouse_frame
 
                     support.set_blend_values()
 
@@ -301,21 +305,22 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
-
-        context.scene.tool_settings.use_keyframe_insert_auto = False
+        scene = context.scene
+        scene.tool_settings.use_keyframe_insert_auto = False
 
         self.leftmouse = False
         self.created = False
 
-        anim_offset = context.scene.animaide.anim_offset
+        anim_offset = scene.animaide.anim_offset
+
         if not anim_offset.in_use:
             support.store_user_timeline_ranges()
 
         if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
 
-        context.scene.use_preview_range = True
         support.add_blends()
+        # scene.use_preview_range = True
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
