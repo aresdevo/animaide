@@ -218,7 +218,7 @@ previous version
   active only after you left-click and drag.\
   ![Installing 2](images/active_on_release.gif)
 >
->- **Overshoot:** allows a bigger range of change.
+>- **Overshoot:** allows a bigger range of change.\
   ![Overshoot](images/overshoot.gif)
 >
 >- **Only keys under cursor:** Ignore selected keys and only influence the keys under the cursor of the selected channels.
