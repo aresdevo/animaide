@@ -1,4 +1,4 @@
-# Animaide 1.0
+# Animaide 1.0.1
 
 
 #### New in this version:
@@ -16,14 +16,23 @@ Here is the summary of the changes:
 - Sliders are now called **curveTools**. Now use buttons instead of the pseudo sliders it used before 
   (the implementation was confusing).
 - **curveTools** can be used in two modes: compact, and a new expanded mode. The expanded mode substitute 
-  the option of adding new "sliders".
+  the option of adding new "sliders".\
+  ![Expanded Mode](images/expanded_mode.gif)
 - Reference Frames can now also be modified by moving the markers (when the "use markers" option is active).
-- You can store reference frames as bookmarks in a new panel list.
+- You can store reference frames as bookmarks in a new panel list.\
+  ![Frame Bookmarks](images/frame_bookmarks.gif)
 - AnimTransform is now called **animOffset**.
-- Mask creation is now interactive.
+- Mask creation is now interactive.\
+  ![Mask Creation](images/mask_creation.gif)
 - The mask creation tool use modifier keys to activate different options.
 - The option in the preferences to modify the interpolation of the mask soft margins (or blends) now work.
-- **animOffset** no longer deactivates **curveTools**. They can coexist now.
+- **animOffset** no longer deactivates **curveTools**. They can coexist now.\
+  ![Tools Can Coexist](images/tools_can_coexist.gif)
+- Added a new way of using the **curveTool**. If you don't like how the tools become active as soon as 
+  you select them, there is an option in the preferences now to change that. If you unselect the option called:
+  "Activate on release" the tools will become active only after you left-click and drag. Let me know if you would
+  prefer it unselected by default.\
+  ![Installing 2](images/active_on_release.gif)
 
 >### IMPORTANT
 >If you are coming from the previous version, you might have some issues with the shortcuts. The reason is that
@@ -31,7 +40,7 @@ Here is the summary of the changes:
 If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel.\
 ![Shortcut Trobleshooting](images/shortcut_trobleshoot.gif)
 
-In the information that follows I expand on these points with animated gifs
+In the information that follows I expand on these points.
 
 ## Introduction: 
 
@@ -211,6 +220,12 @@ previous version
 
 ### Curve Tools Settings:
 
+![Installing 2](images/active_on_release.gif)
+
+- **Activate on release:** When this option is selected tools will behave similar to previous version
+  in the sence that they will become active as soon as you select them. If you unselect it  tools will become 
+  active only after you left-click and drag.
+
 ![Curve Tools Preferences](images/curve_tools_preferences.gif)
 
 - **Overshoot:** allows a bigger range of change.
@@ -218,7 +233,6 @@ previous version
 ![Overshoot](images/overshoot.gif)
 
 - **Only keys under cursor:** Ignore selected keys and only influence the keys under the cursor of the selected channels.
-
 
 >#### TIP:
 > ![Tweak Menu](images/tweak_menu.jpg)

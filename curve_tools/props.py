@@ -1,3 +1,4 @@
+import bpy
 from . import support
 from .. import utils
 from bpy.props import BoolProperty, EnumProperty, StringProperty, \
@@ -46,7 +47,7 @@ def update_selector(self, context):
 
     support.get_tools_globals()
     # self.overshoot = False
-    self.modal_switch = False
+    self.show_factor = False
 
 
 def toggle_tool_markers(self, context):
@@ -110,7 +111,10 @@ class Tool(PropertyGroup):
 
     max_value: FloatProperty(default=1)
 
-    modal_switch: BoolProperty()
+    show_factor: BoolProperty()
+
+    flip: BoolProperty(default=True,
+                       description='Changes how the tools modal work')
 
     expand: BoolProperty(default=True,
                          description='Toggle between compact and expanded modes for the Tools')

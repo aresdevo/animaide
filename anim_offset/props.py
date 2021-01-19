@@ -1,6 +1,6 @@
 import bpy
 from . import support
-from bpy.props import BoolProperty, EnumProperty
+from bpy.props import BoolProperty, EnumProperty, IntProperty
 from bpy.types import PropertyGroup
 
 
@@ -13,6 +13,18 @@ def interpolation_update(self, context):
 
 
 class AnimAideAnimOffset(PropertyGroup):
+
+    user_preview_start: IntProperty()
+
+    user_preview_end: IntProperty()
+
+    user_preview_use: BoolProperty()
+
+    user_scene_start: IntProperty()
+
+    user_scene_end: IntProperty()
+
+    user_scene_auto: BoolProperty()
 
     blends: BoolProperty(default=False)
 

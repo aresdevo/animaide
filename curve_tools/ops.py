@@ -29,58 +29,89 @@ class ANIMAIDE_OT:
     def execute(self, context):
         return
 
+    def reset_tool_factor(self, context):
+        tool = context.scene.animaide.tool
+        tool.show_factor = False
+        tool.factor = 0.0
+        tool.factor_overshoot = 0.0
+        context.window.cursor_set("DEFAULT")
+        context.window.workspace.status_text_set(None)
+        context.area.tag_redraw()
+        # bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
+        # bpy.ops.wm.redraw_timer()
+        # bpy.data.window_managers['WinMan'].windows.update()
+        # bpy.data.window_managers['WinMan'].update_tag()
+
+    def start(self, context, event):
+        self.activated = True
+        # context.scene.animaide.tool.show_factor = True
+        self.init_mouse_x = event.mouse_x
+
+    def end(self, context):
+        self.activated = False
+        # context.scene.animaide.tool.show_factor = False
+        self.reset_tool_factor(context)
+        return {'FINISHED'}
+
     def modal(self, context, event):
-        animaide = context.scene.animaide
-
-        info_tool = animaide.tool.selector.title().replace('_', ' ')
+        tool = context.scene.animaide.tool
+        info_tool = tool.selector.title().replace('_', ' ')
         info_factor = utils.clamp((self.factor * 100), -100, 100)
-        context.window.workspace.status_text_set(f"{info_tool}: {info_factor:0.0f}%")
 
-        def reset_tool_factor():
-            animaide.tool.modal_switch = False
-            animaide.tool.factor = 0.0
-            animaide.tool.factor_overshoot = 0.0
+        context.window.workspace.status_text_set(
+            f"MOUSE-LB: drag to apply {info_tool}       "
+            f"MOUSE-RB: Exit {info_tool} mode"
+        )
 
-        if event.type == 'MOUSEMOVE':  # Use
+        context.window.cursor_set("SCROLL_X")
+        tool.show_factor = True
+
+        if event.type == 'LEFTMOUSE':
+            if event.value == 'PRESS':
+                if tool.flip:
+                    return self.end(context)
+                else:
+                    self.start(context, event)
+
+            elif event.value == 'RELEASE':
+                if tool.flip:
+                    self.start(context, event)
+                else:
+                    return self.end(context)
+
+        if event.type == 'MOUSEMOVE' and self.activated:  # Use
+            context.window.workspace.status_text_set(f"{info_tool}: {info_factor:0.0f}%")
 
             tool_from_zero = (event.mouse_x - self.init_mouse_x) / 100
             self.factor = tool_from_zero
 
-            animaide.tool.factor = tool_from_zero
-            animaide.tool.factor_overshoot = tool_from_zero
+            tool.factor = tool_from_zero
+            tool.factor_overshoot = tool_from_zero
 
             self.execute(context)
-
-        elif event.type == 'LEFTMOUSE':  # Confirm
-            # if context.area.type == 'GRAPH_EDITOR':
-            # context.area.tag_redraw()
-            # support.get_tools_globals()
-
-            reset_tool_factor()
-
-            context.window.workspace.status_text_set(None)
-            context.area.tag_redraw()
-            # bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
-            # bpy.ops.wm.redraw_timer()
-            # bpy.data.window_managers['WinMan'].windows.update()
-            # bpy.data.window_managers['WinMan'].update_tag()
-            return {'FINISHED'}
 
         elif event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
             support.reset_original()
 
-            reset_tool_factor()
+            self.reset_tool_factor(context)
 
-            context.window.workspace.status_text_set(None)
-            context.area.tag_redraw()
-            # bpy.ops.wm.redraw_timer()
-            # bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
             return {'CANCELLED'}
 
         return {'RUNNING_MODAL'}
 
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, 'factor', text='', slider=True)
+
     def invoke(self, context, event):
-        animaide = context.scene.animaide
+        tool = context.scene.animaide.tool
+
+        if tool.flip:
+            self.start(context, event)
+        else:
+            self.activated = False
+            tool.show_factor = False
+            self.init_mouse_x = 0
 
         # The select operator(s) are bugged, and can fail to update selected keys, so
         # When you change the frame, then select keys, the previous keys will stay marked as selected
@@ -89,22 +120,21 @@ class ANIMAIDE_OT:
         if self.op_context == 'EXEC_DEFAULT':
             return self.execute(context)
 
-        animaide.tool.selector = self.tool_type
+        tool.selector = self.tool_type
 
-        animaide.tool.modal_switch = True
-        animaide.tool.factor = 0.0
-        animaide.tool.factor_overshoot = 0.0
-        self.slope = animaide.tool.slope
-        self.phase = animaide.tool.noise_phase
+        tool.factor = 0.0
+        tool.factor_overshoot = 0.0
+        self.slope = tool.slope
+        self.phase = tool.noise_phase
 
-        self.init_mouse_x = event.mouse_x
+        # self.init_mouse_x = event.mouse_x
 
-        animaide.tool.area = context.area.type
+        tool.area = context.area.type
 
         if context.area.type == 'VIEW_3D':
-            animaide.tool.unselected_fcurves = True
+            tool.unselected_fcurves = True
         else:
-            animaide.tool.unselected_fcurves = False
+            tool.unselected_fcurves = False
 
         left_frame, right_frame = support.set_ref_marker(context)
 
@@ -602,6 +632,7 @@ class ANIMAIDE_OT_tools_settings(Operator):
         layout.separator()
         layout.prop(tool, 'overshoot', text='overshoot', toggle=False)
         layout.prop(tool, 'keys_under_cursor', text='Only keys under cursor', toggle=False)
+        layout.prop(tool, 'flip', text='Activates on release', toggle=False)
 
         col = layout.column(align=False)
         if tool.selector == 'BLEND_FRAME':

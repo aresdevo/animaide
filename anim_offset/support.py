@@ -247,36 +247,39 @@ def reset_timeline_mask():
     """Resets the timeline playback and preview ranges to what the user had it as"""
 
     scene = bpy.context.scene
+    anim_offset = scene.animaide.anim_offset
 
-    scene.frame_preview_start = user_preview_range['start']
-    scene.frame_preview_end = user_preview_range['end']
-    scene.use_preview_range = user_preview_range['use']
-    scene.frame_start = user_scene_range['start']
-    scene.frame_end = user_scene_range['end']
-    scene.tool_settings.use_keyframe_insert_auto = user_scene_range['auto']
+    scene.frame_preview_start = anim_offset.user_preview_start
+    scene.frame_preview_end = anim_offset.user_preview_end
+    scene.use_preview_range = anim_offset.user_preview_use
+    scene.frame_start = anim_offset.user_scene_start
+    scene.frame_end = anim_offset.user_scene_end
+    scene.tool_settings.use_keyframe_insert_auto = anim_offset.user_scene_auto
 
 
 def reset_timeline_blends():
     """Resets the timeline playback and preview ranges to what the user had it as"""
 
     scene = bpy.context.scene
+    anim_offset = scene.animaide.anim_offset
 
-    scene.frame_preview_start = user_preview_range['start']
-    scene.frame_preview_end = user_preview_range['end']
-    scene.use_preview_range = user_preview_range['use']
+    scene.frame_preview_start = anim_offset.user_preview_start
+    scene.frame_preview_end = anim_offset.user_preview_end
+    scene.use_preview_range = anim_offset.user_preview_use
 
 
 def store_user_timeline_ranges():
     """Stores the timeline playback and preview ranges"""
 
     scene = bpy.context.scene
+    anim_offset = scene.animaide.anim_offset
 
-    user_preview_range['start'] = scene.frame_preview_start
-    user_preview_range['end'] = scene.frame_preview_end
-    user_preview_range['use'] = scene.use_preview_range
-    user_scene_range['start'] = scene.frame_start
-    user_scene_range['end'] = scene.frame_end
-    user_scene_range['auto'] = scene.tool_settings.use_keyframe_insert_auto
+    anim_offset.user_preview_start = scene.frame_preview_start
+    anim_offset.user_preview_end = scene.frame_preview_end
+    anim_offset.user_preview_use = scene.use_preview_range
+    anim_offset.user_scene_start = scene.frame_start
+    anim_offset.user_scene_end = scene.frame_end
+    anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
 
 
 # ---------- Functions for Operators ------------

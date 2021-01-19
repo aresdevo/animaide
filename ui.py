@@ -20,7 +20,7 @@ class ANIMAIDE_PT_help:
 
 class ANIMAIDE_MT_pie_menu_a(Menu):
     bl_idname = "ANIMAIDE_MT_pie_menu_a"
-    bl_label = "Sliders A"
+    bl_label = "Tools A"
 
     def draw(self, context):
         layout = self.layout
@@ -38,7 +38,7 @@ class ANIMAIDE_MT_pie_menu_a(Menu):
 
 class ANIMAIDE_MT_pie_menu_b(Menu):
     bl_idname = "ANIMAIDE_MT_pie_menu_b"
-    bl_label = "Sliders B"
+    bl_label = "Tools B"
 
     def draw(self, context):
         layout = self.layout

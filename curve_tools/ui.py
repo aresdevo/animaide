@@ -118,6 +118,27 @@ def steps(context, layout, tool, expand):
         row.prop(tool, 'selector', text='')
 
 
+def tool_button(context, layout_type, tool_type=''):
+    area = context.area.type
+    tool = context.scene.animaide.tool
+
+    if tool.overshoot is False:
+        rango = 'factor'
+    else:
+        rango = 'factor_overshoot'
+
+    if tool_type == '':
+        same_type = True
+        tool_type = str(tool.selector).lower()
+    else:
+        same_type = (str(tool.selector).lower() == tool_type)
+
+    if tool.show_factor and same_type and area == tool.area:
+        layout_type.prop(tool, rango, text='', slider=True)
+    else:
+        layout_type.operator('anim.aide_%s' % tool_type, emboss=True)
+
+
 class ANIMAIDE_PT_curve_tools:
     bl_label = "Curve Tools"
     bl_region_type = 'UI'
@@ -128,34 +149,12 @@ class ANIMAIDE_PT_curve_tools:
         animaide = context.scene.animaide
         tool = animaide.tool
 
-        selected = support.get_items(context, any_mode=True)
-
-        if tool.overshoot is False:
-            range = 'factor'
-        else:
-            range = 'factor_overshoot'
-
         if context.area.type == 'VIEW_3D':
             expand = tool.expand_3d
             expand_text = 'expand_3d'
         else:
             expand = tool.expand
             expand_text = 'expand'
-
-        def tool_button(layout_type, tool_type=''):
-            area = context.area.type
-            tool_area = animaide.tool.area
-
-            if tool_type == '':
-                same_type = True
-                tool_type = str(tool.selector).lower()
-            else:
-                same_type = (str(tool.selector).lower() == tool_type)
-
-            if tool.modal_switch and same_type and area == tool_area:
-                layout_type.prop(tool, range, text='', slider=True)
-            else:
-                layout_type.operator('anim.aide_%s' % tool_type, emboss=True)
 
         if expand:
             icon = 'RIGHTARROW'
@@ -178,29 +177,31 @@ class ANIMAIDE_PT_curve_tools:
         box = layout.box()
         col = box.column(align=True)
 
+        selected = support.get_items(context, any_mode=True)
+
         if expand:
             subrow = col.row(align=True)
 
             if not selected:
                 subrow.active = False
 
-            tool_button(subrow)
+            tool_button(context, subrow)
             subrow.prop_menu_enum(tool, 'selector', text='', icon='FCURVE')
         else:
-            tool_button(col, 'ease_to_ease')
-            tool_button(col, 'ease')
-            tool_button(col, 'blend_ease')
-            tool_button(col, 'blend_neighbor')
-            tool_button(col, 'blend_frame')
-            tool_button(col, 'blend_offset')
-            tool_button(col, 'tween')
-            tool_button(col, 'push_pull')
-            tool_button(col, 'scale_left')
-            tool_button(col, 'scale_average')
-            tool_button(col, 'scale_right')
-            tool_button(col, 'smooth')
-            tool_button(col, 'noise')
-            tool_button(col, 'time_offset')
+            tool_button(context, col, 'ease_to_ease')
+            tool_button(context, col, 'ease')
+            tool_button(context, col, 'blend_ease')
+            tool_button(context, col, 'blend_neighbor')
+            tool_button(context, col, 'blend_frame')
+            tool_button(context, col, 'blend_offset')
+            tool_button(context, col, 'tween')
+            tool_button(context, col, 'push_pull')
+            tool_button(context, col, 'scale_left')
+            tool_button(context, col, 'scale_average')
+            tool_button(context, col, 'scale_right')
+            tool_button(context, col, 'smooth')
+            tool_button(context, col, 'noise')
+            tool_button(context, col, 'time_offset')
 
         steps(context, box, tool, expand)
 
