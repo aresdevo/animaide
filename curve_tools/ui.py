@@ -200,7 +200,7 @@ class ANIMAIDE_PT_curve_tools:
             tool_button(context, col, 'scale_average')
             tool_button(context, col, 'scale_right')
             tool_button(context, col, 'smooth')
-            tool_button(context, col, 'noise')
+            tool_button(context, col, 'wave_noise')
             tool_button(context, col, 'time_offset')
 
         steps(context, box, tool, expand)

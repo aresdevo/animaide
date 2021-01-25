@@ -77,26 +77,6 @@ def create_path(context, fcurves):
         n += 1
 
 
-def add_samples(fcurve, reference_fcurve, frequency=1):
-    """Add keys to an fcurve with the given frequency"""
-
-    key_list = fcurve.keyframe_points
-
-    selected_keys = utils.key.get_selected(fcurve)
-    first_key, last_key = utils.key.first_and_last_selected(fcurve, selected_keys)
-
-    amount = int(abs(last_key.co.x - first_key.co.x) / frequency)
-    frame = first_key.co.x
-
-    for n in range(amount):
-        target = reference_fcurve.evaluate(frame)
-        key_list.insert(frame, target)
-        frame += frequency
-
-    target = reference_fcurve.evaluate(last_key.co.x)
-    key_list.insert(last_key.co.x, target)
-
-
 def get_selected(fcurves):
     """return selected fcurves in the current action with the exception of the reference fcurves"""
 
@@ -137,19 +117,6 @@ def add_cycle(fcurve, before='MIRROR', after='MIRROR'):
 
     cycle.mode_before = before
     cycle.mode_after = after
-
-
-def add_noise(fcurve, strength=0.4, scale=1, phase=0):
-    """Adds noise modifier to an fcurve"""
-
-    noise = fcurve.modifiers.new('NOISE')
-
-    noise.strength = strength
-    noise.scale = scale
-    noise.phase = phase
-    # fcurve.convert_to_samples(0, 100)
-    # fcurve.convert_to_keyframes(0, 100)
-    # fcurve.modifiers.remove(noise)
 
 
 def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=False):
@@ -219,35 +186,6 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
     dup.update()
 
     return dup
-
-
-def s_curve(x, slope=1.0, width=1.0, height=1.0, xshift=0.0, yshift=0.0):
-    """Formula for 'S' curve"""
-
-    return height * ((x - xshift) ** slope / ((x - xshift) ** slope + (width - (x - xshift)) ** slope)) + yshift
-
-
-def ramp_curve(x, slope=2.0, height=1.0, yshift=0.0, width=1.0, xshift=0.0, invert=False):
-    """Formula for ease-in or ease-out curve"""
-
-    if invert:
-        slope = 1 / slope
-
-    return height * (((1 / width) * (x - xshift)) ** slope) + yshift
-    # return height * ((((x-xshift)/width)**slope)+yshift)
-
-
-def to_linear_curve(left_neighbor, right_neighbor, selected_keys, factor=1):
-    """Lineal transition between neighbors"""
-
-    local_y = right_neighbor.y - left_neighbor.y
-    local_x = right_neighbor.x - left_neighbor.x
-    ratio = local_y / local_x
-    for k in selected_keys:
-        x = k.co.x - left_neighbor.co.x
-        average_y = ratio * x + left_neighbor.y
-        delta = average_y - k.co.y
-        k.co.y = k.co.y + (delta * factor)
 
 
 def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=False):

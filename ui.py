@@ -18,8 +18,8 @@ class ANIMAIDE_PT_help:
         row.operator('anim.aide_demo', text='', icon='FILE_MOVIE', emboss=False)
 
 
-class ANIMAIDE_MT_pie_menu_a(Menu):
-    bl_idname = "ANIMAIDE_MT_pie_menu_a"
+class ANIMAIDE_MT_pie_tools_a(Menu):
+    bl_idname = "ANIMAIDE_MT_pie_tools_a"
     bl_label = "Tools A"
 
     def draw(self, context):
@@ -36,8 +36,8 @@ class ANIMAIDE_MT_pie_menu_a(Menu):
         pie.operator("anim.aide_blend_frame")
 
 
-class ANIMAIDE_MT_pie_menu_b(Menu):
-    bl_idname = "ANIMAIDE_MT_pie_menu_b"
+class ANIMAIDE_MT_pie_tools_b(Menu):
+    bl_idname = "ANIMAIDE_MT_pie_tools_b"
     bl_label = "Tools B"
 
     def draw(self, context):
@@ -46,14 +46,24 @@ class ANIMAIDE_MT_pie_menu_b(Menu):
 
         pie.operator("anim.aide_scale_left")
         pie.operator("anim.aide_scale_right")
-        pie.operator("anim.aide_noise")
+        pie.operator("anim.aide_wave_noise")
         pie.operator("anim.aide_smooth")
-
-        pie.operator('anim.aide_add_magnet_mask', text='Add AnimOffset Mask')
-        pie.operator('anim.aide_delete_magnet_mask', text='Delete AnimOffset Mask')
-
         pie.operator("anim.aide_blend_offset")
         pie.operator("anim.aide_time_offset")
+
+
+class ANIMAIDE_MT_pie_anim_offset(Menu):
+    bl_idname = "ANIMAIDE_MT_pie_anim_offset"
+    bl_label = "AnimOffset"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        pie.operator('anim.aide_without_magnet_mask', text='AnimOffset Without Mask')
+        pie.operator('anim.aide_add_magnet_mask', text='Add AnimOffset Mask')
+        pie.operator('anim.aide_delete_magnet_mask', text='Delete AnimOffset Mask')
+        pie.operator('anim.aide_deactivate_magnet', text='Deactivate AnimOffset')
 
 
 class ANIMAIDE_MT_operators(Menu):
@@ -67,8 +77,9 @@ class ANIMAIDE_MT_operators(Menu):
     def draw(self, context):
         layout = self.layout
 
-        layout.operator('wm.call_menu_pie', text="Pie Menu A").name = 'ANIMAIDE_MT_pie_menu_a'
-        layout.operator('wm.call_menu_pie', text="Pie Menu B").name = 'ANIMAIDE_MT_pie_menu_b'
+        layout.operator('wm.call_menu_pie', text="Pie Menu A").name = 'ANIMAIDE_MT_pie_tools_a'
+        layout.operator('wm.call_menu_pie', text="Pie Menu B").name = 'ANIMAIDE_MT_pie_tools_b'
+        layout.operator('wm.call_menu_pie', text="Pie AnimOffset").name = 'ANIMAIDE_MT_pie_anim_offset'
         layout.separator()
 
         layout.operator('anim.aide_ease_to_ease')
@@ -87,7 +98,7 @@ class ANIMAIDE_MT_operators(Menu):
         layout.operator('anim.aide_scale_right')
 
         layout.operator('anim.aide_smooth')
-        layout.operator('anim.aide_noise')
+        layout.operator('anim.aide_wave_noise')
 
         layout.operator('anim.aide_time_offset')
 
@@ -100,12 +111,15 @@ class ANIMAIDE_MT_operators(Menu):
 
         layout.separator()
 
+        layout.operator('anim.aide_without_magnet_mask', text='AnimOffset Without Mask')
         layout.operator('anim.aide_add_magnet_mask', text='Add AnimOffset Mask')
         layout.operator('anim.aide_delete_magnet_mask', text='Delete AnimOffset Mask')
+        layout.operator('anim.aide_deactivate_magnet', text='Deactivate AnimOffset')
 
 
 classes = (
-    ANIMAIDE_MT_pie_menu_a,
-    ANIMAIDE_MT_pie_menu_b,
+    ANIMAIDE_MT_pie_tools_a,
+    ANIMAIDE_MT_pie_tools_b,
+    ANIMAIDE_MT_pie_anim_offset,
     ANIMAIDE_MT_operators,
 )

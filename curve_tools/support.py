@@ -1,4 +1,5 @@
 import bpy
+import math
 
 # from utils.key import global_values, on_current_frame, get_selected_neigbors, \
 #     get_frame_neighbors
@@ -39,13 +40,25 @@ def scale_tools(self, scale_type):
         utils.key.set_handles(k, lh_delta, rh_delta)
 
 
+def add_noise(fcurve, strength=0.4, scale=1, phase=0):
+    """Adds noise modifier to an fcurve"""
+
+    noise = fcurve.modifiers.new('NOISE')
+
+    noise.strength = strength
+    noise.scale = scale
+    noise.phase = phase
+    # fcurve.convert_to_samples(0, 100)
+    # fcurve.convert_to_keyframes(0, 100)
+    # fcurve.modifiers.remove(noise)
+
+
 def set_min_max_values(self, context):
     self.animaide = context.scene.animaide
     tool = self.animaide.tool
 
     if self.op_context == 'EXEC_DEFAULT':
-        get_tools_globals(left_frame=tool.left_ref_frame,
-                          right_frame=tool.right_ref_frame)
+        get_globals()
 
     self.min_value = tool.min_value
     self.max_value = tool.max_value
@@ -248,7 +261,7 @@ def reset_original():
     return
 
 
-def get_tools_globals(selected=True, original=True, left_frame=None, right_frame=None):
+def get_globals():
     """Gets all the global values needed to work with the curve_tools"""
 
     context = bpy.context
@@ -310,12 +323,16 @@ def get_tools_globals(selected=True, original=True, left_frame=None, right_frame
                     if key_index - 1 not in keyframes:
                         values[key_index]['sy'] = 'book end'
                         prevkey_value = key.co.y
+                        co = {'x': key.co.x, 'y': key.co.y}
+                        curve_items['first_key'] = co
                     else:
                         prevkey_value = fcurve.keyframe_points[key_index - 1].co.y
 
                     if key_index + 1 not in keyframes:
                         values[key_index]['sy'] = 'book end'
                         nextkey_value = key.co.y
+                        co = {'x': key.co.x, 'y': key.co.y}
+                        curve_items['last_key'] = co
                     else:
                         nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
 
@@ -325,10 +342,14 @@ def get_tools_globals(selected=True, original=True, left_frame=None, right_frame
 
             if keyframes:
                 left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, keyframes)
+                # first_key, last_key = utils.key.first_and_last_selected(fcurve, keyframes)
 
-            if selected:
-                # Store selected keys
+            # if selected:
+            #     # Store selected keys
                 curve_items['selected_keys'] = keyframes
+            else:
+                curve_items['first_key'] = None
+                curve_items['last_key'] = None
 
             if left_neighbor is None:
                 curve_items['left_neighbor'] = None
@@ -344,59 +365,23 @@ def get_tools_globals(selected=True, original=True, left_frame=None, right_frame
                 co = {'x': right_neighbor.co.x, 'y': right_neighbor.co.y}
                 curve_items['right_neighbor'] = co
 
-            if original:
-                # stores original values of every key
-                curve_items['original_values'] = values
-                curve_items['every_key'] = every_key
+            # if original:
+            # stores original values of every key
+            curve_items['original_values'] = values
+            curve_items['every_key'] = every_key
 
-            if left_frame is not None or right_frame is not None:
-                frames = {'left_y': fcurve.evaluate(left_frame),
-                          'right_y': fcurve.evaluate(right_frame)}
+            # if left_frame is not None or right_frame is not None:
+            left_frame, right_frame = set_ref_marker(context)
+            frames = {'left_y': fcurve.evaluate(left_frame),
+                      'right_y': fcurve.evaluate(right_frame)}
 
-                curve_items['ref_frames'] = frames
+            curve_items['ref_frames'] = frames
 
             curves[fcurve_index] = curve_items
 
         global_values[obj.name] = curves
 
     return
-
-
-def get_ref_frame_globals(left_ref_frame, right_ref_frame):
-    """Get global values for the reference frames"""
-
-    objects = bpy.context.selected_objects
-
-    for obj in objects:
-        anim = obj.animation_data
-        if anim is None:
-            continue
-        if anim.action.fcurves is None:
-            continue
-        fcurves = obj.animation_data.action.fcurves
-
-        curves = {}
-        ref_frames = {}
-
-        for fcurve_index, fcurve in fcurves.items():
-            frames = {}
-
-            if fcurve.select is False:
-                continue
-
-            if fcurve.lock is True:
-                continue
-
-            if fcurve.hide is True:
-                continue
-
-            frames['left_y'] = fcurve.evaluate(left_ref_frame)
-            frames['right_y'] = fcurve.evaluate(right_ref_frame)
-
-            curves[fcurve_index]['ref_frames'] = frames
-
-        if curves != {}:
-            global_values[obj.name] = curves
 
 
 def valid_anim(obj):
@@ -441,3 +426,64 @@ def set_ref_marker(context):
         right = tool.right_ref_frame
 
     return left, right
+
+
+def s_curve(x, slope=2.0, width=1.0, height=1.0, xshift=0.0, yshift=0.0):
+    """Formula for 'S' curve"""
+
+    curve = height * ((x - xshift) ** slope / ((x - xshift) ** slope + (width - (x - xshift)) ** slope)) + yshift
+    if x > xshift + width:
+        curve = height + yshift
+    elif x < xshift:
+        curve = yshift
+    return curve
+
+    # return height * ((x - xshift) ** slope / ((x - xshift) ** slope + (width - (x - xshift)) ** slope)) + yshift
+
+
+def sine_curve(x, height=1.0, width=1.0, xshift=0.0, yshift=0.0):
+    curve = height / 2 * math.sin(width * math.pi * (x - xshift + 1.5) + (yshift * 2) + 1)
+    if x > xshift + width or x < xshift:
+        curve = height + yshift
+    return curve
+
+
+def u_curve(x, slope=2, height=1, width=1, reverse_width=1, xshift=0, yshift=0):
+    return height * (((reverse_width / width) * (x - xshift)) ** slope) + yshift
+
+
+def ramp_curve(x, slope=2.0, height=1.0, yshift=0.0, width=1.0, xshift=0.0, invert=False):
+    """Formula for ease-in or ease-out curve"""
+
+    if invert:
+        slope = 1 / slope
+
+    return height * (((1 / width) * (x - xshift)) ** slope) + yshift
+    # return height * ((((x-xshift)/width)**slope)+yshift)
+
+
+def to_linear_curve(left_neighbor, right_neighbor, selected_keys, factor=1):
+    """Lineal transition between neighbors"""
+
+    local_y = right_neighbor.y - left_neighbor.y
+    local_x = right_neighbor.x - left_neighbor.x
+    ratio = local_y / local_x
+    for k in selected_keys:
+        x = k.co.x - left_neighbor.co.x
+        average_y = ratio * x + left_neighbor.y
+        delta = average_y - k.co.y
+        k.co.y = k.co.y + (delta * factor)
+
+
+def linear_y(key, left_neighbor, right_neighbor):
+    big_adjacent = right_neighbor['x'] - left_neighbor['x']
+    big_oposite = right_neighbor['y'] - left_neighbor['y']
+    if big_adjacent == 0:
+        return
+    tangent = big_oposite / big_adjacent
+
+    adjacent = key.co.x - left_neighbor['x']
+    oposite = tangent * adjacent
+    return left_neighbor['y'] + oposite
+
+

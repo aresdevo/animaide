@@ -18,7 +18,7 @@ menu_items = [('EASE_TO_EASE', 'Ease To Ease', 'S shape transition', '', 1),
               ('SCALE_AVERAGE', 'Scale Average', 'Scale to average value', '', 10),
               ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 11),
               ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 12),
-              ('NOISE', 'Noise', 'add random values to keys', '', 13),
+              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 13),
               ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 14)]
 
 
@@ -45,7 +45,7 @@ def update_overshoot(self, context):
 def update_selector(self, context):
     # change values when selector property is changed
 
-    support.get_tools_globals()
+    support.get_globals()
     # self.overshoot = False
     self.show_factor = False
 
@@ -128,12 +128,12 @@ class Tool(PropertyGroup):
                              max=10,
                              description='Change noise shape')
 
-    noise_scale: FloatProperty(default=1,
+    noise_scale: FloatProperty(default=1.0,
                                min=.01,
                                max=2,
                                description='Change noise scale')
 
-    slope: FloatProperty(default=2.0,
+    slope: FloatProperty(default=1.0,
                          min=1.0,
                          max=10.0,
                          description='Determine how sharp the trasition is')

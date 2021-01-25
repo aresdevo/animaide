@@ -34,7 +34,7 @@ bl_info = {
 }
 
 import bpy
-from . import ui, curve_tools, anim_offset
+from . import ui, curve_tools, anim_offset, key_manager
 from bpy.props import BoolProperty, EnumProperty, PointerProperty, CollectionProperty
 from bpy.types import AddonPreferences, PropertyGroup
 
@@ -70,7 +70,7 @@ class AnimAideScene(PropertyGroup):
     tool: PointerProperty(type=curve_tools.props.Tool)
     anim_offset: PointerProperty(type=anim_offset.props.AnimAideAnimOffset)
 
-
+# key_manager.classes + \
 classes = \
     anim_offset.classes + \
     curve_tools.classes + \

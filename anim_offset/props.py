@@ -30,7 +30,7 @@ class AnimAideAnimOffset(PropertyGroup):
 
     # end_on_release: BoolProperty(default=False)
 
-    in_use: BoolProperty(default=False)
+    mask_in_use: BoolProperty(default=False)
 
     fast_mask: BoolProperty(default=False)
 

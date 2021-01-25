@@ -16,14 +16,22 @@ class ANIMAIDE_PT:
 
         row = layout.row(align=True)
 
-        in_use = context.scene.animaide.anim_offset.in_use
-        if in_use:
-            name = 'Modify Mask'
+        if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
+            row.operator("anim.aide_deactivate_magnet", text='Deactivate')
         else:
-            name = 'Add Mask'
-        row.operator("anim.aide_add_magnet_mask", text=name)
-        row.operator("anim.aide_delete_magnet_mask", text='', icon='TRASH')
+            row.operator("anim.aide_without_magnet_mask", text='Without Mask')
+
         row.operator('anim.aide_anim_offset_settings', text='', icon='PREFERENCES', emboss=True)
+
+        mask_in_use = context.scene.animaide.anim_offset.mask_in_use
+        if mask_in_use:
+            mask_name = 'Modify Mask'
+        else:
+            mask_name = 'With Mask'
+
+        row = layout.row(align=True)
+        row.operator("anim.aide_add_magnet_mask", text=mask_name)
+        row.operator("anim.aide_delete_magnet_mask", text='', icon='TRASH')
 
 
 class ANIMAIDE_PT_anim_offset_ge(Panel, ANIMAIDE_PT):

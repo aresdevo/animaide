@@ -86,7 +86,7 @@ def magnet(obj, fcurve, scene):
     for k in fcurve.keyframe_points:
         if scene.frame_start < k.co.x < scene.frame_end:
             factor = 1
-        elif blends_curves is not None:
+        elif blends_curves is not None and len(blends_curves) > 0:
             blends_curve = blends_curves[0]
             factor = blends_curve.evaluate(k.co.x)
         else:
@@ -169,11 +169,10 @@ def remove_mask():
     blends_action = bpy.data.actions.get('animaide')
     blends_curves = getattr(blends_action, 'fcurves', None)
 
-    anim_offset.in_use = False
+    anim_offset.mask_in_use = False
     if blends_curves is not None and len(blends_curves) > 0:
         blends_curves.remove(blends_curves[0])
-
-    reset_timeline_mask()
+        reset_timeline_mask()
 
     return
 
