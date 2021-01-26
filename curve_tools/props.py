@@ -90,12 +90,12 @@ class AnimAideClone(PropertyGroup):
     )
 
 
-class FrameBookmark(PropertyGroup):
+class AnimAideFrameBookmark(PropertyGroup):
     frame: IntProperty()
     name: StringProperty()
 
 
-class Tool(PropertyGroup):
+class AnimAideTool(PropertyGroup):
 
     use_markers: BoolProperty(default=True,
                               description='use markers for the reference frames',
@@ -162,13 +162,13 @@ class Tool(PropertyGroup):
                                     max=2.0
                                     )
 
-    frame_bookmarks: CollectionProperty(type=FrameBookmark)
+    frame_bookmarks: CollectionProperty(type=AnimAideFrameBookmark)
 
     bookmark_index: IntProperty()
 
 
 classes = (
     AnimAideClone,
-    FrameBookmark,
-    Tool,
+    AnimAideFrameBookmark,
+    AnimAideTool,
 )

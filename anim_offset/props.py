@@ -12,7 +12,7 @@ def interpolation_update(self, context):
         support.mask_interpolation(keys)
 
 
-class AnimAideAnimOffset(PropertyGroup):
+class AnimAideOffset(PropertyGroup):
 
     user_preview_start: IntProperty()
 
@@ -58,5 +58,5 @@ class AnimAideAnimOffset(PropertyGroup):
 
 
 classes = (
-    AnimAideAnimOffset,
+    AnimAideOffset,
 )

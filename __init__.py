@@ -67,13 +67,14 @@ def draw_graph_menu(self, context):
 
 class AnimAideScene(PropertyGroup):
     clone: PointerProperty(type=curve_tools.props.AnimAideClone)
-    tool: PointerProperty(type=curve_tools.props.Tool)
-    anim_offset: PointerProperty(type=anim_offset.props.AnimAideAnimOffset)
+    tool: PointerProperty(type=curve_tools.props.AnimAideTool)
+    anim_offset: PointerProperty(type=anim_offset.props.AnimAideOffset)
 
-# key_manager.classes + \
+
 classes = \
     anim_offset.classes + \
     curve_tools.classes + \
+    key_manager.classes + \
     ui.classes + \
     (AnimAideScene,)
 
