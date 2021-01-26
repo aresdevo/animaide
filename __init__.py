@@ -34,7 +34,7 @@ bl_info = {
 }
 
 import bpy
-from . import ui, curve_tools, anim_offset, key_manager
+from . import ui, curve_tools, anim_offset
 from bpy.props import BoolProperty, EnumProperty, PointerProperty, CollectionProperty
 from bpy.types import AddonPreferences, PropertyGroup
 
