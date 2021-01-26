@@ -25,16 +25,17 @@ def magnet_handlers(scene):
     animaide = context.scene.animaide
     anim_offset = animaide.anim_offset
 
-    left_margin = scene.frame_start
-    right_margin = scene.frame_end
-    cur_frame = bpy.context.scene.frame_current
-    if cur_frame < left_margin or cur_frame > right_margin:
-        if anim_offset.insert_outside_keys:
-            autokey = True
-        else:
-            autokey = False
-        context.scene.tool_settings.use_keyframe_insert_auto = autokey
-        return
+    if bpy.context.scene.animaide.anim_offset.mask_in_use:
+        left_margin = scene.frame_start
+        right_margin = scene.frame_end
+        cur_frame = bpy.context.scene.frame_current
+        if cur_frame < left_margin or cur_frame > right_margin:
+            if anim_offset.insert_outside_keys:
+                autokey = True
+            else:
+                autokey = False
+            context.scene.tool_settings.use_keyframe_insert_auto = autokey
+            return
 
     # Doesn't refresh if fast mask is selected:
     # Each time an operator is used is a different one, so this tests
@@ -84,7 +85,9 @@ def magnet(obj, fcurve, scene):
     delta_y = get_delta(obj, fcurve)
 
     for k in fcurve.keyframe_points:
-        if scene.frame_start < k.co.x < scene.frame_end:
+        if not bpy.context.scene.animaide.anim_offset.mask_in_use:
+            factor = 1
+        elif scene.frame_start <= k.co.x <= scene.frame_end:
             factor = 1
         elif blends_curves is not None and len(blends_curves) > 0:
             blends_curve = blends_curves[0]

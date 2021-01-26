@@ -438,7 +438,7 @@ class ANIMAIDE_OT_anim_offset_settings(Operator):
         layout.label(text='Settings')
         layout.separator()
         # layout.prop(anim_offset, 'end_on_release', text='masking ends on mouse release')
-        layout.prop(anim_offset, 'fast_mask', text='Fast mask calculation')
+        layout.prop(anim_offset, 'fast_mask', text='Fast offset calculation')
         layout.prop(anim_offset, 'insert_outside_keys', text='Auto Key outside margins')
         layout.separator()
         layout.label(text='Mask blend interpolation')

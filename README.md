@@ -119,11 +119,13 @@ Just to make it a bit clearer what it does.
 
 >## animOffset
 >
->With this tool you can modify any animated object, and the change will propagate to the animation range filter by
-the mask. You can find the panel in all the animation editors we support but not on the 3D View.
+> With this tool you can modify any animated object, and the change will propagate to the animation range. It can be
+> filter by a mask. You can find the panel in all the animation editors we support but not on the 3D View.
+> 
+> ![AnimOffset](images/anim_offset.gif)
 >
->![AnimOffset](images/anim_offset.gif)
->
+>> ####Update:
+>> A new button was added to be able to use animOffset without a mask
 >The tool becomes active as soon as you create the mask
 >
 >The mask has the option of adding a blending border that fades the effect of the tool. The interpolation can be adjusted
@@ -157,7 +159,7 @@ the cursor is outside the margins while manipulating the object it will create a
 >
 >![Auto Key](images/auto_key.gif)
 
->Selecting "Fast Mask" option in the preferences updates the f-curves only after the transformation is over.
+>Selecting "Fast offset calculation" option in the preferences updates the f-curves only after the transformation is over.
 >
 >![Fast Mask](images/fast_mask.gif)
 
@@ -223,8 +225,7 @@ previous version
 >
 >- **Only keys under cursor:** Ignore selected keys and only influence the keys under the cursor of the selected channels.
 >
->- **Ease Slope:** determines how sharp or smooth the affects is. This setting is only available for "Ease to Ease" and
-  "Ease" tools.
+>> - **Ease Slope:** Has been removed
 
 >#### TIP:
 > ![Tweak Menu](images/tweak_menu.jpg)
@@ -245,10 +246,6 @@ It does not remember how the curve was before activating the tool.
 >
 >![Ease To Ease](images/ease_to_ease.gif)
 >
->With a higher slope:
->
->![Ease To Ease -slope 5-](images/ease_to_ease_slope_5.gif)
-
 >### Ease
 >
 >With this one, you just have either an ease-in or an ease-out, but sometimes that is just what you want. It does not 
