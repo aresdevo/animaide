@@ -430,7 +430,6 @@ def set_ref_marker(context):
 
 def s_curve(x, slope=2.0, width=1.0, height=1.0, xshift=0.0, yshift=0.0):
     """Formula for 'S' curve"""
-
     curve = height * ((x - xshift) ** slope / ((x - xshift) ** slope + (width - (x - xshift)) ** slope)) + yshift
     if x > xshift + width:
         curve = height + yshift
@@ -449,7 +448,12 @@ def sine_curve(x, height=1.0, width=1.0, xshift=0.0, yshift=0.0):
 
 
 def u_curve(x, slope=2, height=1, width=1, reverse_width=1, xshift=0, yshift=0):
-    return height * (((reverse_width / width) * (x - xshift)) ** slope) + yshift
+    curve = height * (((reverse_width / width) * (x - xshift)) ** slope) + yshift
+    if x > xshift + width:
+        curve = height + yshift
+    elif x < xshift:
+        curve = yshift
+    return curve
 
 
 def ramp_curve(x, slope=2.0, height=1.0, yshift=0.0, width=1.0, xshift=0.0, invert=False):

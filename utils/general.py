@@ -20,13 +20,13 @@ def gradual(key_y, target_y, delta=1.0, factor=0.15):
 def clamp(value, minimum, maximum, to_none=False):
     """Take a value and if it goes beyond the minimum and maximum it would replace it with those."""
 
-    if value < minimum:
+    if value <= minimum:
         if to_none is True:
             return None
         else:
             return minimum
 
-    if value > maximum:
+    if value >= maximum:
         if to_none is True:
             return None
         else:
