@@ -51,7 +51,9 @@ def set_handle(key, side, delta):
         handle.y = key.co.y - delta
 
 
-def set_handles(key, lh_delta, rh_delta):
+def set_handles(key):
+    lh_delta = key.co.y - key.handle_left.y
+    rh_delta = key.co.y - key.handle_right.y
     set_handle(key, 'left', lh_delta)
     set_handle(key, 'right', rh_delta)
 

@@ -16,7 +16,7 @@ def scale_tools(self, scale_type):
     R = use right neighboring key as anchor
     Anything else =  use the average point as the anchor"""
 
-    clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+    factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
     y = 0
     for index in self.selected_keys:
@@ -25,19 +25,65 @@ def scale_tools(self, scale_type):
 
     for index in self.selected_keys:
         k = self.fcurve.keyframe_points[index]
-        lh_delta = k.co.y - k.handle_left.y
-        rh_delta = k.co.y - k.handle_right.y
 
-        if scale_type == 'L':
+        if scale_type == 'SCALE_LEFT':
             delta = self.original_values[index]['y'] - self.left_neighbor['y']
-        elif scale_type == 'R':
+        elif scale_type == 'SCALE_RIGHT':
             delta = self.original_values[index]['y'] - self.right_neighbor['y']
-        else:
+        elif scale_type == 'SCALE_AVERAGE':
             delta = self.original_values[index]['y'] - y_average
 
-        k.co.y = self.original_values[index]['y'] + delta * clamped_factor
+        k.co.y = self.original_values[index]['y'] + delta * factor
 
-        utils.key.set_handles(k, lh_delta, rh_delta)
+        utils.key.set_handles(k)
+
+
+def ease_tools(self, ease_type):
+
+    local_y = self.right_neighbor['y'] - self.left_neighbor['y']
+    local_x = self.right_neighbor['x'] - self.left_neighbor['x']
+
+    for index in self.selected_keys:
+
+        k = self.fcurve.keyframe_points[index]
+        x = k.co.x - self.left_neighbor['x']
+        frame_ratio = x / local_x
+        factor = utils.clamp(self.factor, self.min_value, self.max_value)
+
+        flipflop = abs(factor)
+
+        if factor > 0:
+            shift = - 1
+            xshift = -1 - flipflop/20
+        else:
+            shift = 0
+            xshift = 0 + flipflop/20
+
+        if ease_type == 'EASE_TO_EASE':
+            transition = s_curve(frame_ratio, xshift=factor)
+            k.co.y = self.left_neighbor['y'] + local_y * transition
+
+        elif ease_type == 'EASE':
+            slope = 1 + (5 * flipflop)
+            ease_y = s_curve(frame_ratio, slope=slope, width=2, height=2, xshift=shift, yshift=shift)
+            k.co.y = self.left_neighbor['y'] + local_y * ease_y
+
+        elif ease_type == 'BLEND_EASE':
+
+            source = self.original_values[index]['y']
+
+            if factor > 0:
+                delta = self.right_neighbor['y'] - source
+                base = source
+            else:
+                delta = source - self.left_neighbor['y']
+                base = self.left_neighbor['y']
+
+            slope = flipflop * 5
+            ease_y = s_curve(frame_ratio, slope=slope, width=2, height=2, xshift=shift, yshift=shift)
+            k.co.y = base + delta * ease_y
+
+        utils.key.set_handles(k)
 
 
 def add_noise(fcurve, strength=0.4, scale=1, phase=0):
@@ -101,15 +147,16 @@ def to_execute(self, context, function, *args):
 
             self.noise_steps += 1
 
-            self.global_fcurve = global_values[obj.name][fcurve_index]
-            self.selected_keys = self.global_fcurve['selected_keys']
+            obj_name = global_values.get(obj.name)
+            self.global_fcurve = obj_name.get(fcurve_index)
+            self.selected_keys = self.global_fcurve.get('selected_keys')
 
             if not self.selected_keys:
                 continue
 
-            self.original_values = self.global_fcurve['original_values']
-            self.left_neighbor = self.global_fcurve['left_neighbor']
-            self.right_neighbor = self.global_fcurve['right_neighbor']
+            self.original_values = self.global_fcurve.get('original_values')
+            self.left_neighbor = self.global_fcurve.get('left_neighbor')
+            self.right_neighbor = self.global_fcurve.get('right_neighbor')
 
             function(*args)
 
@@ -237,10 +284,14 @@ def reset_original():
             if not poll_fcurve(context, obj, fcurve):
                 continue
 
-            global_fcurve = global_values[obj.name][fcurve_index]
+            obj_name = global_values.get(obj.name)
+            global_fcurve = obj_name.get(fcurve_index)
 
-            selected_keys = global_fcurve['selected_keys']
-            original_values = global_fcurve['original_values']
+            selected_keys = global_fcurve.get('selected_keys')
+            original_values = global_fcurve.get('original_values')
+
+            if not original_values:
+                continue
 
             if not selected_keys:
                 index = utils.key.on_current_frame(fcurve)
@@ -252,9 +303,10 @@ def reset_original():
                 if index is None:
                     continue
                 k = fcurve.keyframe_points[index]
-                k.co.y = original_values[index]['y']
-                k.handle_left.y = original_values[index]['handles']['l']
-                k.handle_right.y = original_values[index]['handles']['r']
+                k.co.y = original_values[index].get('y')
+                handles = original_values[index].get('handles')
+                k.handle_left.y = handles.get('l')
+                k.handle_right.y = handles.get('r')
 
             fcurve.update()
 

@@ -154,34 +154,8 @@ class ANIMAIDE_OT_ease_to_ease(Operator, ANIMAIDE_OT):
 
     tool_type = 'EASE_TO_EASE'
 
-    def ease_to_ease(self):
-
-        clamped_factor = utils.clamp(-self.factor, self.min_value, self.max_value)
-
-        local_y = self.right_neighbor['y'] - self.left_neighbor['y']
-        local_x = self.right_neighbor['x'] - self.left_neighbor['x']
-
-        for index in self.selected_keys:
-
-            k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
-            x = k.co.x - self.left_neighbor['x']
-            try:
-                key_ratio = x / local_x
-            except:
-                key_ratio = 0
-
-            clamped_move = utils.clamp(clamped_factor, minimum=key_ratio - 1, maximum=key_ratio)
-
-            ease_y = support.s_curve(key_ratio, xshift=clamped_move)
-
-            k.co.y = self.left_neighbor['y'] + local_y * ease_y
-
-            utils.key.set_handles(k, lh_delta, rh_delta)
-
     def execute(self, context):
-        return support.to_execute(self, context, self.ease_to_ease)
+        return support.to_execute(self, context, support.ease_tools, self, self.tool_type)
 
 
 class ANIMAIDE_OT_ease(Operator, ANIMAIDE_OT):
@@ -194,66 +168,8 @@ class ANIMAIDE_OT_ease(Operator, ANIMAIDE_OT):
 
     tool_type = 'EASE'
 
-    def ease(self):
-
-        local_y = self.right_neighbor['y'] - self.left_neighbor['y']
-        local_x = self.right_neighbor['x'] - self.left_neighbor['x']
-
-        for index in self.selected_keys:
-
-            k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
-            x = k.co.x - self.left_neighbor['x']
-
-            frame_ratio = x / local_x
-
-            if self.factor > 0:
-                shift = -1
-                neighbor_delta = self.original_values[index]['y'] - self.left_neighbor['y']
-            else:
-                neighbor_delta = self.right_neighbor['y'] - self.original_values[index]['y']
-                shift = 0
-
-            ease = support.s_curve(frame_ratio, slope=3, width=2, height=2, xshift=shift, yshift=shift) # test
-
-            lineal = self.left_neighbor['y'] + local_y * frame_ratio # lineal
-
-            original = True
-
-            if original:
-                source = self.original_values[index]['y']
-            else:
-                source = lineal
-
-            ease_target = self.left_neighbor['y'] + ease * local_y
-            ease_delta = ease_target - source
-
-            clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
-
-            slope = 1 + (5 * abs(clamped_factor))
-
-            transition = support.s_curve(frame_ratio, xshift=clamped_factor) # ease_to_ease
-
-            ############# previouse method:
-
-            # clamped_move = utils.clamp(clamped_factor, minimum=frame_ratio - 1, maximum=frame_ratio)
-
-            ease_y = support.s_curve(frame_ratio, slope=slope, width=2, height=2, xshift=shift, yshift=shift)
-
-            # k.co.y = self.left_neighbor['y'] + local_y * transition # ease_to_ease
-            k.co.y = self.left_neighbor['y'] + local_y * ease_y # ease
-            # k.co.y = source + ease_delta * abs(clamped_factor) # blend ease
-            # k.co.y = source + neighbor_delta * -clamped_factor # blend neighbor
-            # k.co.y = self.left_neighbor['y'] + local_y * (clamped_factor+1)/2 # tween
-
-            print(f'transition: {utils.clamp((-2*transition)+1, -1, 1)}')
-            print(f'clamp_factor: {clamped_factor}')
-
-            utils.key.set_handles(k, lh_delta, rh_delta)
-
     def execute(self, context):
-        return support.to_execute(self, context, self.ease)
+        return support.to_execute(self, context, support.ease_tools, self, self.tool_type)
 
 
 class ANIMAIDE_OT_blend_neighbor(Operator, ANIMAIDE_OT):
@@ -270,19 +186,17 @@ class ANIMAIDE_OT_blend_neighbor(Operator, ANIMAIDE_OT):
         for index in self.selected_keys:
 
             k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
 
             if self.factor < 0:
                 delta = self.left_neighbor['y'] - self.original_values[index]['y']
             else:
                 delta = self.right_neighbor['y'] - self.original_values[index]['y']
 
-            clamped_factor = utils.clamp(abs(self.factor), 0, self.max_value)
+            factor = utils.clamp(abs(self.factor), 0, self.max_value)
 
-            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
+            k.co.y = self.original_values[index]['y'] + delta * factor
 
-            utils.key.set_handles(k, lh_delta, rh_delta)
+            utils.key.set_handles(k)
 
     def execute(self, context):
         return support.to_execute(self, context, self.blend_neighbor)
@@ -307,19 +221,17 @@ class ANIMAIDE_OT_blend_frame(Operator, ANIMAIDE_OT):
         for index in self.selected_keys:
 
             k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
 
             if self.factor < 0:
                 delta = left_y_ref - self.original_values[index]['y']
             else:
                 delta = right_y_ref - self.original_values[index]['y']
 
-            clamped_factor = utils.clamp(abs(self.factor), 0, self.max_value)
+            factor = utils.clamp(abs(self.factor), 0, self.max_value)
 
-            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
+            k.co.y = self.original_values[index]['y'] + delta * factor
 
-            utils.key.set_handles(k, lh_delta, rh_delta)
+            utils.key.set_handles(k)
 
     def execute(self, context):
         return support.to_execute(self, context, self.blend_frame)
@@ -334,50 +246,8 @@ class ANIMAIDE_OT_blend_ease(Operator, ANIMAIDE_OT):
 
     tool_type = 'BLEND_EASE'
 
-    def blend_ease(self):
-
-        clamped_factor = utils.clamp(abs(self.factor), 0, self.max_value)
-
-        local_y = self.right_neighbor['y'] - self.left_neighbor['y']
-        local_x = self.right_neighbor['x'] - self.left_neighbor['x']
-
-        slope = 1 + (2 * abs(clamped_factor))
-
-        for index in self.selected_keys:
-
-            k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
-            x = k.co.x - self.left_neighbor['x']
-
-            try:
-                key_ratio = x / local_x
-            except:
-                key_ratio = 0
-
-            if self.factor < 0:
-                shift = -1
-            else:
-                shift = 0
-
-            ease_y = support.s_curve(key_ratio, slope=slope, width=2, height=2, xshift=shift, yshift=shift)
-
-            transition = support.s_curve(clamped_factor, slope=3, width=1, height=1, xshift=0, yshift=0)
-
-            delta = (self.left_neighbor['y'] + local_y * ease_y.real) - self.original_values[index]['y']
-
-            # k.co.y = self.left_neighbor['y'] + local_y * ease_y # test
-            # k.co.y = self.original_values[index]['y'] + delta * transition # test
-
-
-            print(f'transition: {transition}')
-
-            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
-
-            utils.key.set_handles(k, lh_delta, rh_delta)
-
     def execute(self, context):
-        return support.to_execute(self, context, self.blend_ease)
+        return support.to_execute(self, context, support.ease_tools, self, self.tool_type)
 
 
 class ANIMAIDE_OT_blend_offset(Operator, ANIMAIDE_OT):
@@ -391,7 +261,7 @@ class ANIMAIDE_OT_blend_offset(Operator, ANIMAIDE_OT):
 
     def blend_offset(self):
 
-        clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+        factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
         first_key_index = self.selected_keys[0]
         last_key_index = self.selected_keys[-1]
@@ -399,19 +269,17 @@ class ANIMAIDE_OT_blend_offset(Operator, ANIMAIDE_OT):
         if first_key_index is None or last_key_index is None:
             return
 
-        if clamped_factor > 0:
+        if factor > 0:
             delta = self.right_neighbor['y'] - self.original_values[last_key_index]['y']
         else:
             delta = self.original_values[first_key_index]['y'] - self.left_neighbor['y']
 
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
 
-            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
+            k.co.y = self.original_values[index]['y'] + delta * factor
 
-            utils.key.set_handles(k, lh_delta, rh_delta)
+            utils.key.set_handles(k)
 
     def execute(self, context):
         return support.to_execute(self, context, self.blend_offset)
@@ -429,20 +297,17 @@ class ANIMAIDE_OT_tween(Operator, ANIMAIDE_OT):
 
     def tween(self):
 
-        clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+        factor = utils.clamp(self.factor, self.min_value, self.max_value)
+        factor_zero_one = (factor+1)/2
 
         local_y = self.right_neighbor['y'] - self.left_neighbor['y']
-        delta = local_y / 2
-        mid = self.left_neighbor['y'] + delta
 
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
 
-            k.co.y = mid + delta * clamped_factor
+            k.co.y = self.left_neighbor['y'] + local_y * factor_zero_one
 
-            utils.key.set_handles(k, lh_delta, rh_delta)
+            utils.key.set_handles(k)
 
     def execute(self, context):
         return support.to_execute(self, context, self.tween)
@@ -458,21 +323,21 @@ class ANIMAIDE_OT_push_pull(Operator, ANIMAIDE_OT):
 
     def push_pull(self):
 
-        clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+        factor = utils.clamp(self.factor, self.min_value, self.max_value)
+        local_y = self.right_neighbor['y'] - self.left_neighbor['y']
+        local_x = self.right_neighbor['x'] - self.left_neighbor['x']
 
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
+            x = k.co.x - self.left_neighbor['x']
+            frame_ratio = x / local_x
+            lineal = self.left_neighbor['y'] + local_y * frame_ratio
+            delta = self.original_values[index]['y'] - lineal
+            factor_zero_two = factor + 1
 
-            average_y = support.linear_y(k, self.left_neighbor, self.right_neighbor)
-            if average_y is None:
-                continue
-            delta = self.original_values[index]['y'] - average_y
+            k.co.y = lineal + delta * factor_zero_two
 
-            k.co.y = self.original_values[index]['y'] + delta * clamped_factor
-
-            utils.key.set_handles(k, lh_delta, rh_delta)
+            utils.key.set_handles(k)
 
     def execute(self, context):
         return support.to_execute(self, context, self.push_pull)
@@ -488,12 +353,10 @@ class ANIMAIDE_OT_smooth(Operator, ANIMAIDE_OT):
 
     def smooth(self):
 
-        clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+        factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
 
             if 'sy' not in self.original_values[index]:
                 continue
@@ -505,9 +368,9 @@ class ANIMAIDE_OT_smooth(Operator, ANIMAIDE_OT):
             else:
                 delta = self.original_values[index]['y'] - smooth_y
 
-            k.co.y = self.original_values[index]['y'] - delta * clamped_factor * 0.5
+            k.co.y = self.original_values[index]['y'] - delta * factor / 5
 
-            utils.key.set_handles(k, lh_delta, rh_delta)
+            utils.key.set_handles(k)
 
     def execute(self, context):
         return support.to_execute(self, context, self.smooth)
@@ -534,16 +397,14 @@ class ANIMAIDE_OT_time_offset(Operator, ANIMAIDE_OT):
                                                 before=cycle_before,
                                                 after=cycle_after)
 
-        clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+        factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
         for index in self.selected_keys:
             k = self.fcurve.keyframe_points[index]
-            lh_delta = k.co.y - k.handle_left.y
-            rh_delta = k.co.y - k.handle_right.y
 
-            k.co.y = clone.evaluate(k.co.x - 20 * clamped_factor)
+            k.co.y = clone.evaluate(k.co.x - 20 * factor)
 
-            utils.key.set_handles(k, lh_delta, rh_delta)
+            utils.key.set_handles(k)
 
         self.fcurves.remove(clone)
 
@@ -561,9 +422,9 @@ class ANIMAIDE_OT_wave_noise(Operator, ANIMAIDE_OT):
 
     def noise(self):
 
-        clamped_factor = utils.clamp(self.factor, self.min_value, self.max_value)
+        factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
-        if clamped_factor > 0:
+        if factor > 0:
             clone = utils.curve.duplicate_from_data(self.fcurves,
                                                     self.global_fcurve,
                                                     'animaide')
@@ -575,13 +436,11 @@ class ANIMAIDE_OT_wave_noise(Operator, ANIMAIDE_OT):
 
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
-                lh_delta = k.co.y - k.handle_left.y
-                rh_delta = k.co.y - k.handle_right.y
 
                 delta = clone.evaluate(k.co.x) - self.original_values[index]['y']
-                k.co.y = self.original_values[index]['y'] + delta * clamped_factor
+                k.co.y = self.original_values[index]['y'] + delta * factor
 
-                utils.key.set_handles(k, lh_delta, rh_delta)
+                utils.key.set_handles(k)
 
             self.fcurves.remove(clone)
         else:
@@ -593,7 +452,7 @@ class ANIMAIDE_OT_wave_noise(Operator, ANIMAIDE_OT):
                 else:
                     direction = -1
                 k = self.fcurve.keyframe_points[index]
-                k.co.y = self.original_values[index]['y'] + (clamped_factor * direction)/5
+                k.co.y = self.original_values[index]['y'] + (factor * direction)/5
                 if n == 2:
                     n = 0
 
@@ -611,7 +470,7 @@ class ANIMAIDE_OT_scale_left(Operator, ANIMAIDE_OT):
     tool_type = 'SCALE_LEFT'
 
     def execute(self, context):
-        return support.to_execute(self, context, support.scale_tools, self, 'L')
+        return support.to_execute(self, context, support.scale_tools, self, self.tool_type)
 
 
 class ANIMAIDE_OT_scale_right(Operator, ANIMAIDE_OT):
@@ -624,7 +483,7 @@ class ANIMAIDE_OT_scale_right(Operator, ANIMAIDE_OT):
     tool_type = 'SCALE_RIGHT'
 
     def execute(self, context):
-        return support.to_execute(self, context, support.scale_tools, self, 'R')
+        return support.to_execute(self, context, support.scale_tools, self, self.tool_type)
 
 
 class ANIMAIDE_OT_scale_average(Operator, ANIMAIDE_OT):
@@ -637,7 +496,7 @@ class ANIMAIDE_OT_scale_average(Operator, ANIMAIDE_OT):
     tool_type = 'SCALE_AVERAGE'
 
     def execute(self, context):
-        return support.to_execute(self, context, support.scale_tools, self, '')
+        return support.to_execute(self, context, support.scale_tools, self, self.tool_type)
 
 
 class ANIMAIDE_OT_tools_settings(Operator):
