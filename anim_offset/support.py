@@ -104,10 +104,10 @@ def magnet(context, obj, fcurve):
     return
 
 
-def get_delta(obj, fcurve):
+def get_delta(context, obj, fcurve):
     """Determine the transformation change by the user of the current object"""
 
-    cur_frame = bpy.context.scene.frame_current
+    cur_frame = context.scene.frame_current
 
     source = fcurve.evaluate(cur_frame)
     curve_value = obj.path_resolve(fcurve.data_path)
@@ -167,25 +167,25 @@ def add_blends():
     return blends_curve
 
 
-def remove_mask():
+def remove_mask(context):
     """Removes the fcurve and action that are been used as a mask for anim_offset"""
 
-    anim_offset = bpy.context.scene.animaide.anim_offset
+    anim_offset = context.scene.animaide.anim_offset
     blends_action = bpy.data.actions.get('animaide')
     blends_curves = getattr(blends_action, 'fcurves', None)
 
     anim_offset.mask_in_use = False
     if blends_curves is not None and len(blends_curves) > 0:
         blends_curves.remove(blends_curves[0])
-        reset_timeline_mask()
+        reset_timeline_mask(context)
 
     return
 
 
-def set_blend_values():
-    """Modify the position of the fcurve 4 control points that is been used as mask to anim_offset"""
+def set_blend_values(context):
+    """Modify the position of the fcurve 4 control points that is been used as mask to anim_offset """
 
-    scene = bpy.context.scene
+    scene = context.scene
     blends_action = bpy.data.actions.get('animaide')
     blends_curves = getattr(blends_action, 'fcurves', None)
 

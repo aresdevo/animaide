@@ -27,12 +27,11 @@ def attach_to_fcurve(key, source_key, target_fcurve, factor=1.0, is_gradual=True
         key.co.y = target_y
 
 
-def get_selected(fcurve):
+def get_selected_index(fcurve):
     """Creates a list of selected keys index"""
 
     keys = fcurve.keyframe_points
     keyframe_indexes = []
-
     if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
         return []  # we don't want to select keys on reference fcurves
 
@@ -41,6 +40,17 @@ def get_selected(fcurve):
             keyframe_indexes.append(index)
 
     return keyframe_indexes
+
+
+def some_selected_key(context):
+    objects = context.selected_objects
+    for obj in objects:
+        action = obj.animation_data.action
+        for fcurve in action.fcurves:
+            keys = fcurve.keyframe_points
+            for key in keys:
+                if key.select_control_point:
+                    return True
 
 
 def set_handle(key, side, delta):

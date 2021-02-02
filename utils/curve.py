@@ -103,7 +103,7 @@ def remove_helpers(objects):
 
 def get_slope(fcurve):
     """Gets the slope of a curve at a specific range"""
-    selected_keys = utils.key.get_selected(fcurve)
+    selected_keys = utils.key.get_selected_index(fcurve)
     first_key, last_key = utils.key.first_and_last_selected(fcurve, selected_keys)
     slope = (first_key.co.y**2 - last_key.co.y**2) / (first_key.co.x**2 - last_key.co.x**2)
     return slope
@@ -236,7 +236,7 @@ def move_clone(objects):
         for aclone in aclones:
             clone = action.fcurves[aclone.fcurve.index]
             fcurve = action.fcurves[aclone.original_fcurve.index]
-            selected_keys = utils.key.get_selected(fcurve)
+            selected_keys = utils.key.get_selected_index(fcurve)
             key1, key2 = utils.key.first_and_last_selected(fcurve, selected_keys)
             amount = abs(key2.co.x - key1.co.x)
             for key in clone.keyframe_points:

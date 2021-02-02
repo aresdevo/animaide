@@ -1,9 +1,10 @@
-import bpy
 import math
 
 # from utils.key import global_values, on_current_frame, get_selected_neigbors, \
 #     get_frame_neighbors
-
+# from utils.curve import valid_anim, valid_fcurve, valid_obj
+# from utils.curve import poll_fcurve
+# from utils import get_items
 from .. import utils
 
 
@@ -32,10 +33,12 @@ def scale_tools(self, scale_type):
             delta = self.original_values[index]['y'] - self.right_neighbor['y']
         elif scale_type == 'SCALE_AVERAGE':
             delta = self.original_values[index]['y'] - y_average
+        else:
+            delta = self.original_values[index]['y'] - y_average
 
-        k.co.y = self.original_values[index]['y'] + delta * factor
+        k.co_ui.y = self.original_values[index]['y'] + delta * factor
 
-        utils.key.set_handles(k)
+        # utils.key.set_handles(k)
 
 
 def ease_tools(self, ease_type):
@@ -46,7 +49,7 @@ def ease_tools(self, ease_type):
     for index in self.selected_keys:
 
         k = self.fcurve.keyframe_points[index]
-        x = k.co.x - self.left_neighbor['x']
+        x = k.co_ui.x - self.left_neighbor['x']
         frame_ratio = x / local_x
         factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
@@ -60,13 +63,13 @@ def ease_tools(self, ease_type):
             xshift = 0 + flipflop/20
 
         if ease_type == 'EASE_TO_EASE':
-            transition = s_curve(frame_ratio, xshift=factor)
-            k.co.y = self.left_neighbor['y'] + local_y * transition
+            transition = s_curve(frame_ratio, xshift=-factor)
+            k.co_ui.y = self.left_neighbor['y'] + local_y * transition
 
         elif ease_type == 'EASE':
             slope = 1 + (5 * flipflop)
             ease_y = s_curve(frame_ratio, slope=slope, width=2, height=2, xshift=shift, yshift=shift)
-            k.co.y = self.left_neighbor['y'] + local_y * ease_y
+            k.co_ui.y = self.left_neighbor['y'] + local_y * ease_y
 
         elif ease_type == 'BLEND_EASE':
 
@@ -81,9 +84,9 @@ def ease_tools(self, ease_type):
 
             slope = flipflop * 5
             ease_y = s_curve(frame_ratio, slope=slope, width=2, height=2, xshift=shift, yshift=shift)
-            k.co.y = base + delta * ease_y
+            k.co_ui.y = base + delta * ease_y
 
-        utils.key.set_handles(k)
+        # utils.key.set_handles(k)
 
 
 def add_noise(fcurve, strength=0.4, scale=1, phase=0):
@@ -104,45 +107,29 @@ def set_min_max_values(self, context):
     tool = self.animaide.tool
 
     if self.op_context == 'EXEC_DEFAULT':
-        get_globals()
+        get_globals(context)
 
     self.min_value = tool.min_value
     self.max_value = tool.max_value
-
-
-def valid_obj(context, obj):
-    if not valid_anim(obj):
-        return False
-
-    visible = obj.visible_get()
-
-    if not visible:
-        return False
-
-    if context.area.type != 'VIEW_3D':
-        if not context.space_data.dopesheet.show_hidden and not visible:
-            return False
-
-    return True
 
 
 def to_execute(self, context, function, *args):
 
     set_min_max_values(self, context)
 
-    objects = get_items(context)
+    objects = utils.get_items(context)
 
     self.noise_steps = 0
 
     for obj in objects:
 
-        if not valid_obj(context, obj):
+        if not utils.curve.valid_obj(context, obj):
             continue
 
         self.fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, self.fcurve in self.fcurves.items():
-            if not poll_fcurve(context, obj, self.fcurve):
+            if not utils.curve.poll_fcurve(context, obj, self.fcurve):
                 continue
 
             self.noise_steps += 1
@@ -165,111 +152,14 @@ def to_execute(self, context, function, *args):
     return {'FINISHED'}
 
 
-def update_keyframe_points(context):
-    # The select operator(s) are bugged, and can fail to update selected keys, so
-
-    area = context.area.type
-    if area != 'GRAPH_EDITOR':
-        context.area.type = 'GRAPH_EDITOR'
-
-    snap = context.space_data.auto_snap
-    context.space_data.auto_snap = 'NONE'
-
-    bpy.ops.transform.transform()
-
-    context.space_data.auto_snap = snap
-    if area != 'GRAPH_EDITOR':
-        context.area.type = area
-
-
-def poll(context):
-    """Poll used on all the slider operators"""
-
-    selected = get_items(context, any_mode=True)
-
-    area = context.area.type
-    return bool((area == 'GRAPH_EDITOR' or
-                area == 'DOPESHEET_EDITOR' or
-                area == 'VIEW_3D') and
-                selected)
-
-
-def poll_fcurve(context, obj, fcurve):
-    if not valid_fcurve(fcurve):
-        return
-
-    if obj.type == 'ARMATURE':
-
-        if getattr(fcurve.group, 'name', None) == 'Object Transforms':
-            # When animating an object, by default its fcurves grouped with this name.
-            return
-        elif not fcurve.group:
-            transforms = (
-                'location', 'rotation_euler', 'scale',
-                'rotation_quaternion', 'rotation_axis_angle',
-                '[\"',  # custom property
-            )
-            if fcurve.data_path.startswith(transforms):
-                # fcurve belongs to the  object, so skip it
-                return
-
-        # if fcurve.group.name not in bones_names:
-            # return
-
-        split_data_path = fcurve.data_path.split(sep='"')
-        bone_name = split_data_path[1]
-        bone = obj.data.bones.get(bone_name)
-
-        if bone is None or bone.hide:
-            return
-
-        if context.area.type == 'VIEW_3D':
-            if not bone.select:
-                return
-        else:
-            only_selected = context.space_data.dopesheet.show_only_selected
-            if only_selected and not bone.select:
-                return
-
-        # if bone_name is None:
-            # return
-
-    if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
-        return  # we don't want to select keys on reference fcurves
-
-    return True
-
-
-def get_items(context, any_mode=False):
-    """returns objects"""
-    if any_mode:
-        if context.mode == 'OBJECT':
-            selected = context.selected_objects
-        elif context.mode == 'POSE':
-            selected = context.selected_pose_bones
-        else:
-            selected = None
-    else:
-        selected = context.selected_objects
-
-    if context.area.type == 'VIEW_3D':
-        return selected
-    elif context.space_data.dopesheet.show_only_selected:
-        return selected
-    else:
-        return bpy.data.objects
-
-
-def reset_original():
+def reset_original(context):
     """Set selected keys to the values in the global variables"""
 
-    context = bpy.context
-
-    objects = get_items(context)
+    objects = utils.get_items(context)
 
     for obj in objects:
 
-        if not valid_anim(obj):
+        if not utils.curve.valid_anim(obj):
             continue
 
         visible = obj.visible_get()
@@ -281,7 +171,7 @@ def reset_original():
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, fcurve in fcurves.items():
-            if not poll_fcurve(context, obj, fcurve):
+            if not utils.curve.poll_fcurve(context, obj, fcurve):
                 continue
 
             obj_name = global_values.get(obj.name)
@@ -303,7 +193,7 @@ def reset_original():
                 if index is None:
                     continue
                 k = fcurve.keyframe_points[index]
-                k.co.y = original_values[index].get('y')
+                k.co_ui.y = original_values[index].get('y')
                 handles = original_values[index].get('handles')
                 k.handle_left.y = handles.get('l')
                 k.handle_right.y = handles.get('r')
@@ -313,17 +203,16 @@ def reset_original():
     return
 
 
-def get_globals():
+def get_globals(context):
     """Gets all the global values needed to work with the curve_tools"""
 
-    context = bpy.context
     animaide = context.scene.animaide
 
-    objects = get_items(context)
+    objects = utils.get_items(context)
 
     for obj in objects:
 
-        if not valid_anim(obj):
+        if not utils.curve.valid_anim(obj):
             continue
 
         # Level 1 variables
@@ -335,7 +224,7 @@ def get_globals():
 
         for fcurve_index, fcurve in fcurves.items():
 
-            if not valid_fcurve(fcurve):
+            if not utils.curve.valid_fcurve(context, fcurve):
                 continue
 
             # level 2 variables
@@ -352,8 +241,8 @@ def get_globals():
 
                 # stores coordinate of every key
                 handles = {'l': key.handle_left.y, 'r': key.handle_right.y}
-                co = {'x': key.co.x, 'y': key.co.y}
-                values[key_index] = co
+                co_ui = {'x': key.co_ui.x, 'y': key.co_ui.y}
+                values[key_index] = co_ui
                 values[key_index]['handles'] = handles
 
                 # stores every key
@@ -374,21 +263,21 @@ def get_globals():
 
                     if key_index - 1 not in keyframes:
                         values[key_index]['sy'] = 'book end'
-                        prevkey_value = key.co.y
-                        co = {'x': key.co.x, 'y': key.co.y}
-                        curve_items['first_key'] = co
+                        prevkey_value = key.co_ui.y
+                        co_ui = {'x': key.co_ui.x, 'y': key.co_ui.y}
+                        curve_items['first_key'] = co_ui
                     else:
-                        prevkey_value = fcurve.keyframe_points[key_index - 1].co.y
+                        prevkey_value = fcurve.keyframe_points[key_index - 1].co_ui.y
 
                     if key_index + 1 not in keyframes:
                         values[key_index]['sy'] = 'book end'
-                        nextkey_value = key.co.y
-                        co = {'x': key.co.x, 'y': key.co.y}
-                        curve_items['last_key'] = co
+                        nextkey_value = key.co_ui.y
+                        co_ui = {'x': key.co_ui.x, 'y': key.co_ui.y}
+                        curve_items['last_key'] = co_ui
                     else:
-                        nextkey_value = fcurve.keyframe_points[key_index + 1].co.y
+                        nextkey_value = fcurve.keyframe_points[key_index + 1].co_ui.y
 
-                    # smooth = (prevkey_value + key.co.y + nextkey_value) / 3
+                    # smooth = (prevkey_value + key.co_ui.y + nextkey_value) / 3
                     smooth = (prevkey_value + nextkey_value) / 2
                     values[key_index]['sy'] = smooth
 
@@ -407,15 +296,15 @@ def get_globals():
                 curve_items['left_neighbor'] = None
             else:
                 # stores coordinates of left neighboring key
-                co = {'x': left_neighbor.co.x, 'y': left_neighbor.co.y}
-                curve_items['left_neighbor'] = co
+                co_ui = {'x': left_neighbor.co_ui.x, 'y': left_neighbor.co_ui.y}
+                curve_items['left_neighbor'] = co_ui
 
             if right_neighbor is None:
                 curve_items['right_neighbor'] = None
             else:
                 # stores coordinates of right neighboring key
-                co = {'x': right_neighbor.co.x, 'y': right_neighbor.co.y}
-                curve_items['right_neighbor'] = co
+                co_ui = {'x': right_neighbor.co_ui.x, 'y': right_neighbor.co_ui.y}
+                curve_items['right_neighbor'] = co_ui
 
             # if original:
             # stores original values of every key
@@ -434,32 +323,6 @@ def get_globals():
         global_values[obj.name] = curves
 
     return
-
-
-def valid_anim(obj):
-    """checks if the obj has an active action"""
-
-    anim = obj.animation_data
-    action = getattr(anim, 'action', None)
-    fcurves = getattr(action, 'fcurves', None)
-
-    return bool(fcurves)
-
-
-def valid_fcurve(fcurve):
-    """Validates an fcurve to see if it can be used with animaide"""
-
-    animaide = bpy.context.scene.animaide
-    if animaide.tool.unselected_fcurves is False:
-        if fcurve.select is False:
-            return False
-
-    if fcurve.lock or fcurve.hide:
-        return False
-    elif getattr(fcurve.group, 'name', None) == utils.curve.group_name:
-        return False  # we don't want to select keys on reference fcurves
-    else:
-        return True
 
 
 def set_ref_marker(context):
@@ -525,10 +388,10 @@ def to_linear_curve(left_neighbor, right_neighbor, selected_keys, factor=1):
     local_x = right_neighbor.x - left_neighbor.x
     ratio = local_y / local_x
     for k in selected_keys:
-        x = k.co.x - left_neighbor.co.x
+        x = k.co_ui.x - left_neighbor.co_ui.x
         average_y = ratio * x + left_neighbor.y
-        delta = average_y - k.co.y
-        k.co.y = k.co.y + (delta * factor)
+        delta = average_y - k.co_ui.y
+        k.co_ui.y = k.co_ui.y + (delta * factor)
 
 
 def linear_y(key, left_neighbor, right_neighbor):
@@ -538,7 +401,7 @@ def linear_y(key, left_neighbor, right_neighbor):
         return
     tangent = big_oposite / big_adjacent
 
-    adjacent = key.co.x - left_neighbor['x']
+    adjacent = key.co_ui.x - left_neighbor['x']
     oposite = tangent * adjacent
     return left_neighbor['y'] + oposite
 

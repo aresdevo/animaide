@@ -8,55 +8,6 @@ from bpy.props import StringProperty, FloatProperty, EnumProperty, BoolProperty
 from bpy.types import Operator
 
 
-class AAT_OT_clone(Operator):
-    '''
-    Creates a clone of an fcurve'''
-
-    bl_idname = 'animaide.fcurve_clone'
-    bl_label = "Clone Fcurve"
-    bl_options = {'REGISTER'}
-    # cycle_before: StringProperty()
-    # cycle_after: StringProperty()
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-        animaide = context.scene.animaide
-        cycle_before = animaide.clone.cycle_before
-        cycle_after = animaide.clone.cycle_after
-
-        objects = context.selected_objects
-
-        utils.curve.add_clone(objects, cycle_before, cycle_after)
-
-        return {'FINISHED'}
-
-
-class AAT_OT_clone_remove(Operator):
-    '''
-    Removes a clone of an fcurve'''
-
-    bl_idname = 'animaide.remove_clone'
-    bl_label = "Remove Clone"
-    bl_options = {'REGISTER'}
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-
-        objects = context.selected_objects
-
-        utils.curve.remove_helpers(objects)
-
-        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
-
-        return {'FINISHED'}
-
-
 class AAT_OT_move_key(Operator):
     """Move selected keys"""
 
@@ -205,6 +156,78 @@ class AAT_OT_set_handles_type(Operator):
         return {'FINISHED'}
 
 
+class AAT_OT_select_key_parts(Operator):
+    """Move selected keys"""
+
+    bl_idname = 'anim.aide_select_key_parts'
+    bl_label = "Select Key Parts"
+    bl_options = {'REGISTER'}
+
+    left: BoolProperty()
+    right: BoolProperty()
+    point: BoolProperty()
+    handle_type: EnumProperty(
+        items=support.handle_type,
+        name="Handle Type",
+        default='AUTO_CLAMPED'
+    )
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+
+        support.select_key_parts(
+            context,
+            left=self.left,
+            right=self.right,
+            point=self.point
+        )
+
+        return {'FINISHED'}
+
+
+class AAT_OT_set_handles_interp(Operator):
+    """Sets handles interpolation"""
+
+    bl_idname = 'anim.aide_set_handles_interp'
+    bl_label = "Set Handles Interpolation"
+    bl_options = {'REGISTER'}
+
+    interp: EnumProperty(
+        items=support.interp,
+        name="Interpolation",
+        default='BEZIER'
+    )
+
+    strength: EnumProperty(
+        items=support.strength,
+        name="Ease Strength",
+        default='SINE'
+    )
+
+    easing: EnumProperty(
+        items=support.easing,
+        name="Ease Mode",
+        default='AUTO'
+    )
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+
+        support.set_handles_interp(context, interp=self.interp,
+                                   easing=self.easing, strength=self.strength)
+
+        return {'FINISHED'}
+
+
+# ------- Not used --------
+
+
 class ANIMAIDE_OT_key_manager_settings(Operator):
     """Shows global options for Curve Tools"""
 
@@ -298,6 +321,55 @@ class ANIMAIDE_OT_path(Operator):
         obj = context.object
         fcurves = obj.animation_data.action.fcurves
         utils.curve.create_path(context, fcurves)
+
+
+class AAT_OT_clone(Operator):
+    '''
+    Creates a clone of an fcurve'''
+
+    bl_idname = 'animaide.fcurve_clone'
+    bl_label = "Clone Fcurve"
+    bl_options = {'REGISTER'}
+    # cycle_before: StringProperty()
+    # cycle_after: StringProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        animaide = context.scene.animaide
+        cycle_before = animaide.clone.cycle_before
+        cycle_after = animaide.clone.cycle_after
+
+        objects = context.selected_objects
+
+        utils.curve.add_clone(objects, cycle_before, cycle_after)
+
+        return {'FINISHED'}
+
+
+class AAT_OT_clone_remove(Operator):
+    '''
+    Removes a clone of an fcurve'''
+
+    bl_idname = 'animaide.remove_clone'
+    bl_label = "Remove Clone"
+    bl_options = {'REGISTER'}
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+
+        objects = context.selected_objects
+
+        utils.curve.remove_helpers(objects)
+
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+
+        return {'FINISHED'}
 
 
 classes = (

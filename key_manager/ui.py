@@ -4,6 +4,33 @@ import bpy
 from bpy.types import Panel, Menu, UIList, WorkSpaceTool
 
 
+def key_type_row(layout, name, key_type, icon):
+    row = layout.row(align=True)
+    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='CHECKMARK')
+    op.type = key_type
+    op.selection = True
+    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='X')
+    op.type = key_type
+    op.selection = False
+    op = row.operator('anim.aide_set_key_type', text=name, emboss=True, icon=icon)
+    op.type = key_type
+    op = row.operator('anim.aide_delete_key_type', text='', emboss=True, icon='TRASH')
+    op.type = key_type
+
+
+def handles_select_row(layout, name, icon='NONE', left=False, right=False, point=False, depress=False):
+    op = layout.operator('anim.aide_select_key_parts', text=name, emboss=True, icon=icon, depress=depress)
+    op.left = left
+    op.right = right
+    op.point = point
+
+
+def handles_type_row(layout, icon='NONE', handle_type='NONE'):
+    op = layout.operator('anim.aide_set_handles_type', text='', emboss=True, icon=icon)
+    op.act_on = 'SELECTION'
+    op.handle_type = handle_type
+
+
 class ANIMAIDE_PT_key_manager:
     bl_label = "Key Manager"
     bl_region_type = 'UI'
