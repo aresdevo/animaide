@@ -131,10 +131,10 @@ class ANIMAIDE_OT:
 
         tool.area = context.area.type
 
-        if context.area.type == 'VIEW_3D':
-            tool.unselected_fcurves = True
-        else:
+        if context.area.type == 'GRAPH_EDITOR':
             tool.unselected_fcurves = False
+        else:
+            tool.unselected_fcurves = True
 
         # left_frame, right_frame = support.set_ref_marker(context)
 
@@ -246,9 +246,6 @@ class ANIMAIDE_OT_ease(Operator, ANIMAIDE_OT):
             # k.co.y = source + ease_delta * abs(clamped_factor) # blend ease
             # k.co.y = source + neighbor_delta * -clamped_factor # blend neighbor
             # k.co.y = self.left_neighbor['y'] + local_y * (clamped_factor+1)/2 # tween
-
-            print(f'transition: {utils.clamp((-2*transition)+1, -1, 1)}')
-            print(f'clamp_factor: {clamped_factor}')
 
             utils.key.set_handles(k, lh_delta, rh_delta)
 
@@ -368,9 +365,6 @@ class ANIMAIDE_OT_blend_ease(Operator, ANIMAIDE_OT):
 
             # k.co.y = self.left_neighbor['y'] + local_y * ease_y # test
             # k.co.y = self.original_values[index]['y'] + delta * transition # test
-
-
-            print(f'transition: {transition}')
 
             k.co.y = self.original_values[index]['y'] + delta * clamped_factor
 
