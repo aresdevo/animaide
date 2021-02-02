@@ -1,5 +1,7 @@
 import bpy
 
+# from curve_tools.support import get_items
+
 
 def gradual(key_y, target_y, delta=1.0, factor=0.15):
     """Gradualy transition the value of key_y to target_y"""
@@ -107,3 +109,35 @@ def switch_aim(aim, factor):
     if factor < 0.5:
         aim = aim * -1
     return aim
+
+
+def poll(context):
+    """Poll used on all the slider operators"""
+
+    selected = get_items(context, any_mode=True)
+
+    area = context.area.type
+    return bool((area == 'GRAPH_EDITOR' or
+                area == 'DOPESHEET_EDITOR' or
+                area == 'VIEW_3D') and
+                selected)
+
+
+def get_items(context, any_mode=False):
+    """returns objects"""
+    if any_mode:
+        if context.mode == 'OBJECT':
+            selected = context.selected_objects
+        elif context.mode == 'POSE':
+            selected = context.selected_pose_bones
+        else:
+            selected = None
+    else:
+        selected = context.selected_objects
+
+    if context.area.type == 'VIEW_3D':
+        return selected
+    elif context.space_data.dopesheet.show_only_selected:
+        return selected
+    else:
+        return bpy.data.objects

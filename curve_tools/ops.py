@@ -1,6 +1,8 @@
 import bpy
 import os
 
+# import utils.general
+# import utils.key
 from . import support
 from .. import utils
 # from .utils import curve, key
@@ -24,7 +26,7 @@ class ANIMAIDE_OT:
 
     @classmethod
     def poll(cls, context):
-        return support.poll(context)
+        return utils.general.poll(context)
 
     def execute(self, context):
         return
@@ -91,7 +93,7 @@ class ANIMAIDE_OT:
             self.execute(context)
 
         elif event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
-            support.reset_original()
+            support.reset_original(context)
 
             self.reset_tool_factor(context)
 
@@ -115,7 +117,7 @@ class ANIMAIDE_OT:
 
         # The select operator(s) are bugged, and can fail to update selected keys, so
         # When you change the frame, then select keys, the previous keys will stay marked as selected
-        support.update_keyframe_points(context)
+        utils.key.update_keyframe_points(context)
 
         if self.op_context == 'EXEC_DEFAULT':
             return self.execute(context)
@@ -507,7 +509,7 @@ class ANIMAIDE_OT_tools_settings(Operator):
 
     @classmethod
     def poll(cls, context):
-        return support.poll(context)
+        return utils.general.poll(context)
 
     def execute(self, context):
         return {'FINISHED'}

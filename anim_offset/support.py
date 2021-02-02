@@ -20,15 +20,15 @@ def magnet_handlers(scene):
 
     context = bpy.context
 
-    external_op = bpy.context.active_operator
+    external_op = context.active_operator
 
     animaide = context.scene.animaide
     anim_offset = animaide.anim_offset
 
-    if bpy.context.scene.animaide.anim_offset.mask_in_use:
+    if context.scene.animaide.anim_offset.mask_in_use:
         left_margin = scene.frame_start
         right_margin = scene.frame_end
-        cur_frame = bpy.context.scene.frame_current
+        cur_frame = context.scene.frame_current
         if cur_frame < left_margin or cur_frame > right_margin:
             if anim_offset.insert_outside_keys:
                 autokey = True
@@ -42,7 +42,7 @@ def magnet_handlers(scene):
     # if any transform on an object is steel been applied
     if external_op is last_op and anim_offset.fast_mask:
         return
-    last_op = bpy.context.active_operator
+    last_op = context.active_operator
 
     context.scene.tool_settings.use_keyframe_insert_auto = False
 
@@ -62,16 +62,18 @@ def magnet_handlers(scene):
                     return
 
                 if bone.select or bone.parent or bone.children:
-                    magnet(obj, fcurve, scene)
+                    magnet(context, obj, fcurve)
             else:
-                magnet(obj, fcurve, scene)
+                magnet(context, obj, fcurve)
 
     return
 
 
-def magnet(obj, fcurve, scene):
+def magnet(context, obj, fcurve):
     """Modify all the keys in every fcurve of the current object proportionally to the change in transformation
-    on the current frame by the user"""
+    on the current frame by the user """
+
+    scene = context.scene
 
     if fcurve.lock:
         return
@@ -82,10 +84,10 @@ def magnet(obj, fcurve, scene):
     blends_action = bpy.data.actions.get('animaide')
     blends_curves = getattr(blends_action, 'fcurves', None)
 
-    delta_y = get_delta(obj, fcurve)
+    delta_y = get_delta(context, obj, fcurve)
 
     for k in fcurve.keyframe_points:
-        if not bpy.context.scene.animaide.anim_offset.mask_in_use:
+        if not context.scene.animaide.anim_offset.mask_in_use:
             factor = 1
         elif scene.frame_start <= k.co.x <= scene.frame_end:
             factor = 1
@@ -205,11 +207,11 @@ def set_blend_values():
         keys[3].co.x = right_blend
         keys[3].co.y = 0
 
-        mask_interpolation(keys)
+        mask_interpolation(keys, context)
 
 
-def mask_interpolation(keys):
-    anim_offset = bpy.context.scene.animaide.anim_offset
+def mask_interpolation(keys, context):
+    anim_offset = context.scene.animaide.anim_offset
     interp = anim_offset.interp
     easing = anim_offset.easing
 
@@ -233,10 +235,10 @@ def mask_interpolation(keys):
 # -------- For mask interface -------
 
 
-def set_timeline_ranges(left_blend, left_margin, right_margin, right_blend):
+def set_timeline_ranges(context, left_blend, left_margin, right_margin, right_blend):
     """Use the timeline playback and preview ranges to represent the mask"""
 
-    scene = bpy.context.scene
+    scene = context.scene
     scene.use_preview_range = True
 
     scene.frame_preview_start = left_blend
@@ -245,10 +247,10 @@ def set_timeline_ranges(left_blend, left_margin, right_margin, right_blend):
     scene.frame_preview_end = right_blend
 
 
-def reset_timeline_mask():
+def reset_timeline_mask(context):
     """Resets the timeline playback and preview ranges to what the user had it as"""
 
-    scene = bpy.context.scene
+    scene = context.scene
     anim_offset = scene.animaide.anim_offset
 
     scene.frame_preview_start = anim_offset.user_preview_start
@@ -259,10 +261,10 @@ def reset_timeline_mask():
     scene.tool_settings.use_keyframe_insert_auto = anim_offset.user_scene_auto
 
 
-def reset_timeline_blends():
+def reset_timeline_blends(context):
     """Resets the timeline playback and preview ranges to what the user had it as"""
 
-    scene = bpy.context.scene
+    scene = context.scene
     anim_offset = scene.animaide.anim_offset
 
     scene.frame_preview_start = anim_offset.user_preview_start
@@ -270,10 +272,10 @@ def reset_timeline_blends():
     scene.use_preview_range = anim_offset.user_preview_use
 
 
-def store_user_timeline_ranges():
+def store_user_timeline_ranges(context):
     """Stores the timeline playback and preview ranges"""
 
-    scene = bpy.context.scene
+    scene = context.scene
     anim_offset = scene.animaide.anim_offset
 
     anim_offset.user_preview_start = scene.frame_preview_start
@@ -292,10 +294,10 @@ def poll(context):
 
     objects = context.selected_objects
     area = context.area.type
-    return objects is not None and area == 'GRAPH_EDITOR' or area == 'DOPESHEET_EDITOR'
+    return objects is not None and area == 'GRAPH_EDITOR' or area == 'DOPESHEET_EDITOR' or area == 'VIEW_3D'
 
 
-def get_anim_offset_globals(object):
+def get_anim_offset_globals(context, object):
     """Get global values for the anim_offset"""
 
     anim = object.animation_data
@@ -313,7 +315,7 @@ def get_anim_offset_globals(object):
         if fcurve.lock is True:
             continue
 
-        cur_frame = bpy.context.scene.frame_current
+        cur_frame = context.scene.frame_current
         cur_frame_y = fcurve.evaluate(cur_frame)
 
         values = {'x': cur_frame, 'y': cur_frame_y}

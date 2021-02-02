@@ -4,7 +4,7 @@ import os
 from . import support
 from .. import utils
 # from .utils import curve, key
-from bpy.props import StringProperty, FloatProperty, EnumProperty
+from bpy.props import StringProperty, FloatProperty, EnumProperty, BoolProperty
 from bpy.types import Operator
 
 
@@ -58,10 +58,9 @@ class AAT_OT_clone_remove(Operator):
 
 
 class AAT_OT_move_key(Operator):
-    '''
-    Move selected keys'''
+    """Move selected keys"""
 
-    bl_idname = 'animaide.move_key'
+    bl_idname = 'anim.aide_move_key'
     bl_label = "Move Key"
     bl_options = {'REGISTER'}
     amount: FloatProperty(default=1.0)
@@ -79,9 +78,129 @@ class AAT_OT_move_key(Operator):
         return True
 
     def execute(self, context):
-        objects = context.selected_objects
 
-        utils.key.move_right_left(objects, self.amount, self.direction)
+        if self.direction == 'LEFT' or self.direction == 'RIGHT':
+            support.change_frame(context, self.amount, self.direction)
+        elif self.direction == 'UP' or self.direction == 'DOWN':
+            support.change_value(context, self.amount, self.direction)
+
+        return {'FINISHED'}
+
+
+class AAT_OT_set_key_type(Operator):
+    """Set key type"""
+
+    bl_idname = 'anim.aide_set_key_type'
+    bl_label = "Set Key Type"
+    bl_options = {'REGISTER'}
+
+    type: EnumProperty(
+        items=support.key_type,
+        name="Key Type",
+        default='JITTER'
+    )
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+
+        if self.type == 'KEYFRAME':
+            support.set_type(context, 'KEYFRAME')
+        elif self.type == 'BREAKDOWN':
+            support.set_type(context, 'BREAKDOWN')
+        elif self.type == 'JITTER':
+            support.set_type(context, 'JITTER')
+        elif self.type == 'EXTREME':
+            support.set_type(context, 'EXTREME')
+
+        return {'FINISHED'}
+
+
+class AAT_OT_delete_key_type(Operator):
+    """MDelete key type"""
+
+    bl_idname = 'anim.aide_delete_key_type'
+    bl_label = "Delete Key Type"
+    bl_options = {'REGISTER'}
+
+    type: EnumProperty(
+        items=support.key_type,
+        name="Key Type",
+        default='JITTER'
+    )
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+
+        support.delete_by_type(context, kind=self.type)
+
+        return {'FINISHED'}
+
+
+class AAT_OT_select_key_type(Operator):
+    """Selects key type"""
+
+    bl_idname = 'anim.aide_select_key_type'
+    bl_label = "Select Key Type"
+    bl_options = {'REGISTER'}
+
+    selection: BoolProperty()
+
+    type: EnumProperty(
+        items=support.key_type,
+        name="Key Type",
+        default='JITTER'
+    )
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+
+        support.select_by_type(context, kind=self.type, selection=self.selection)
+
+        return {'FINISHED'}
+
+
+class AAT_OT_set_handles_type(Operator):
+    """Sets the type of handle the ky has"""
+
+    bl_idname = 'anim.aide_set_handles_type'
+    bl_label = "Set Handles Type"
+    bl_options = {'REGISTER'}
+
+    act_on: EnumProperty(
+        items=[('SELECTION', '', 'Selection', '', 1),
+               ('FIRST', '', 'First', '', 2),
+               ('LAST', '', 'Last', '', 3),
+               ('BOTH', '', 'Both', '', 4),
+               ('ALL', '', 'All', '', 5)],
+        name="Act on",
+        default='SELECTION'
+    )
+
+    handle_type: EnumProperty(
+        items=support.handle_type,
+        name="Handle Type",
+        default='AUTO_CLAMPED'
+    )
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+
+        support.set_handles_type(
+            context,
+            act_on=self.act_on,
+            handle_type=self.handle_type)
 
         return {'FINISHED'}
 
@@ -182,5 +301,11 @@ class ANIMAIDE_OT_path(Operator):
 
 
 classes = (
-    ANIMAIDE_OT_key_manager_settings,
+    AAT_OT_move_key,
+    AAT_OT_set_key_type,
+    AAT_OT_delete_key_type,
+    AAT_OT_select_key_type,
+    AAT_OT_set_handles_type,
+    AAT_OT_select_key_parts,
+    AAT_OT_set_handles_interp,
 )

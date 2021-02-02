@@ -1,11 +1,12 @@
 import bpy
+
 from .. import utils
 
 
 def attach_selection_to_fcurve(fcurve, target_fcurve, factor=1.0, is_gradual=True):
     """Match 'y' value of selected keys to the value o target_fcurve"""
 
-    selected_keys = get_selected(fcurve)
+    selected_keys = get_selected_index(fcurve)
 
     for index in selected_keys:
 
@@ -167,3 +168,22 @@ def get_frame_neighbors(fcurve, frame=None, clamped=False):
             right_neighbor = None
 
     return left_neighbor, right_neighbor
+
+
+def update_keyframe_points(context):
+    # The select operator(s) are bugged, and can fail to update selected keys, so
+
+    area = context.area.type
+    if area != 'GRAPH_EDITOR':
+        context.area.type = 'GRAPH_EDITOR'
+
+    snap = context.space_data.auto_snap
+    context.space_data.auto_snap = 'NONE'
+
+    bpy.ops.transform.transform()
+
+    context.space_data.auto_snap = snap
+    if area != 'GRAPH_EDITOR':
+        context.area.type = area
+
+

@@ -45,7 +45,7 @@ def update_overshoot(self, context):
 def update_selector(self, context):
     # change values when selector property is changed
 
-    support.get_globals()
+    support.get_globals(context)
     # self.overshoot = False
     self.show_factor = False
 
@@ -101,8 +101,8 @@ class AnimAideTool(PropertyGroup):
                               description='use markers for the reference frames',
                               update=toggle_tool_markers)
 
-    unselected_fcurves: BoolProperty(default=False,
-                                     description='Affect unselected fcurves')
+    # unselected_fcurves: BoolProperty(default=False,
+    #                                  description='Affect unselected fcurves')
 
     keys_under_cursor: BoolProperty(default=False,
                                     description='Affect unselected keys when cursor is over them')

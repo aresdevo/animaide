@@ -69,6 +69,7 @@ class AnimAideScene(PropertyGroup):
     clone: PointerProperty(type=curve_tools.props.AnimAideClone)
     tool: PointerProperty(type=curve_tools.props.AnimAideTool)
     anim_offset: PointerProperty(type=anim_offset.props.AnimAideOffset)
+    key_tweak: PointerProperty(type=key_manager.props.KeyTweak)
 
 
 classes = \
@@ -77,15 +78,6 @@ classes = \
     key_manager.classes + \
     ui.classes + \
     (AnimAideScene,)
-
-# classes = \
-#     curve_tools.props.classes + \
-#     curve_tools.ops.classes + \
-#     ops.classes + \
-#     ui.classes + \
-#     curve_tools.ui.classes + \
-#     anim_offset.classes + \
-#     (AnimAideScene,)
 
 
 def register():

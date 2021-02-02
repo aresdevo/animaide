@@ -233,7 +233,7 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                                 f"Left Blend: {scene.frame_preview_start}     "
                             )
 
-                        support.set_blend_values()
+                        support.set_blend_values(context)
 
                     elif event.alt:
                         # -------------- Move range -------------
@@ -246,7 +246,7 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                         scene.frame_start = self.init_start + distance
                         scene.frame_end = self.init_end + distance
                         scene.frame_preview_end = self.init_preview_end + distance
-                        support.set_blend_values()
+                        support.set_blend_values(context)
 
                     else:
                         # -------------- Move margins -------------
@@ -264,7 +264,7 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                             info = self.marign_blend_info(context, 'Left')
                             context.window.workspace.status_text_set(info)
 
-                        support.set_blend_values()
+                        support.set_blend_values(context)
 
                 else:
                     # --------------- Add mask ----------------
@@ -292,7 +292,7 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                         scene.frame_end = self.leftmouse_frame
                         scene.frame_preview_end = self.leftmouse_frame
 
-                    support.set_blend_values()
+                    support.set_blend_values(context)
 
         elif event.type in {'RIGHTMOUSE', 'ESC'}:
             self.finish_mask(context)
@@ -314,7 +314,7 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
         anim_offset = scene.animaide.anim_offset
 
         if not anim_offset.mask_in_use:
-            support.store_user_timeline_ranges()
+            support.store_user_timeline_ranges(context)
 
         if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
@@ -343,11 +343,11 @@ class ANIMAIDE_OT_deactivate_magnet(Operator):
         if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
 
-        support.remove_mask()
+        support.remove_mask(context)
 
         context.area.tag_redraw()
         # bpy.ops.wm.redraw_timer()
-        # bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
         # bpy.data.window_managers['WinMan'].windows.update()
         # bpy.data.window_managers['WinMan'].update_tag()
 
@@ -371,11 +371,11 @@ class ANIMAIDE_OT_without_magnet_mask(Operator):
         if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
 
-        support.remove_mask()
+        support.remove_mask(context)
 
         context.area.tag_redraw()
         # bpy.ops.wm.redraw_timer()
-        # bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
         # bpy.data.window_managers['WinMan'].windows.update()
         # bpy.data.window_managers['WinMan'].update_tag()
 
@@ -399,7 +399,7 @@ class ANIMAIDE_OT_delete_magnet_mask(Operator):
         # if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
         #     bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
 
-        support.remove_mask()
+        support.remove_mask(context)
 
         context.area.tag_redraw()
         # bpy.ops.wm.redraw_timer()
@@ -439,13 +439,14 @@ class ANIMAIDE_OT_anim_offset_settings(Operator):
         layout.separator()
         # layout.prop(anim_offset, 'end_on_release', text='masking ends on mouse release')
         layout.prop(anim_offset, 'fast_mask', text='Fast offset calculation')
-        layout.prop(anim_offset, 'insert_outside_keys', text='Auto Key outside margins')
-        layout.separator()
-        layout.label(text='Mask blend interpolation')
-        row = layout.row(align=True)
-        row.prop(anim_offset, 'easing', text='', icon_only=False)
-        row.prop(anim_offset, 'interp', text='', expand=True)
-        # layout.prop(anim.aide_anim_offset, 'use_markers', text='Use Markers')
+        if context.area.type != 'VIEW_3D':
+            layout.prop(anim_offset, 'insert_outside_keys', text='Auto Key outside margins')
+            layout.separator()
+            layout.label(text='Mask blend interpolation')
+            row = layout.row(align=True)
+            row.prop(anim_offset, 'easing', text='', icon_only=False)
+            row.prop(anim_offset, 'interp', text='', expand=True)
+            # layout.prop(anim.aide_anim_offset, 'use_markers', text='Use Markers')
 
 
 classes = (

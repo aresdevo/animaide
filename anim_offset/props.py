@@ -9,7 +9,7 @@ def interpolation_update(self, context):
     blends_curves = getattr(blends_action, 'fcurves', None)
     if blends_curves:
         keys = blends_curves[0].keyframe_points
-        support.mask_interpolation(keys)
+        support.mask_interpolation(keys, context)
 
 
 class AnimAideOffset(PropertyGroup):
