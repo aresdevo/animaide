@@ -148,6 +148,7 @@ class ANIMAIDE_PT_curve_tools:
 
         animaide = context.scene.animaide
         tool = animaide.tool
+        clone = animaide.clone
 
         if context.area.type == 'VIEW_3D':
             expand = tool.expand_3d
@@ -168,8 +169,8 @@ class ANIMAIDE_PT_curve_tools:
         flow = layout.column_flow(columns=2)
         sub = flow.row(align=True)
         sub.alignment = 'LEFT'
-        sub.prop(tool, expand_text, text='', icon=icon, emboss=False)
-        sub.label(text=title)
+        sub.prop(tool, expand_text, text=title, icon=icon, emboss=False)
+        # sub.label(text=title)
         sub = flow.row(align=True)
         sub.alignment = 'RIGHT'
         sub.operator('anim.aide_tools_settings', text='', icon='PREFERENCES', emboss=False)
@@ -204,6 +205,17 @@ class ANIMAIDE_PT_curve_tools:
             tool_button(context, col, 'time_offset')
 
         steps(context, box, tool, expand)
+
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+
+        if tool.selector == 'TIME_OFFSET':
+
+            subrow = layout.row(align=True)
+            subrow.prop(clone, 'cycle_before', text='Cycle Before')
+
+            subrow = layout.row(align=True)
+            subrow.prop(clone, 'cycle_after', text='Cycle After')
 
         reference_frames(context, layout, expand)
 
