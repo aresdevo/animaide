@@ -210,6 +210,8 @@ def get_globals(context):
 
     objects = utils.get_items(context)
 
+    # are_keys_selected = False
+
     for obj in objects:
 
         if not utils.curve.valid_anim(obj):
@@ -256,7 +258,7 @@ def get_globals(context):
                 elif key.select_control_point:
                     # stores only selected keys
                     keyframes.append(key_index)
-
+                    # are_keys_selected = True
                     # find smooth values (average) of the original keys
 
                     # key = fcurve.keyframe_points[key_index]
@@ -319,8 +321,10 @@ def get_globals(context):
             curve_items['ref_frames'] = frames
 
             curves[fcurve_index] = curve_items
+            # curves['keys_selected'] = keys_selected
 
         global_values[obj.name] = curves
+        # global_values['are_keys_selected'] = are_keys_selected
 
     return
 

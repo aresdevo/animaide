@@ -12,6 +12,8 @@ class ANIMAIDE_PT:
 
     def draw(self, context):
 
+        anim_offset = context.scene.animaide.anim_offset
+
         layout = self.layout
 
         row = layout.row(align=True)
@@ -23,18 +25,25 @@ class ANIMAIDE_PT:
 
         row.operator('anim.aide_anim_offset_settings', text='', icon='PREFERENCES', emboss=True)
 
+        row = layout.row(align=True)
+
         if context.area.type != 'VIEW_3D':
             mask_in_use = context.scene.animaide.anim_offset.mask_in_use
             if mask_in_use:
-                mask_name = 'Modify Mask'
+                name = 'Modify Mask'
                 depress = True
+
             else:
-                mask_name = 'With Mask'
+                name = 'With Mask'
                 depress = False
 
-            row = layout.row(align=True)
-            row.operator("anim.aide_add_magnet_mask", text=mask_name, depress=depress)
+            row.operator("anim.aide_add_magnet_mask", text=name, depress=depress)
             row.operator("anim.aide_delete_magnet_mask", text='', icon='TRASH')
+            if mask_in_use:
+                layout.label(text='Mask blend interpolation:')
+                row = layout.row(align=True)
+                row.prop(anim_offset, 'easing', text='', icon_only=False)
+                row.prop(anim_offset, 'interp', text='', expand=True)
 
 
 class ANIMAIDE_PT_anim_offset_3d(Panel, ANIMAIDE_PT):

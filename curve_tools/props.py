@@ -77,17 +77,17 @@ class AnimAideClone(PropertyGroup):
                      ('REPEAT_OFFSET', 'Repeat with Offset', '', '', 3),
                      ('MIRROR', 'Mirrored', '', '', 4)]
 
-    cycle_before: EnumProperty(
+    cycle: EnumProperty(
         items=cycle_options,
         name='Before',
         default='REPEAT_OFFSET'
     )
 
-    cycle_after: EnumProperty(
-        items=cycle_options,
-        name='Before',
-        default='REPEAT_OFFSET'
-    )
+    # cycle_after: EnumProperty(
+    #     items=cycle_options,
+    #     name='Before',
+    #     default='REPEAT_OFFSET'
+    # )
 
 
 class AnimAideFrameBookmark(PropertyGroup):

@@ -4,7 +4,7 @@ import os
 from . import support
 from .. import utils
 # from .utils import curve, key
-from bpy.props import StringProperty, FloatProperty, EnumProperty, BoolProperty
+from bpy.props import StringProperty, FloatProperty, EnumProperty, BoolProperty, IntProperty
 from bpy.types import Operator
 
 
@@ -38,6 +38,31 @@ class AAT_OT_move_key(Operator):
         return {'FINISHED'}
 
 
+class AAT_OT_insert_frames(Operator):
+    """insert frames between keys keys"""
+
+    bl_idname = 'anim.aide_insert_frames'
+    bl_label = "Move Key"
+    bl_options = {'REGISTER'}
+
+    amount: IntProperty(default=1)
+    # amount: EnumProperty(
+    #     items=support.amount,
+    #     name="Amount",
+    #     default='3'
+    # )
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+
+        support.insert_frames(context, self.amount)
+
+        return {'FINISHED'}
+
+
 class AAT_OT_set_key_type(Operator):
     """Set key type"""
 
@@ -46,7 +71,7 @@ class AAT_OT_set_key_type(Operator):
     bl_options = {'REGISTER'}
 
     type: EnumProperty(
-        items=support.key_type,
+        items=support.key_type_t,
         name="Key Type",
         default='JITTER'
     )
@@ -77,7 +102,7 @@ class AAT_OT_delete_key_type(Operator):
     bl_options = {'REGISTER'}
 
     type: EnumProperty(
-        items=support.key_type,
+        items=support.key_type_t,
         name="Key Type",
         default='JITTER'
     )
@@ -103,7 +128,7 @@ class AAT_OT_select_key_type(Operator):
     selection: BoolProperty()
 
     type: EnumProperty(
-        items=support.key_type,
+        items=support.key_type_t,
         name="Key Type",
         default='JITTER'
     )
@@ -137,7 +162,7 @@ class AAT_OT_set_handles_type(Operator):
     )
 
     handle_type: EnumProperty(
-        items=support.handle_type,
+        items=support.handle_type_t,
         name="Handle Type",
         default='AUTO_CLAMPED'
     )
@@ -167,7 +192,7 @@ class AAT_OT_select_key_parts(Operator):
     right: BoolProperty()
     point: BoolProperty()
     handle_type: EnumProperty(
-        items=support.handle_type,
+        items=support.handle_type_t,
         name="Handle Type",
         default='AUTO_CLAMPED'
     )
@@ -196,19 +221,19 @@ class AAT_OT_set_handles_interp(Operator):
     bl_options = {'REGISTER'}
 
     interp: EnumProperty(
-        items=support.interp,
+        items=support.interp_t,
         name="Interpolation",
         default='BEZIER'
     )
 
     strength: EnumProperty(
-        items=support.strength,
+        items=support.strength_t,
         name="Ease Strength",
         default='SINE'
     )
 
     easing: EnumProperty(
-        items=support.easing,
+        items=support.easing_t,
         name="Ease Mode",
         default='AUTO'
     )
@@ -374,6 +399,7 @@ class AAT_OT_clone_remove(Operator):
 
 classes = (
     AAT_OT_move_key,
+    AAT_OT_insert_frames,
     AAT_OT_set_key_type,
     AAT_OT_delete_key_type,
     AAT_OT_select_key_type,

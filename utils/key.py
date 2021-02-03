@@ -36,7 +36,7 @@ def get_selected_index(fcurve):
         return []  # we don't want to select keys on reference fcurves
 
     for index, key in keys.items():
-        if key.select_control_point:
+        if key.select_control_point or key.select_left_handle or key.select_right_handle:
             keyframe_indexes.append(index)
 
     return keyframe_indexes

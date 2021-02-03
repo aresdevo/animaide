@@ -40,7 +40,7 @@ def reference_frames(context, layout, expand):
     if tool.selector == 'BLEND_FRAME' or not expand:
 
         row = layout.row(align=True)
-        row.label(text='Referece frames:')
+        # row.label(text='Referece frames:')
 
         left_frame, right_frame = support.set_ref_marker(context)
 
@@ -167,14 +167,25 @@ class ANIMAIDE_PT_curve_tools:
 
         layout = self.layout
 
-        flow = layout.column_flow(columns=2)
-        sub = flow.row(align=True)
-        sub.alignment = 'LEFT'
-        sub.prop(tool, expand_text, text=title, icon=icon, emboss=False)
+        # flow = layout.column_flow(columns=2)
+        # sub = flow.row(align=True)
+        # sub.alignment = 'LEFT'
+        # sub.prop(tool, expand_text, text=title, icon=icon, emboss=False)
+        # # sub.label(text=title)
+        # sub = flow.row(align=True)
+        # sub.alignment = 'RIGHT'
+        # sub.operator('anim.aide_tools_settings', text='', icon='PREFERENCES', emboss=False)
+
+        # split = layout.split(factor=0.9)
+        row = layout.row(align=True)
+        # split.alignment = 'LEFT'
+        row.prop(tool, expand_text, text=' ', icon=icon, emboss=False)
         # sub.label(text=title)
-        sub = flow.row(align=True)
-        sub.alignment = 'RIGHT'
-        sub.operator('anim.aide_tools_settings', text='', icon='PREFERENCES', emboss=False)
+        # subsplit = split.split(factor=80)
+        # sub = flow.row(align=True)
+        # row.alignment = 'RIGHT'
+        row.prop(tool, 'overshoot', text='', toggle=1, invert_checkbox=False, icon='SNAP_INCREMENT')
+        row.operator('anim.aide_tools_settings', text='', icon='PREFERENCES', emboss=False)
 
         box = layout.box()
         col = box.column(align=True)
@@ -212,11 +223,12 @@ class ANIMAIDE_PT_curve_tools:
 
         if tool.selector == 'TIME_OFFSET':
 
-            subrow = layout.row(align=True)
-            subrow.prop(clone, 'cycle_before', text='Cycle Before')
+            # subrow = layout.row(align=True)
+            layout.label(text='Cicle Options:')
+            layout.prop(clone, 'cycle', text='')
 
-            subrow = layout.row(align=True)
-            subrow.prop(clone, 'cycle_after', text='Cycle After')
+            # subrow = layout.row(align=True)
+            # subrow.prop(clone, 'cycle_after', text='Cycle After')
 
         reference_frames(context, layout, expand)
 

@@ -6,50 +6,61 @@ import bpy
 from .. import utils
 
 
-handle_type = [('FREE', ' ', 'Free', 'HANDLE_FREE', 1),
-               ('ALIGNED', ' ', 'Aligned', 'HANDLE_ALIGNED', 2),
-               ('VECTOR', ' ', 'Vector', 'HANDLE_VECTOR', 3),
-               ('AUTO', ' ', 'Auto', 'HANDLE_AUTO', 4),
-               ('AUTO_CLAMPED', ' ', 'Auto Clamped', 'HANDLE_AUTOCLAMPED', 5)]
+handle_type_t = [('FREE', ' ', 'Free', 'HANDLE_FREE', 1),
+                 ('ALIGNED', ' ', 'Aligned', 'HANDLE_ALIGNED', 2),
+                 ('VECTOR', ' ', 'Vector', 'HANDLE_VECTOR', 3),
+                 ('AUTO', ' ', 'Auto', 'HANDLE_AUTO', 4),
+                 ('AUTO_CLAMPED', ' ', 'Auto Clamped', 'HANDLE_AUTOCLAMPED', 5)]
 
 
-interp = [('CONSTANT', 'Constant', 'Constant', 'IPO_CONSTANT', 1),
-          ('LINEAR', 'Linear', 'Linear', 'IPO_LINEAR', 2),
-          ('BEZIER', 'Bezier', 'Bezier', 'IPO_BEZIER', 3),
-          ('EASE', 'Ease', 'Ease', 'IPO_EASE_IN_OUT', 4)]
+interp_t = [('CONSTANT', 'Constant', 'Constant', 'IPO_CONSTANT', 1),
+            ('LINEAR', 'Linear', 'Linear', 'IPO_LINEAR', 2),
+            ('BEZIER', 'Bezier', 'Bezier', 'IPO_BEZIER', 3),
+            ('EASE', 'Ease', 'Ease', 'IPO_EASE_IN_OUT', 4)]
 
 
-strength = [('SINE', 'Sinusoidal', 'Sinusoidal', 'IPO_SINE', 1),
-            ('QUAD', 'Quadratic', 'Quadratic', 'IPO_QUAD', 2),
-            ('CUBIC', 'Cubic', 'Cubic', 'IPO_CUBIC', 3),
-            ('QUART', 'Quartic', 'Quartic', 'IPO_QUART', 4),
-            ('QUINT', 'Quintic', 'Quintic', 'IPO_QUINT', 5),
-            ('EXPO', 'Exponential', 'Exponential', 'IPO_EXPO', 6),
-            ('CIRC', 'Circular', 'Circular', 'IPO_CIRC', 7),
-            ('BACK', 'Back', 'Back', 'IPO_BACK', 8),
-            ('BOUNCE', 'Bounce', 'Bounce', 'IPO_BOUNCE', 9),
-            ('ELASTIC', 'Elastic', 'Elastic', 'IPO_ELASTIC', 10)]
+strength_t = [('SINE', 'Sinusoidal', 'Sinusoidal', 'IPO_SINE', 1),
+              ('QUAD', 'Quadratic', 'Quadratic', 'IPO_QUAD', 2),
+              ('CUBIC', 'Cubic', 'Cubic', 'IPO_CUBIC', 3),
+              ('QUART', 'Quartic', 'Quartic', 'IPO_QUART', 4),
+              ('QUINT', 'Quintic', 'Quintic', 'IPO_QUINT', 5),
+              ('EXPO', 'Exponential', 'Exponential', 'IPO_EXPO', 6),
+              ('CIRC', 'Circular', 'Circular', 'IPO_CIRC', 7),
+              ('BACK', 'Back', 'Back', 'IPO_BACK', 8),
+              ('BOUNCE', 'Bounce', 'Bounce', 'IPO_BOUNCE', 9),
+              ('ELASTIC', 'Elastic', 'Elastic', 'IPO_ELASTIC', 10)]
 
 
-easing = [('AUTO', 'Auto', 'Auto', 'IPO_EASE_IN_OUT', 1),
-          ('EASE_IN', 'Ease in', 'Ease in', 'IPO_EASE_IN', 2),
-          ('EASE_OUT', 'Ease-out', 'Ease-out', 'IPO_EASE_OUT', 3),
-          ('EASE_IN_OUT', 'Ease in-out', 'Ease in-out', 'IPO_EASE_IN_OUT', 4)]
+easing_t = [('AUTO', 'Auto', 'Auto', 'IPO_EASE_IN_OUT', 1),
+            ('EASE_IN', 'Ease in', 'Ease in', 'IPO_EASE_IN', 2),
+            ('EASE_OUT', 'Ease-out', 'Ease-out', 'IPO_EASE_OUT', 3),
+            ('EASE_IN_OUT', 'Ease in-out', 'Ease in-out', 'IPO_EASE_IN_OUT', 4)]
 
 
-key_type = [('KEYFRAME', ' ', 'Keyframe', 'KEYTYPE_KEYFRAME_VEC', 1),
-            ('BREAKDOWN', ' ', 'Breakdown', 'KEYTYPE_BREAKDOWN_VEC', 2),
-            ('JITTER', ' ', 'Jitter', 'KEYTYPE_JITTER_VEC', 3),
-            ('EXTREME', ' ', 'Extreme', 'KEYTYPE_EXTREME_VEC', 4)]
+key_type_t = [('KEYFRAME', ' ', 'Keyframe', 'KEYTYPE_KEYFRAME_VEC', 1),
+              ('BREAKDOWN', ' ', 'Breakdown', 'KEYTYPE_BREAKDOWN_VEC', 2),
+              ('JITTER', ' ', 'Jitter', 'KEYTYPE_JITTER_VEC', 3),
+              ('EXTREME', ' ', 'Extreme', 'KEYTYPE_EXTREME_VEC', 4)]
 
 
-act_on = [('FIRST', 'First', 'First', ' ', 1),
-          ('LAST', 'Last', 'Last', ' ', 2),
-          ('BOTH', 'Both', 'Both', ' ', 3),
-          ('ALL', 'All', 'All', ' ', 4)]
+act_on_t = [('SELECTION', 'Selection', 'Selection', ' ', 1),
+            ('FIRST', 'First', 'First', ' ', 2),
+            ('LAST', 'Last', 'Last', ' ', 3),
+            ('BOTH', 'Both', 'Both', ' ', 4),
+            ('ALL', 'All', 'All', ' ', 5)]
 
 
-tmp_points = {}
+amount_t = [('2', '2', '2', '', 1),
+           ('3', '3', '3', '', 2),
+           ('4', '4', '4', '', 3),
+           ('5', '5', '5', '', 4),
+           ('10', '10', '10', '', 5),
+           ('20', '20', '20', '', 6),
+           ('50', '50', '50', '', 7),
+           ('100', '100', '100', '', 8)]
+
+
+# tmp_points = {}
 
 
 def set_type(context, kind):
@@ -151,6 +162,7 @@ def change_frame(context, amount, direction='RIGHT'):
         if not utils.curve.valid_anim(obj):
             continue
 
+
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve in fcurves:
@@ -193,6 +205,53 @@ def change_frame(context, amount, direction='RIGHT'):
                     fcurve.update()
 
     context.scene.frame_current += frames
+
+
+def insert_frames(context, amount):
+    """insert frames between keys"""
+
+    objects = context.selected_objects
+
+    current_frame = context.scene.frame_current
+
+    # if direction == 'IN':
+    #     amount = amount
+    # elif direction == 'OUT':
+    #     amount = -amount
+
+    if not objects:
+        return
+
+    for obj in objects:
+
+        if not utils.curve.valid_anim(obj):
+            continue
+
+        fcurves = obj.animation_data.action.fcurves
+
+        for fcurve in fcurves:
+
+            if not utils.curve.valid_fcurve(context, fcurve):
+                continue
+
+            selected_keys = utils.key.get_selected_index(fcurve)
+
+            if selected_keys:
+                for selected_i in selected_keys:
+                    for index, key in sorted(fcurve.keyframe_points.items(), reverse=True):
+                        if index > selected_i:
+                            key.co_ui.x += amount
+                        else:
+                            continue
+            else:
+                # left_key, right_key = utils.key.get_frame_neighbors(fcurve, frame=None, clamped=False)
+                for index, key in sorted(fcurve.keyframe_points.items(), reverse=True):
+                    if key.co_ui.x > current_frame:
+                        key.co_ui.x += amount
+                    else:
+                        continue
+
+            fcurve.update()
 
 
 def set_handles_type(context, act_on='SELECTION', handle_type='NONE'):
@@ -266,12 +325,12 @@ def select_key_parts(context, left=False, right=False, point=False):
 
             selected_keys_index = utils.key.get_selected_index(fcurve)
 
-            if not selected_keys_index and fcurve_index in tmp_points.keys():
-                selected_keys_index = tmp_points[fcurve_index]
-                tmp_points[fcurve_index] = []
+            # if not selected_keys_index and fcurve_index in tmp_points.keys():
+            #     selected_keys_index = tmp_points[fcurve_index]
+            #     tmp_points[fcurve_index] = []
 
             if selected_keys_index:
-                tmp_points[fcurve_index] = selected_keys_index
+                # tmp_points[fcurve_index] = selected_keys_index
                 for index in selected_keys_index:
                     key = fcurve.keyframe_points[index]
 
@@ -321,11 +380,14 @@ def set_handles_interp(context, interp='NONE', easing='NONE', strength='NONE'):
 def handle_buttons(context, key, left, point, right):
     key_tweak = context.scene.animaide.key_tweak
 
-    if length is None:
-        return
+    key.select_left_handle = left
+    key.select_right_handle = right
+    key.select_control_point = point
 
-    if left is True:
-        key.handle_left.length = length
+    key_tweak.left = left
+    key_tweak.right = right
+    key_tweak.point = point
+
 
 def handle_type_asignment(key, left=True, right=True, handle_type='AUTO_CLAMPED'):
     """set 'type' of a key handles"""

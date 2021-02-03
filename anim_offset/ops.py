@@ -442,10 +442,10 @@ class ANIMAIDE_OT_anim_offset_settings(Operator):
         if context.area.type != 'VIEW_3D':
             layout.prop(anim_offset, 'insert_outside_keys', text='Auto Key outside margins')
             layout.separator()
-            layout.label(text='Mask blend interpolation')
-            row = layout.row(align=True)
-            row.prop(anim_offset, 'easing', text='', icon_only=False)
-            row.prop(anim_offset, 'interp', text='', expand=True)
+            # layout.label(text='Mask blend interpolation')
+            # row = layout.row(align=True)
+            # row.prop(anim_offset, 'easing', text='', icon_only=False)
+            # row.prop(anim_offset, 'interp', text='', expand=True)
             # layout.prop(anim.aide_anim_offset, 'use_markers', text='Use Markers')
 
 

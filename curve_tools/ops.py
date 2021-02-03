@@ -106,7 +106,8 @@ class ANIMAIDE_OT:
         layout.prop(self, 'factor', text='', slider=True)
 
     def invoke(self, context, event):
-        tool = context.scene.animaide.tool
+        animaide = context.scene.animaide
+        tool = animaide.tool
 
         if tool.flip:
             self.start(context, event)
@@ -141,6 +142,11 @@ class ANIMAIDE_OT:
         # left_frame, right_frame = support.set_ref_marker(context)
 
         support.get_globals(context)
+
+        # if support.global_values['are_keys_selected']:
+        #     animaide.tool.keys_under_cursor = False
+        # else:
+        #     animaide.tool.keys_under_cursor = True
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -389,15 +395,14 @@ class ANIMAIDE_OT_time_offset(Operator, ANIMAIDE_OT):
 
     def time_offset(self):
 
-        cycle_before = self.animaide.clone.cycle_before
-        cycle_after = self.animaide.clone.cycle_after
+        cycle = self.animaide.clone.cycle
 
         clone_name = '%s.%d.clone' % (self.fcurve.data_path, self.fcurve.array_index)
         clone = utils.curve.duplicate_from_data(self.fcurves,
                                                 self.global_fcurve,
                                                 clone_name,
-                                                before=cycle_before,
-                                                after=cycle_after)
+                                                before=cycle,
+                                                after=cycle)
 
         factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
@@ -526,7 +531,7 @@ class ANIMAIDE_OT_tools_settings(Operator):
 
         layout.label(text='Settings')
         layout.separator()
-        layout.prop(tool, 'overshoot', text='overshoot', toggle=False)
+        # layout.prop(tool, 'overshoot', text='overshoot', toggle=False)
         layout.prop(tool, 'keys_under_cursor', text='Only keys under cursor', toggle=False)
         layout.prop(tool, 'flip', text='Activates on release', toggle=False)
 
