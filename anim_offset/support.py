@@ -106,7 +106,6 @@ def get_delta(obj, fcurve):
     """Determine the transformation change by the user of the current object"""
 
     cur_frame = bpy.context.scene.frame_current
-
     curve_value = fcurve.evaluate(cur_frame)
 
     try:
