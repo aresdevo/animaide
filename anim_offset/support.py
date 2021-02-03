@@ -52,19 +52,19 @@ def magnet_handlers(scene):
         action = getattr(obj.animation_data, 'action', None)
 
         for fcurve in getattr(action, 'fcurves', list()):
-
-            if obj.type == 'ARMATURE':
-                split_data_path = fcurve.data_path.split(sep='"')
-                bone_name = split_data_path[1]
-                bone = obj.data.bones.get(bone_name)
-
-                if bone is None or bone.hide:
-                    return
-
-                if bone.select or bone.parent or bone.children:
-                    magnet(obj, fcurve, scene)
-            else:
-                magnet(obj, fcurve, scene)
+            # ######### Not sure we need this part ##########
+            # if obj.type == 'ARMATURE':
+            #     split_data_path = fcurve.data_path.split(sep='"')
+            #     bone_name = split_data_path[1]
+            #     bone = obj.data.bones.get(bone_name)
+            #
+            #     if not bone:
+            #         return
+            #
+            #     if bone.select or bone.parent or bone.children:
+            #         magnet(obj, fcurve, scene)
+            # else:
+            magnet(obj, fcurve, scene)
 
     return
 
@@ -107,15 +107,21 @@ def get_delta(obj, fcurve):
 
     cur_frame = bpy.context.scene.frame_current
 
-    source = fcurve.evaluate(cur_frame)
-    curve_value = obj.path_resolve(fcurve.data_path)
+    curve_value = fcurve.evaluate(cur_frame)
 
     try:
-        target = curve_value[fcurve.array_index]
-    except TypeError:
-        target = curve_value
+        prop = obj.path_resolve(fcurve.data_path)
+    except:
+        prop = None
 
-    return target - source
+    if prop:
+        try:
+            target = prop[fcurve.array_index]
+        except TypeError:
+            target = prop
+        return target - curve_value
+    else:
+        return 0
 
 
 # ----------- Mask -----------
