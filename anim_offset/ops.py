@@ -53,6 +53,77 @@ class ANIMAIDE_OT_modal_test(Operator):
         return {'RUNNING_MODAL'}
 
 
+class ANIMAIDE_OT_without_magnet_mask(Operator):
+    """Activates Anim Offset without maks"""
+
+    bl_idname = "anim.aide_without_magnet_mask"
+    bl_label = "Without Mask"
+
+    # bl_options = {'REGISTER'}
+
+    @classmethod
+    def poll(cls, context):
+        return support.poll(context)
+
+    def execute(self, context):
+
+        scene = context.scene
+        anim_offset = scene.animaide.anim_offset
+
+        anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
+        support.store_user_timeline_ranges()
+
+        scene.tool_settings.use_keyframe_insert_auto = False
+
+        if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
+            bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
+
+        # support.remove_mask(context)
+
+        context.area.tag_redraw()
+        # bpy.ops.wm.redraw_timer()
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        # bpy.data.window_managers['WinMan'].windows.update()
+        # bpy.data.window_managers['WinMan'].update_tag()
+
+        return {'FINISHED'}
+
+
+class ANIMAIDE_OT_deactivate_magnet(Operator):
+    """Deactivates Anim Offset"""
+
+    bl_idname = "anim.aide_deactivate_magnet"
+    bl_label = "Deactivate"
+
+    # bl_options = {'REGISTER'}
+
+    @classmethod
+    def poll(cls, context):
+        return support.poll(context)
+
+    def execute(self, context):
+
+        if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
+            bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
+
+        scene = context.scene
+        anim_offset = scene.animaide.anim_offset
+
+        if anim_offset.mask_in_use:
+            support.remove_mask()
+            support.reset_timeline_mask()
+
+        scene.tool_settings.use_keyframe_insert_auto = anim_offset.user_scene_auto
+
+        context.area.tag_redraw()
+        # bpy.ops.wm.redraw_timer()
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        # bpy.data.window_managers['WinMan'].windows.update()
+        # bpy.data.window_managers['WinMan'].update_tag()
+
+        return {'FINISHED'}
+
+
 class ANIMAIDE_OT_add_magnet_mask(Operator):
     """Adds of modifies Anim Offset mask and activates it"""
 
@@ -306,17 +377,15 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
 
     def invoke(self, context, event):
         scene = context.scene
-        scene.tool_settings.use_keyframe_insert_auto = False
 
         self.leftmouse = False
         self.created = False
 
         anim_offset = scene.animaide.anim_offset
 
-        if not anim_offset.mask_in_use:
-            support.store_user_timeline_ranges()
-
         if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
+            anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
+            support.store_user_timeline_ranges()
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
 
         support.add_blends()
@@ -324,62 +393,6 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
-
-
-class ANIMAIDE_OT_deactivate_magnet(Operator):
-    """Deactivates Anim Offset"""
-
-    bl_idname = "anim.aide_deactivate_magnet"
-    bl_label = "Deactivate"
-
-    # bl_options = {'REGISTER'}
-
-    @classmethod
-    def poll(cls, context):
-        return support.poll(context)
-
-    def execute(self, context):
-
-        if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
-            bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
-
-        support.remove_mask()
-
-        context.area.tag_redraw()
-        # bpy.ops.wm.redraw_timer()
-        # bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
-        # bpy.data.window_managers['WinMan'].windows.update()
-        # bpy.data.window_managers['WinMan'].update_tag()
-
-        return {'FINISHED'}
-
-
-class ANIMAIDE_OT_without_magnet_mask(Operator):
-    """Activates Anim Offset without maks"""
-
-    bl_idname = "anim.aide_without_magnet_mask"
-    bl_label = "Without Mask"
-
-    # bl_options = {'REGISTER'}
-
-    @classmethod
-    def poll(cls, context):
-        return support.poll(context)
-
-    def execute(self, context):
-
-        if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
-            bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
-
-        support.remove_mask()
-
-        context.area.tag_redraw()
-        # bpy.ops.wm.redraw_timer()
-        # bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
-        # bpy.data.window_managers['WinMan'].windows.update()
-        # bpy.data.window_managers['WinMan'].update_tag()
-
-        return {'FINISHED'}
 
 
 class ANIMAIDE_OT_delete_magnet_mask(Operator):
@@ -400,6 +413,7 @@ class ANIMAIDE_OT_delete_magnet_mask(Operator):
         #     bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
 
         support.remove_mask()
+        support.reset_timeline_mask()
 
         context.area.tag_redraw()
         # bpy.ops.wm.redraw_timer()

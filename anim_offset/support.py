@@ -261,7 +261,7 @@ def reset_timeline_mask():
     scene.use_preview_range = anim_offset.user_preview_use
     scene.frame_start = anim_offset.user_scene_start
     scene.frame_end = anim_offset.user_scene_end
-    scene.tool_settings.use_keyframe_insert_auto = anim_offset.user_scene_auto
+    # scene.tool_settings.use_keyframe_insert_auto = anim_offset.user_scene_auto
 
 
 def reset_timeline_blends():
@@ -286,7 +286,7 @@ def store_user_timeline_ranges():
     anim_offset.user_preview_use = scene.use_preview_range
     anim_offset.user_scene_start = scene.frame_start
     anim_offset.user_scene_end = scene.frame_end
-    anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
+    # anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
 
 
 # ---------- Functions for Operators ------------
