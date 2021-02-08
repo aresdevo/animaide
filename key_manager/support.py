@@ -24,6 +24,8 @@ def set_type(context, key_type):
             if not utils.curve.valid_obj(context, obj):
                 continue
 
+            some_selected_key = utils.key.some_selected_key(context, obj)
+
             fcurves = obj.animation_data.action.fcurves
 
             for fcurve in fcurves:
@@ -38,12 +40,13 @@ def set_type(context, key_type):
                         key = fcurve.keyframe_points[index]
                         key.type = key_type
 
-                elif cursor_index:
-                    key = fcurve.keyframe_points[cursor_index]
-                    key.type = key_type
+                elif not some_selected_key:
+                    if cursor_index:
+                        key = fcurve.keyframe_points[cursor_index]
+                        key.type = key_type
 
-                else:
-                    add_key_type(context, fcurve, key_type)
+                    else:
+                        add_key_type(context, fcurve, key_type)
 
                 fcurve.update()
 
@@ -204,30 +207,32 @@ def set_handles_type(context, act_on='SELECTION', handle_type='NONE', strict=Tru
 
             selected_keys_index = utils.key.get_selected_index(fcurve)
 
+            some_selected_key = utils.key.some_selected_key(context, obj)
+
             first_key = fcurve.keyframe_points[0]
             last_index = len(fcurve.keyframe_points) - 1
             last_key = fcurve.keyframe_points[last_index]
             kwargs = dict(left=True, right=True, handle_type=handle_type)
 
-            if act_on == 'SELECTION':
-                if selected_keys_index:
+            if selected_keys_index:
+                if act_on == 'SELECTION':
                     for index in selected_keys_index:
                         key = fcurve.keyframe_points[index]
                         handle_type_asignment(key,
                                               left=key.select_left_handle,
                                               right=key.select_right_handle,
                                               handle_type=handle_type)
-
-            elif act_on == 'ALL':
-                for index, key in fcurve.keyframe_points.items():
-                    handle_type_asignment(key, **kwargs)
-            elif act_on == 'FIRST':
-                handle_type_asignment(first_key, **kwargs)
-            elif act_on == 'LAST':
-                handle_type_asignment(last_key, **kwargs)
-            elif act_on == 'BOTH':
-                handle_type_asignment(last_key, **kwargs)
-                handle_type_asignment(first_key, **kwargs)
+            elif not some_selected_key:
+                if act_on == 'ALL':
+                    for index, key in fcurve.keyframe_points.items():
+                        handle_type_asignment(key, **kwargs)
+                elif act_on == 'FIRST':
+                    handle_type_asignment(first_key, **kwargs)
+                elif act_on == 'LAST':
+                    handle_type_asignment(last_key, **kwargs)
+                elif act_on == 'BOTH':
+                    handle_type_asignment(last_key, **kwargs)
+                    handle_type_asignment(first_key, **kwargs)
 
             fcurve.update()
 

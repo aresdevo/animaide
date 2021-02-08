@@ -6,10 +6,10 @@ from bpy.types import Panel, Menu, UIList, WorkSpaceTool
 
 def key_type_row(layout, name, key_type, icon):
     row = layout.row(align=True)
-    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='HIDE_OFF')
+    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='RESTRICT_SELECT_OFF')
     op.type = key_type
     op.selection = True
-    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='HIDE_ON')
+    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='RESTRICT_SELECT_ON')
     op.type = key_type
     op.selection = False
     op = row.operator('anim.aide_set_key_type', text=name, emboss=True, icon=icon)
@@ -68,7 +68,7 @@ class ANIMAIDE_PT_move_keys:
     bl_label = "Move-Insert"
     bl_region_type = 'UI'
     bl_category = 'AnimAide'
-    bl_options = {'HEADER_LAYOUT_EXPAND'}
+    # bl_options = {'HEADER_LAYOUT_EXPAND'}
 
     def draw(self, context):
 
@@ -141,7 +141,7 @@ class ANIMAIDE_PT_key_type:
     bl_label = "Type"
     bl_region_type = 'UI'
     bl_category = 'AnimAide'
-    bl_options = {'DEFAULT_CLOSED'}
+    # bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
 
@@ -175,7 +175,7 @@ class ANIMAIDE_PT_key_interp:
     bl_label = "Interpolation"
     bl_region_type = 'UI'
     bl_category = 'AnimAide'
-    bl_options = {'DEFAULT_CLOSED'}
+    # bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
 
