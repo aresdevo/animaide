@@ -120,7 +120,7 @@ def strength_update(self, context):
 
 
 def amount_update(self, context):
-    self.frame_change = int(self.amount)
+    self.frames = int(self.amount)
 
 
 class KeyTweak(PropertyGroup):

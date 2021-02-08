@@ -278,13 +278,10 @@ def select_key_parts(context,  left=False, right=False, point=False):
 def assign_interp(key, interp, easing, strength):
     if interp != 'NONE':
         key.interpolation = interp
-        print(f'interpolation: {interp}')
     if easing != 'NONE':
         key.easing = easing
-        print(f'easing: {easing}')
     if strength != 'NONE':
         key.interpolation = strength
-        print(f'strength: {strength}')
 
 
 def set_handles_interp(context, act_on='SELECTION', interp='NONE', easing='NONE', strength='NONE', strict=True):
