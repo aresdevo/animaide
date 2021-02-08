@@ -302,16 +302,16 @@ def poll(context):
     return objects is not None and area == 'GRAPH_EDITOR' or area == 'DOPESHEET_EDITOR' or area == 'VIEW_3D'
 
 
-def get_anim_offset_globals(context, object):
+def get_anim_offset_globals(context, obj):
     """Get global values for the anim_offset"""
 
-    anim = object.animation_data
+    anim = obj.animation_data
     if anim is None:
         return
     if anim.action.fcurves is None:
         return
 
-    fcurves = object.animation_data.action.fcurves
+    fcurves = obj.animation_data.action.fcurves
 
     curves = {}
 
@@ -327,6 +327,6 @@ def get_anim_offset_globals(context, object):
 
         curves[fcurve_index]['current_frame'] = values
 
-    global_values[object.name] = curves
+    global_values[obj.name] = curves
 
 

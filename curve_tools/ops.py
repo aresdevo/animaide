@@ -24,6 +24,13 @@ class ANIMAIDE_OT:
 
     tool_type = None
 
+    def __init__(self):
+        self.cursor_keys = []
+        pass
+
+    def __del__(self):
+        pass
+
     @classmethod
     def poll(cls, context):
         return utils.general.poll(context)
@@ -210,6 +217,102 @@ class ANIMAIDE_OT_blend_neighbor(Operator, ANIMAIDE_OT):
         return support.to_execute(self, context, self.blend_neighbor)
 
 
+class ANIMAIDE_OT_blend_infinite(Operator, ANIMAIDE_OT):
+    """Blend selected keys - or current key - to the value of the neighboring\n""" \
+    """left and right keys."""
+
+    bl_idname = "anim.aide_blend_infinite"
+    bl_label = "Blend infinite"
+
+    tool_type = 'BLEND_INFINITE'
+
+    def reference(self, index):
+        if 0 <= index <= len(self.fcurve.keyframe_points) - 1:
+            return self.fcurve.keyframe_points[index]
+        else:
+            return None
+
+    def set_values(self, index, key):
+        if self.factor > 0:
+            near = self.reference(index-1)
+            far = self.reference(index-2)
+        elif self.factor < 0:
+            near = self.reference(index+1)
+            far = self.reference(index+2)
+        else:
+            near = None
+            far = None
+
+        if not near:
+            return None, None, None
+
+        if not far:
+            previous_y = 0
+            local_factor = 0
+        else:
+            previous_y = far.co_ui.y - near.co.y
+            previous_x = far.co_ui.x - near.co.x
+            if key:
+                current_x = key.co_ui.x - near.co.x
+            else:
+                current_x = previous_x
+
+            try:
+                local_factor = current_x / previous_x
+            except:
+                local_factor = 0
+
+        return near, previous_y, local_factor
+
+    def blend_infinite(self, context):
+
+        added_a_key = None
+        factor = utils.clamp(abs(self.factor), self.min_value, self.max_value)
+
+        if self.selected_keys:
+            if self.factor < 0:
+                selected_keys = sorted(self.selected_keys, reverse=True)
+            else:
+                selected_keys = self.selected_keys
+
+            for index in selected_keys:
+                k = self.fcurve.keyframe_points[index]
+                near, previous_y, local_factor = self.set_values(index, k)
+                if not near:
+                    continue
+                factor = utils.clamp(abs(self.factor), self.min_value, self.max_value)
+                k.co_ui.y = near.co.y + previous_y * local_factor * factor
+
+        elif self.fcurve_index in self.cursor_keys:
+            index = utils.key.on_current_frame(self.fcurve)
+            k = self.fcurve.keyframe_points[index]
+            near, previous_y, local_factor = self.set_values(index, k)
+            if not near:
+                return added_a_key
+            k.co_ui.y = near.co_ui.y + previous_y * local_factor * factor
+
+        else:
+            keys = self.fcurve.keyframe_points
+            current_frame = context.scene.frame_current
+            # left, right = utils.key.get_frame_neighbors(self.fcurve, frame=current_frame)
+            if self.factor >= 0:
+                index = len(self.fcurve.keyframe_points) - 1
+            else:
+                index = 0
+            near, previous_y, local_factor = self.set_values(index, key=None)
+            if not near:
+                return added_a_key
+            x = current_frame
+            y = near.co_ui.y + previous_y * local_factor * factor
+            utils.key.add_key(keys, x, y, select=False)
+            added_a_key = self.fcurve_index
+
+        return added_a_key
+
+    def execute(self, context):
+        return support.to_execute(self, context, self.blend_infinite, context)
+
+
 class ANIMAIDE_OT_blend_frame(Operator, ANIMAIDE_OT):
     """Blend selected keys - or current key - to the value of the chosen\n""" \
     """left and right frames."""
@@ -303,22 +406,38 @@ class ANIMAIDE_OT_tween(Operator, ANIMAIDE_OT):
 
     tool_type = 'TWEEN'
 
-    def tween(self):
+    def tween(self, context):
+
+        added_a_key = None
 
         factor = utils.clamp(self.factor, self.min_value, self.max_value)
         factor_zero_one = (factor+1)/2
-
         local_y = self.right_neighbor['y'] - self.left_neighbor['y']
 
-        for index in self.selected_keys:
+        if self.selected_keys:
+            for index in self.selected_keys:
+                k = self.fcurve.keyframe_points[index]
+                k.co_ui.y = self.left_neighbor['y'] + local_y * factor_zero_one
+                utils.key.set_handles(k)
+
+        elif self.fcurve_index in self.cursor_keys:
+            index = utils.key.on_current_frame(self.fcurve)
             k = self.fcurve.keyframe_points[index]
-
-            k.co.y = self.left_neighbor['y'] + local_y * factor_zero_one
-
+            k.co_ui.y = self.left_neighbor['y'] + local_y * factor_zero_one
             utils.key.set_handles(k)
 
+        else:
+            keys = self.fcurve.keyframe_points
+            cur_frame = context.scene.frame_current
+            x = cur_frame
+            y = self.left_neighbor['y'] + local_y * factor_zero_one
+            utils.key.add_key(keys, x, y, select=False)
+            added_a_key = self.fcurve_index
+
+        return added_a_key
+
     def execute(self, context):
-        return support.to_execute(self, context, self.tween)
+        return support.to_execute(self, context, self.tween, context)
 
 
 class ANIMAIDE_OT_push_pull(Operator, ANIMAIDE_OT):
@@ -532,7 +651,7 @@ class ANIMAIDE_OT_tools_settings(Operator):
         layout.label(text='Settings')
         layout.separator()
         # layout.prop(tool, 'overshoot', text='overshoot', toggle=False)
-        layout.prop(tool, 'keys_under_cursor', text='Only keys under cursor', toggle=False)
+        # layout.prop(tool, 'keys_under_cursor', text='Only keys under cursor', toggle=False)
         layout.prop(tool, 'flip', text='Activates on release', toggle=False)
 
         col = layout.column(align=False)
@@ -733,4 +852,5 @@ classes = (
     ANIMAIDE_OT_wave_noise,
     ANIMAIDE_OT_time_offset,
     ANIMAIDE_OT_tween,
+    ANIMAIDE_OT_blend_infinite,
 )

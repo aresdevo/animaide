@@ -6,67 +6,14 @@ import bpy
 from .. import utils
 
 
-handle_type_t = [('FREE', ' ', 'Free', 'HANDLE_FREE', 1),
-                 ('ALIGNED', ' ', 'Aligned', 'HANDLE_ALIGNED', 2),
-                 ('VECTOR', ' ', 'Vector', 'HANDLE_VECTOR', 3),
-                 ('AUTO', ' ', 'Auto', 'HANDLE_AUTO', 4),
-                 ('AUTO_CLAMPED', ' ', 'Auto Clamped', 'HANDLE_AUTOCLAMPED', 5)]
+last_op = None
+external_op = None
 
 
-interp_t = [('CONSTANT', 'Constant', 'Constant', 'IPO_CONSTANT', 1),
-            ('LINEAR', 'Linear', 'Linear', 'IPO_LINEAR', 2),
-            ('BEZIER', 'Bezier', 'Bezier', 'IPO_BEZIER', 3),
-            ('EASE', 'Ease', 'Ease', 'IPO_EASE_IN_OUT', 4)]
-
-
-strength_t = [('SINE', 'Sinusoidal', 'Sinusoidal', 'IPO_SINE', 1),
-              ('QUAD', 'Quadratic', 'Quadratic', 'IPO_QUAD', 2),
-              ('CUBIC', 'Cubic', 'Cubic', 'IPO_CUBIC', 3),
-              ('QUART', 'Quartic', 'Quartic', 'IPO_QUART', 4),
-              ('QUINT', 'Quintic', 'Quintic', 'IPO_QUINT', 5),
-              ('EXPO', 'Exponential', 'Exponential', 'IPO_EXPO', 6),
-              ('CIRC', 'Circular', 'Circular', 'IPO_CIRC', 7),
-              ('BACK', 'Back', 'Back', 'IPO_BACK', 8),
-              ('BOUNCE', 'Bounce', 'Bounce', 'IPO_BOUNCE', 9),
-              ('ELASTIC', 'Elastic', 'Elastic', 'IPO_ELASTIC', 10)]
-
-
-easing_t = [('AUTO', 'Auto', 'Auto', 'IPO_EASE_IN_OUT', 1),
-            ('EASE_IN', 'Ease in', 'Ease in', 'IPO_EASE_IN', 2),
-            ('EASE_OUT', 'Ease-out', 'Ease-out', 'IPO_EASE_OUT', 3),
-            ('EASE_IN_OUT', 'Ease in-out', 'Ease in-out', 'IPO_EASE_IN_OUT', 4)]
-
-
-key_type_t = [('KEYFRAME', ' ', 'Keyframe', 'KEYTYPE_KEYFRAME_VEC', 1),
-              ('BREAKDOWN', ' ', 'Breakdown', 'KEYTYPE_BREAKDOWN_VEC', 2),
-              ('JITTER', ' ', 'Jitter', 'KEYTYPE_JITTER_VEC', 3),
-              ('EXTREME', ' ', 'Extreme', 'KEYTYPE_EXTREME_VEC', 4)]
-
-
-act_on_t = [('SELECTION', 'Selection', 'Selection', ' ', 1),
-            ('FIRST', 'First', 'First', ' ', 2),
-            ('LAST', 'Last', 'Last', ' ', 3),
-            ('BOTH', 'Both', 'Both', ' ', 4),
-            ('ALL', 'All', 'All', ' ', 5)]
-
-
-amount_t = [('2', '2', '2', '', 1),
-           ('3', '3', '3', '', 2),
-           ('4', '4', '4', '', 3),
-           ('5', '5', '5', '', 4),
-           ('10', '10', '10', '', 5),
-           ('20', '20', '20', '', 6),
-           ('50', '50', '50', '', 7),
-           ('100', '100', '100', '', 8)]
-
-
-# tmp_points = {}
-
-
-def set_type(context, kind):
+def set_type(context, key_type):
     """Sets key type"""
 
-    if kind == 'KEYFRAME' or kind == 'BREAKDOWN' or kind == 'JITTER' or kind == 'EXTREME':
+    if key_type == 'KEYFRAME' or key_type == 'BREAKDOWN' or key_type == 'JITTER' or key_type == 'EXTREME':
 
         objects = context.selected_objects
 
@@ -74,69 +21,57 @@ def set_type(context, kind):
             return
 
         for obj in objects:
-            if not utils.curve.valid_anim(obj):
+            if not utils.curve.valid_obj(context, obj):
                 continue
+
             fcurves = obj.animation_data.action.fcurves
 
             for fcurve in fcurves:
-
-                if not utils.curve.valid_fcurve(context, fcurve):
+                if not utils.curve.valid_fcurve(context, obj, fcurve):
                     continue
 
                 selected_keys = utils.key.get_selected_index(fcurve)
+                cursor_index = utils.key.on_current_frame(fcurve)
 
-                if not selected_keys:
-                    continue
+                if selected_keys:
+                    for index in selected_keys:
+                        key = fcurve.keyframe_points[index]
+                        key.type = key_type
 
-                for index in selected_keys:
-                    key = fcurve.keyframe_points[index]
-                    key.type = kind
+                elif cursor_index:
+                    key = fcurve.keyframe_points[cursor_index]
+                    key.type = key_type
+
+                else:
+                    add_key_type(context, fcurve, key_type)
+
                 fcurve.update()
 
 
-def change_value(context, amount, direction='UP'):
-    """move keys verticaly"""
+def add_key_type(context, fcurve, key_type):
+    keys = fcurve.keyframe_points
+    cur_frame = context.scene.frame_current
+    left, right = utils.key.get_frame_neighbors(fcurve, cur_frame)
+    if left:
+        interp = left.interpolation
+    elif right:
+        interp = right.interpolation
+    else:
+        interp = 'BEZIER'
 
-    objects = context.selected_objects
+    x = cur_frame
+    y = fcurve.evaluate(cur_frame)
+    key = utils.key.add_key(keys, x, y, select=False)
+    key.interpolation = interp
+    key.type = key_type
 
-    if objects is None:
-        return
-
-    if direction == 'DOWN':
-        amount = -amount
-
-    some_selected_key = utils.key.some_selected_key(context)
-
-    for obj in objects:
-        if not utils.curve.valid_anim(obj):
-            continue
-
-        fcurves = obj.animation_data.action.fcurves
-
-        for fcurve in fcurves:
-
-            if not utils.curve.valid_fcurve(context, fcurve):
-                continue
-
-            selected_keys = utils.key.get_selected_index(fcurve)
-            current_index = utils.key.on_current_frame(fcurve)
-
-            if selected_keys:
-                for index in selected_keys:
-                    if index is None:
-                        continue
-                    key = fcurve.keyframe_points[index]
-                    key.co.y += amount
-                    fcurve.update()
-            elif current_index and not some_selected_key:
-                key = fcurve.keyframe_points[current_index]
-                key.co.y += amount
+    fcurve.update()
 
 
 def change_frame(context, amount, direction='RIGHT'):
     """move keys horizontally"""
 
-    def cant_move(l_neighbor, r_neighbor, l_key, r_key):
+    def can_move(l_neighbor, r_neighbor, l_key, r_key):
         if l_neighbor is not None and l_key.co.x + amount <= l_neighbor.co.x:
             return False
         elif r_neighbor is not None and r_key.co.x + amount >= r_neighbor.co.x:
@@ -154,20 +89,18 @@ def change_frame(context, amount, direction='RIGHT'):
     else:
         amount = int(amount)
 
-    some_selected_key = utils.key.some_selected_key(context)
     frames = amount
 
     for obj in objects:
-
-        if not utils.curve.valid_anim(obj):
+        if not utils.curve.valid_obj(context, obj):
             continue
 
+        some_selected_key = utils.key.some_selected_key(context, obj)
 
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve in fcurves:
-
-            if not utils.curve.valid_fcurve(context, fcurve):
+            if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
             selected_keys = utils.key.get_selected_index(fcurve)
@@ -175,10 +108,10 @@ def change_frame(context, amount, direction='RIGHT'):
             if selected_keys:
                 left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, selected_keys)
                 left_key, right_key = utils.key.first_and_last_selected(fcurve, selected_keys)
-                if not cant_move(left_neighbor, right_neighbor, left_key, right_key):
+                if not can_move(left_neighbor, right_neighbor, left_key, right_key):
                     return
                 for index in selected_keys:
-                    if index is None:
+                    if not index:
                         continue
                     key = fcurve.keyframe_points[index]
                     key.co.x += amount
@@ -190,16 +123,16 @@ def change_frame(context, amount, direction='RIGHT'):
                 current_index = utils.key.on_current_frame(fcurve)
                 if current_index:
                     key = fcurve.keyframe_points[current_index]
-                    if not cant_move(left_neighbor, right_neighbor, key, key):
+                    if not can_move(left_neighbor, right_neighbor, key, key):
                         return
                     key.co.x += amount
                     fcurve.update()
                     # context.scene.frame_current += amount
                     frames = amount
                 else:
-                    if direction == 'LEFT':
+                    if direction == 'LEFT' and right_neighbor:
                         right_neighbor.co.x = context.scene.frame_current
-                    elif direction == 'RIGHT':
+                    elif direction == 'RIGHT' and left_neighbor:
                         left_neighbor.co.x = context.scene.frame_current
                     frames = 0
                     fcurve.update()
@@ -214,74 +147,70 @@ def insert_frames(context, amount):
 
     current_frame = context.scene.frame_current
 
-    # if direction == 'IN':
-    #     amount = amount
-    # elif direction == 'OUT':
-    #     amount = -amount
+    def displace_keys(anchor_frame):
+        for key in fcurve.keyframe_points:
+            if key.co_ui.x <= anchor_frame:
+                continue
+
+            if key.co_ui.x + amount <= anchor_frame:
+                break
+
+            key.co_ui.x += amount
 
     if not objects:
         return
 
     for obj in objects:
-
-        if not utils.curve.valid_anim(obj):
+        if not utils.curve.valid_obj(context, obj):
             continue
+
+        some_selected_key = utils.key.some_selected_key(context, obj)
 
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve in fcurves:
-
-            if not utils.curve.valid_fcurve(context, fcurve):
+            if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
             selected_keys = utils.key.get_selected_index(fcurve)
 
             if selected_keys:
                 for selected_i in selected_keys:
-                    for index, key in sorted(fcurve.keyframe_points.items(), reverse=True):
-                        if index > selected_i:
-                            key.co_ui.x += amount
-                        else:
-                            continue
-            else:
-                # left_key, right_key = utils.key.get_frame_neighbors(fcurve, frame=None, clamped=False)
-                for index, key in sorted(fcurve.keyframe_points.items(), reverse=True):
-                    if key.co_ui.x > current_frame:
-                        key.co_ui.x += amount
-                    else:
-                        continue
+                    selected_k = fcurve.keyframe_points[selected_i]
+                    displace_keys(selected_k.co_ui.x)
+            elif not some_selected_key:
+                displace_keys(current_frame)
 
             fcurve.update()
 
 
-def set_handles_type(context, act_on='SELECTION', handle_type='NONE'):
+def set_handles_type(context, act_on='SELECTION', handle_type='NONE', strict=True):
     """lets you select or unselect either handle or control point of a key"""
 
     objects = context.selected_objects
 
+    if handle_type == 'NONE':
+        return
+
     for obj in objects:
-        if not utils.curve.valid_anim(obj):
+        if not utils.curve.valid_obj(context, obj, strict=strict):
             continue
 
         action = obj.animation_data.action
 
         for fcurve in action.fcurves:
-
-            if not utils.curve.valid_fcurve(context, fcurve):
+            if not utils.curve.valid_fcurve(context, obj, fcurve, strict=strict):
                 continue
 
             selected_keys_index = utils.key.get_selected_index(fcurve)
 
-            # first_key, last_key = first_and_last_selected(fcurve)
-            # first_key = fcurve.keyframe_points[0]
-            # last_index = len(fcurve.keyframe_points) - 1
-            # last_key = fcurve.keyframe_points[last_index]
-            if selected_keys_index:
-                first_key = fcurve.keyframe_points[selected_keys_index[0]]
-                last_index = len(selected_keys_index) - 1
-                last_key = fcurve.keyframe_points[selected_keys_index[last_index]]
+            first_key = fcurve.keyframe_points[0]
+            last_index = len(fcurve.keyframe_points) - 1
+            last_key = fcurve.keyframe_points[last_index]
+            kwargs = dict(left=True, right=True, handle_type=handle_type)
 
-                if act_on == 'SELECTION':
+            if act_on == 'SELECTION':
+                if selected_keys_index:
                     for index in selected_keys_index:
                         key = fcurve.keyframe_points[index]
                         handle_type_asignment(key,
@@ -289,38 +218,37 @@ def set_handles_type(context, act_on='SELECTION', handle_type='NONE'):
                                               right=key.select_right_handle,
                                               handle_type=handle_type)
 
-                elif handle_type != 'NONE':
-                    kwargs = dict(left=True, right=True, handle_type=handle_type)
-                    if act_on == 'ALL':
-                        for index, key in fcurve.keyframe_points.items():
-                            handle_type_asignment(key, **kwargs)
-                    elif act_on == 'FIRST':
-                        handle_type_asignment(first_key, **kwargs)
-                    elif act_on == 'LAST':
-                        handle_type_asignment(last_key, **kwargs)
-                    elif act_on == 'BOTH':
-                        handle_type_asignment(last_key, **kwargs)
-                        handle_type_asignment(first_key, **kwargs)
+            elif act_on == 'ALL':
+                for index, key in fcurve.keyframe_points.items():
+                    handle_type_asignment(key, **kwargs)
+            elif act_on == 'FIRST':
+                handle_type_asignment(first_key, **kwargs)
+            elif act_on == 'LAST':
+                handle_type_asignment(last_key, **kwargs)
+            elif act_on == 'BOTH':
+                handle_type_asignment(last_key, **kwargs)
+                handle_type_asignment(first_key, **kwargs)
 
-                fcurve.update()
+            fcurve.update()
 
 
-def select_key_parts(context, left=False, right=False, point=False):
+def select_key_parts(context,  left=False, right=False, point=False):
     """lets you select or unselect either handle or control point of a key"""
 
-    global tmp_points
+    global last_op
+
+    last_op = external_op
 
     objects = context.selected_objects
 
     for obj in objects:
-        if not utils.curve.valid_anim(obj):
+        if not utils.curve.valid_obj(context, obj):
             continue
 
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, fcurve in fcurves.items():
-
-            if not utils.curve.valid_fcurve(context, fcurve):
+            if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
             selected_keys_index = utils.key.get_selected_index(fcurve)
@@ -347,32 +275,43 @@ def select_key_parts(context, left=False, right=False, point=False):
                         handle_buttons(context, key, left=True, point=True, right=True)
 
 
-def set_handles_interp(context, interp='NONE', easing='NONE', strength='NONE'):
+def assign_interp(key, interp, easing, strength):
+    if interp != 'NONE':
+        key.interpolation = interp
+        print(f'interpolation: {interp}')
+    if easing != 'NONE':
+        key.easing = easing
+        print(f'easing: {easing}')
+    if strength != 'NONE':
+        key.interpolation = strength
+        print(f'strength: {strength}')
+
+
+def set_handles_interp(context, act_on='SELECTION', interp='NONE', easing='NONE', strength='NONE', strict=True):
     """lets you select or unselect either handle or control point of a key"""
 
     objects = context.selected_objects
 
     for obj in objects:
-        if not utils.curve.valid_anim(obj):
+        if not utils.curve.valid_obj(context, obj, strict=strict):
             continue
 
         action = obj.animation_data.action
 
         for fcurve in action.fcurves:
-
-            if not utils.curve.valid_fcurve(context, fcurve):
+            if not utils.curve.valid_fcurve(context, obj, fcurve, strict=strict):
                 continue
 
             selected_keys_index = utils.key.get_selected_index(fcurve)
 
-            for index in selected_keys_index:
-                key = fcurve.keyframe_points[index]
-                if interp != 'NONE':
-                    key.interpolation = interp
-                if easing != 'NONE':
-                    key.easing = easing
-                if strength != 'NONE':
-                    key.interpolation = strength
+            if selected_keys_index and act_on == 'SELECTION':
+                for index in selected_keys_index:
+                    key = fcurve.keyframe_points[index]
+                    assign_interp(key, interp, easing, strength)
+
+            if act_on == 'ALL':
+                for index, key in fcurve.keyframe_points.items():
+                    assign_interp(key, interp, easing, strength)
 
             fcurve.update()
 
@@ -399,7 +338,7 @@ def handle_type_asignment(key, left=True, right=True, handle_type='AUTO_CLAMPED'
         key.handle_right_type = handle_type
 
 
-def delete_by_type(context, kind=None):
+def delete_by_type(context, key_type):
     """Deletes keys if they match the type in 'kind'"""
 
     objects = context.selected_objects
@@ -408,28 +347,34 @@ def delete_by_type(context, kind=None):
         return
 
     for obj in objects:
-        if not utils.curve.valid_anim(obj):
+        if not utils.curve.valid_obj(context, obj):
             continue
+
         action = obj.animation_data.action
 
         for fcurve in action.fcurves:
-
-            if not utils.curve.valid_fcurve(context, fcurve):
+            if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
+            selected_keys = utils.key.get_selected_index(fcurve)
+            cursor_index = utils.key.on_current_frame(fcurve)
+
+            # if not utils.curve.valid_fcurve(context, fcurve):
+            #     continue
+
             keys = fcurve.keyframe_points
+
             for index, key in keys.items():
-                if not kind:
+                if selected_keys:
+                    if not key.select_control_point:
+                        continue
+
+                while key.type == key_type:
                     obj.keyframe_delete(fcurve.data_path,
                                         fcurve.array_index,
                                         key.co_ui.x,
                                         fcurve.group.name)
-                else:
-                    while key.type == kind:
-                        obj.keyframe_delete(fcurve.data_path,
-                                            fcurve.array_index,
-                                            key.co_ui.x,
-                                            fcurve.group.name)
+
             fcurve.update()
 
             # utils.key.select_by_type(fcurve, kind)
@@ -455,23 +400,24 @@ def select_by_type(context, kind, selection=True):
         return
 
     for obj in objects:
-        if not utils.curve.valid_anim(obj):
+        if not utils.curve.valid_obj(context, obj):
             continue
+
         action = obj.animation_data.action
 
         for fcurve in action.fcurves:
-
-            if not utils.curve.valid_fcurve(context, fcurve):
+            if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
-            if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
-                return []  # we don't want to select keys on reference fcurves
+            # if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
+            #     return []  # we don't want to select keys on reference fcurves
 
             keys = fcurve.keyframe_points
 
             for index, key in keys.items():
                 if key.type == kind:
-                    key.select_control_point = selection
+                    # key.select_control_point = selection
+                    handle_buttons(context, key, selection, selection, selection)
 
     # context.area.tag_redraw()
     bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
@@ -481,34 +427,7 @@ def select_by_type(context, kind, selection=True):
     # bpy.data.window_managers['WinMan'].update_tag()
 
 
-def poll(context):
-    """Poll used on all the slider operators"""
-
-    # selected = get_items(context, any_mode=True)
-    #
-    # area = context.area.type
-    # return bool((area == 'GRAPH_EDITOR' or
-    #              area == 'DOPESHEET_EDITOR' or
-    #              area == 'VIEW_3D') and
-    #             selected)
-
-    return True
-
-
 # ----------- Not used -----------
-
-
-def calculate_delta(key, previous_key, next_key):
-
-    frames_gap = abs(next_key.co_ui.x - previous_key.co_ui.x)  # frames between keys
-    key_pos = abs(key.co_ui.x - previous_key.co_ui.x)  # frame position of the key in question
-
-    if frames_gap == 0:  # not to devided by zero
-        return 0
-    if key_pos == 0:
-        return 0.25     # in the case of the fist or last key
-    else:
-        return ((key_pos * 100) / frames_gap) / 100
 
 
 def add_samples(fcurve, reference_fcurve, frequency=1):
@@ -529,17 +448,6 @@ def add_samples(fcurve, reference_fcurve, frequency=1):
 
     target = reference_fcurve.evaluate(last_key.co_ui.x)
     key_list.insert(last_key.co_ui.x, target)
-
-
-def set_direction(factor, left_key, right_key):
-    if factor < 0:
-        next_key = left_key
-        previous_key = right_key
-    else:
-        next_key = right_key
-        previous_key = left_key
-
-    return previous_key, next_key
 
 
 def swap(key1, key2):
@@ -608,71 +516,3 @@ def copy_value(keyframes, reference_key):
 
     for index, key in keyframes:
         key.co_ui.y = reference_key.co.y
-
-
-def flatten(objects, side):
-    """Match the value of the selected keys to the neighboring key to the 'side'"""
-
-    for obj in objects:
-        action = obj.animation_data.action
-
-        for fcurve in action.fcurves:
-
-            if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
-                continue  # we don't want to add to the list the helper curves we have created
-
-            if fcurve.select is False:
-                continue
-
-            selected_keys = utils.key.get_selected_index(fcurve)
-
-            if not selected_keys:
-                index = utils.key.on_current_frame(fcurve)
-                selected_keys = [index]
-
-            left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, selected_keys)
-
-            if side == 'LEFT':
-                # this fixes the problem of the fist key moving (just happens with this one)
-                # if selected_keys[0][1] != fcurve.keyframe_points[0]:
-                #     copy_value(selected_keys, left_neighbor)  # if there is no key on the left then it uses itself
-                # else:
-                copy_value(selected_keys, fcurve.keyframe_points[0])
-
-            elif side == 'RIGHT':
-                copy_value(selected_keys, right_neighbor)
-
-            fcurve.update()
-
-
-def select_handle(key, index, left=None, right=None, control_point=None):
-    """selects handles of chosen key"""
-
-    global tmp_points
-
-    if left is not None:
-        key.select_left_handle = left
-    if right is not None:
-        key.select_right_handle = right
-    if control_point is not None:
-        if not control_point:
-            tmp_points.append((index, key))
-        else:
-            tmp_points = []
-        key.select_control_point = control_point
-
-
-def handle_manipulate(key, left=None, right=None, length=None):
-    """set length of a key handles"""
-
-    key.select_left_handle = left
-    key.select_right_handle = right
-    key.select_control_point = point
-
-    key_tweak.left = left
-    key_tweak.right = right
-    key_tweak.point = point
-
-
-    if right is True:
-        key.handle_right.length = length

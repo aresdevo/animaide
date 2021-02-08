@@ -50,6 +50,7 @@ class ANIMAIDE_MT_pie_tools_b(Menu):
         pie.operator("anim.aide_smooth")
         pie.operator("anim.aide_blend_offset")
         pie.operator("anim.aide_time_offset")
+        pie.operator('anim.aide_blend_infinite')
 
 
 class ANIMAIDE_MT_pie_anim_offset(Menu):
@@ -82,25 +83,24 @@ class ANIMAIDE_MT_operators(Menu):
         layout.operator('wm.call_menu_pie', text="Pie AnimOffset").name = 'ANIMAIDE_MT_pie_anim_offset'
         layout.separator()
 
-        layout.operator('anim.aide_ease_to_ease')
-        layout.operator('anim.aide_ease')
         layout.operator('anim.aide_blend_ease')
-
-        layout.operator('anim.aide_blend_neighbor')
         layout.operator('anim.aide_blend_frame')
+        layout.operator('anim.aide_blend_infinite')
+        layout.operator('anim.aide_blend_neighbor')
         layout.operator('anim.aide_blend_offset')
 
-        layout.operator('anim.aide_tween')
-        layout.operator('anim.aide_push_pull')
+        layout.operator('anim.aide_ease')
+        layout.operator('anim.aide_ease_to_ease')
 
-        layout.operator('anim.aide_scale_left')
         layout.operator('anim.aide_scale_average')
+        layout.operator('anim.aide_scale_left')
         layout.operator('anim.aide_scale_right')
 
         layout.operator('anim.aide_smooth')
-        layout.operator('anim.aide_wave_noise')
-
+        layout.operator('anim.aide_push_pull')
         layout.operator('anim.aide_time_offset')
+        layout.operator('anim.aide_tween')
+        layout.operator('anim.aide_wave_noise')
 
         layout.separator()
 

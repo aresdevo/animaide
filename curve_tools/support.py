@@ -46,6 +46,9 @@ def ease_tools(self, ease_type):
     local_y = self.right_neighbor['y'] - self.left_neighbor['y']
     local_x = self.right_neighbor['x'] - self.left_neighbor['x']
 
+    if local_x == 0:
+        return
+
     for index in self.selected_keys:
 
         k = self.fcurve.keyframe_points[index]
@@ -117,35 +120,46 @@ def to_execute(self, context, function, *args):
 
     set_min_max_values(self, context)
 
-    objects = utils.get_items(context)
-
     self.noise_steps = 0
 
-    for obj in objects:
+    objects = utils.get_items(context)
 
+    for obj in objects:
         if not utils.curve.valid_obj(context, obj):
             continue
 
+        stored_obj = global_values.get(obj.name)
+
+        self.keys_are_selected = global_values.get('keys_are_selected')
+
         self.fcurves = obj.animation_data.action.fcurves
 
-        for fcurve_index, self.fcurve in self.fcurves.items():
-            if not utils.curve.poll_fcurve(context, obj, self.fcurve):
+        for self.fcurve_index, self.fcurve in self.fcurves.items():
+            if not utils.curve.valid_fcurve(context, obj, self.fcurve):
                 continue
 
             self.noise_steps += 1
 
-            obj_name = global_values.get(obj.name)
-            self.global_fcurve = obj_name.get(fcurve_index)
+            self.global_fcurve = stored_obj.get(self.fcurve_index)
             self.selected_keys = self.global_fcurve.get('selected_keys')
+            under_cursor = self.global_fcurve.get('under_cursor')
 
             if not self.selected_keys:
-                continue
+                if self.keys_are_selected:
+                    continue
+                elif under_cursor:
+                    self.selected_keys = under_cursor
+                elif self.tool_type not in ('TWEEN', 'BLEND_INFINITE'):
+                    continue
 
             self.original_values = self.global_fcurve.get('original_values')
             self.left_neighbor = self.global_fcurve.get('left_neighbor')
             self.right_neighbor = self.global_fcurve.get('right_neighbor')
 
-            function(*args)
+            fcurve_key_added = function(*args)
+
+            if fcurve_key_added:
+                self.cursor_keys.append(fcurve_key_added)
 
             self.fcurve.update()
 
@@ -158,20 +172,13 @@ def reset_original(context):
     objects = utils.get_items(context)
 
     for obj in objects:
-
-        if not utils.curve.valid_anim(obj):
+        if not utils.curve.valid_obj(context, obj):
             continue
-
-        visible = obj.visible_get()
-
-        if context.area.type != 'VIEW_3D':
-            if not context.space_data.dopesheet.show_hidden and not visible:
-                continue
 
         fcurves = obj.animation_data.action.fcurves
 
         for fcurve_index, fcurve in fcurves.items():
-            if not utils.curve.poll_fcurve(context, obj, fcurve):
+            if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
             obj_name = global_values.get(obj.name)
@@ -210,28 +217,23 @@ def get_globals(context):
 
     objects = utils.get_items(context)
 
-    # are_keys_selected = False
+    keys_are_selected = False
 
     for obj in objects:
-
-        if not utils.curve.valid_anim(obj):
+        if not utils.curve.valid_obj(context, obj):
             continue
-
-        # Level 1 variables
-        # if object.type == 'ARMATURE':
-        #     bones = context.selected_pose_bones
 
         fcurves = obj.animation_data.action.fcurves
         curves = {}
 
         for fcurve_index, fcurve in fcurves.items():
-
-            if not utils.curve.valid_fcurve(context, fcurve):
+            if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
             # level 2 variables
             curve_items = {}
             keyframes = []
+            under_cursor = []
             values = {}
             every_key = []
             left_neighbor = None
@@ -250,15 +252,15 @@ def get_globals(context):
                 # stores every key
                 every_key.append(key_index)
 
-                if animaide.tool.keys_under_cursor:
-                    index = utils.key.on_current_frame(fcurve)
-                    if index is not None:
-                        keyframes = [index]
-                        # left_neighbor, right_neighbor = utils.key.get_frame_neighbors(fcurve, frame=None, clamped=False)
-                elif key.select_control_point:
+                # if animaide.tool.keys_under_cursor:
+                index = utils.key.on_current_frame(fcurve)
+                if index is not None:
+                    under_cursor = [index]
+                    # left_neighbor, right_neighbor = utils.key.get_frame_neighbors(fcurve, frame=None, clamped=False)
+                if key.select_control_point:
                     # stores only selected keys
                     keyframes.append(key_index)
-                    # are_keys_selected = True
+                    keys_are_selected = True
                     # find smooth values (average) of the original keys
 
                     # key = fcurve.keyframe_points[key_index]
@@ -291,6 +293,12 @@ def get_globals(context):
             #     # Store selected keys
                 curve_items['selected_keys'] = keyframes
             else:
+                if under_cursor:
+                    left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, under_cursor)
+                else:
+                    cur_frame = context.scene.frame_current
+                    left_neighbor, right_neighbor = utils.key.get_frame_neighbors(fcurve, cur_frame)
+                curve_items['selected_keys'] = None
                 curve_items['first_key'] = None
                 curve_items['last_key'] = None
 
@@ -312,6 +320,7 @@ def get_globals(context):
             # stores original values of every key
             curve_items['original_values'] = values
             curve_items['every_key'] = every_key
+            curve_items['under_cursor'] = under_cursor
 
             # if left_frame is not None or right_frame is not None:
             left_frame, right_frame = set_ref_marker(context)
@@ -324,7 +333,7 @@ def get_globals(context):
             # curves['keys_selected'] = keys_selected
 
         global_values[obj.name] = curves
-        # global_values['are_keys_selected'] = are_keys_selected
+        global_values['keys_are_selected'] = keys_are_selected
 
     return
 

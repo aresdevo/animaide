@@ -6,10 +6,10 @@ from bpy.types import Panel, Menu, UIList, WorkSpaceTool
 
 def key_type_row(layout, name, key_type, icon):
     row = layout.row(align=True)
-    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='CHECKMARK')
+    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='HIDE_OFF')
     op.type = key_type
     op.selection = True
-    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='X')
+    op = row.operator('anim.aide_select_key_type', text='', emboss=True, icon='HIDE_ON')
     op.type = key_type
     op.selection = False
     op = row.operator('anim.aide_set_key_type', text=name, emboss=True, icon=icon)
@@ -25,10 +25,18 @@ def handles_select_row(layout, name, icon='NONE', left=False, right=False, point
     op.point = point
 
 
-def handles_type_row(layout, icon='NONE', handle_type='NONE'):
-    op = layout.operator('anim.aide_set_handles_type', text=' ', emboss=True, icon=icon)
-    op.act_on = 'SELECTION'
+def handles_type_row(context, layout, act_on, name, icon='NONE', handle_type='NONE'):
+    subcol = layout.column(align=True)
+    if not utils.general.poll(context):
+        subcol.active = False
+    key_tweak = context.scene.animaide.key_tweak
+    # subcol.prop(key_tweak, act_on, text='', icon='LAYER_USED', icon_only=True, emboss=False)
+    op = subcol.operator('anim.aide_set_handles_type', text=' ', emboss=True, icon=icon)
     op.handle_type = handle_type
+    op.act_on = 'SELECTION'
+    op.strict = True
+    subcol.prop(key_tweak, act_on, text='', icon='CHECKMARK', icon_only=True, emboss=False)
+
 
 
 class ANIMAIDE_PT_key_manager:
@@ -66,36 +74,39 @@ class ANIMAIDE_PT_move_keys:
 
         layout = self.layout
 
+        if not utils.general.poll(context):
+            layout.active = False
+
         key_tweak = context.scene.animaide.key_tweak
 
         row = layout.row(align=True)
 
         op = row.operator('anim.aide_move_key', text='', emboss=True, icon='TRACKING_BACKWARDS_SINGLE')
         op.direction = 'LEFT'
-        op.amount = key_tweak.frame_change
+        op.amount = key_tweak.frames
 
         row.separator()
 
         op = row.operator('anim.aide_move_key', text='', emboss=True, icon='TRACKING_FORWARDS_SINGLE')
         op.direction = 'RIGHT'
-        op.amount = key_tweak.frame_change
+        op.amount = key_tweak.frames
 
         row.separator()
 
-        sub = row.split(factor=0.75, align=True)
+        sub = row.split(factor=0.9, align=True)
 
-        sub.prop(key_tweak, 'frame_change', text='', slider=False)
-        sub.prop(key_tweak, 'amount', text='', icon_only=True)
+        sub.prop(key_tweak, 'frames', text='', slider=False)
+        sub.prop(key_tweak, 'amount', text='', icon='DOWNARROW_HLT', icon_only=True, emboss=False)
 
         row.separator()
 
         op = row.operator('anim.aide_insert_frames', text='', emboss=True, icon='IMPORT')
-        op.amount = key_tweak.frame_change
+        op.amount = key_tweak.frames
 
         row.separator()
 
         op = row.operator('anim.aide_insert_frames', text='', emboss=True, icon='EXPORT')
-        op.amount = -key_tweak.frame_change
+        op.amount = -key_tweak.frames
 
         # row = layout.row(align=True)
         #
@@ -168,56 +179,81 @@ class ANIMAIDE_PT_key_interp:
 
     def draw(self, context):
 
+        support.external_op = context.active_operator
+
         layout = self.layout
 
         key_tweak = context.scene.animaide.key_tweak
+
+        if not utils.general.poll(context):
+            layout.active = False
 
         layout.prop(key_tweak, 'interp', text='')
 
         layout.separator()
 
-        if key_tweak.interp == 'BEZIER':
+        if key_tweak.interp == 'CONSTANT':
 
-            col = layout.column(align=True)
+            op = layout.operator('anim.aide_set_handles_interp',
+                                 text='Assign to every key',
+                                 emboss=True, icon='CHECKMARK')
+            op.interp = 'CONSTANT'
+            # op.strength = 'NONE'
+            # op.easing = 'NONE'
+            op.act_on = 'ALL'
+            op.strict = False
 
-            subrow = col.row(align=True)
+        elif key_tweak.interp == 'LINEAR':
 
-            subrow.scale_y = .6
+            op = layout.operator('anim.aide_set_handles_interp',
+                                 text='Assign to every key',
+                                 emboss=True, icon='CHECKMARK')
+            op.interp = 'LINEAR'
+            # op.strength = 'NONE'
+            # op.easing = 'NONE'
+            op.act_on = 'ALL'
+            op.strict = False
 
-            subrow.prop_menu_enum(key_tweak, 'free_act_on', text=' ')
-            subrow.prop_menu_enum(key_tweak, 'aligned_act_on', text=' ')
-            subrow.prop_menu_enum(key_tweak, 'vector_act_on', text=' ')
-            subrow.prop_menu_enum(key_tweak, 'auto_act_on', text=' ')
-            subrow.prop_menu_enum(key_tweak, 'auto_clamped_act_on', text=' ')
-
-            subrow = col.row(align=True)
-
-            handles_type_row(subrow, icon='HANDLE_FREE', handle_type='FREE')
-            handles_type_row(subrow, icon='HANDLE_ALIGNED', handle_type='ALIGNED')
-            handles_type_row(subrow, icon='HANDLE_VECTOR', handle_type='VECTOR')
-            handles_type_row(subrow, icon='HANDLE_AUTO', handle_type='AUTO')
-            handles_type_row(subrow, icon='HANDLE_AUTOCLAMPED', handle_type='AUTO_CLAMPED')
-
-            # layout.label(text='Handles selection:')
+        elif key_tweak.interp == 'BEZIER':
 
             subrow = layout.row(align=True)
 
-            if key_tweak.left:
-                depress = True
+            if support.external_op and support.external_op != support.last_op:
+                if support.external_op.name == 'Box Select':
+                    left = True
+                    point = True
+                    right = True
+                else:
+                    left = False
+                    point = True
+                    right = False
             else:
-                depress = False
-            handles_select_row(subrow, 'Left', left=True, depress=depress)
+                if key_tweak.left:
+                    left = True
+                else:
+                    left = False
 
-            if key_tweak.point:
-                handles_select_row(subrow, '', icon='DECORATE_KEYFRAME', point=True, depress=True)
-            else:
-                handles_select_row(subrow, '', icon='DECORATE_KEYFRAME', point=False, depress=False)
+                if key_tweak.point:
+                    point = True
+                else:
+                    point = False
 
-            if key_tweak.right:
-                depress = True
-            else:
-                depress = False
-            handles_select_row(subrow, 'Right', right=True, depress=depress)
+                if key_tweak.right:
+                    right = True
+                else:
+                    right = False
+
+            handles_select_row(subrow, 'Left', left=True, depress=left)
+            handles_select_row(subrow, '', icon='DECORATE_KEYFRAME', point=point, depress=point)
+            handles_select_row(subrow, 'Right', right=True, depress=right)
+
+            subrow = layout.row(align=True)
+
+            handles_type_row(context, subrow, 'free_act_on', 'Free', icon='HANDLE_FREE', handle_type='FREE')
+            handles_type_row(context, subrow, 'aligned_act_on', 'Aligned', icon='HANDLE_ALIGNED', handle_type='ALIGNED')
+            handles_type_row(context, subrow, 'vector_act_on', 'Vector', icon='HANDLE_VECTOR', handle_type='VECTOR')
+            handles_type_row(context, subrow, 'auto_act_on', 'Auto', icon='HANDLE_AUTO', handle_type='AUTO')
+            handles_type_row(context, subrow, 'auto_clamped_act_on', 'Auto Clamped', icon='HANDLE_AUTOCLAMPED', handle_type='AUTO_CLAMPED')
 
         elif key_tweak.interp == 'EASE':
 
@@ -226,10 +262,13 @@ class ANIMAIDE_PT_key_interp:
             subrow.prop(key_tweak, 'strength', text='', icon_only=False)
             subrow.prop(key_tweak, 'easing', text='', expand=True)
 
-            # col.prop(key_tweak, 'easing', text='')
-            # subrow = col.row(align=True)
-            # subrow.prop(key_tweak, 'strength', text='', icon_only=True, expand=True)
-            # layout.prop_tabs_enum(key_tweak, 'easing')
+            op = layout.operator('anim.aide_set_handles_interp',
+                                 text='Assign to every key',
+                                 emboss=True, icon='CHECKMARK')
+            op.easing = key_tweak.easing
+            op.strength = key_tweak.strength
+            op.act_on = 'ALL'
+            op.strict = False
 
 
 class ANIMAIDE_PT_key_interp_ge(Panel, ANIMAIDE_PT_key_interp):

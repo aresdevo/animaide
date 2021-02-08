@@ -6,20 +6,25 @@ from bpy.props import BoolProperty, EnumProperty, StringProperty, \
 from bpy.types import PropertyGroup
 
 
-menu_items = [('EASE_TO_EASE', 'Ease To Ease', 'S shape transition', '', 1),
-              ('EASE', 'Ease', 'C shape transition', '', 2),
-              ('BLEND_EASE', 'Blend Ease', 'From current to C shape', '', 3),
+menu_items = [('BLEND_EASE', 'Blend Ease', 'From current to C shape', '', 1),
+              ('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 2),
+              ('BLEND_INFINITE', 'Blend Infinite', 'Adds or adjust keys to conform to the adjacent slope', '', 3),
               ('BLEND_NEIGHBOR', 'Blend Neighbor', 'From current to neighbors', '', 4),
-              ('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 5),
-              ('BLEND_OFFSET', 'Blend Offset', 'Offset key values to neighbors', '', 6),
-              ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 7),
-              ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 8),
+              ('BLEND_OFFSET', 'Blend Offset', 'Offset key values to neighbors', '', 5),
+
+              ('EASE', 'Ease', 'C shape transition', '', 6),
+              ('EASE_TO_EASE', 'Ease To Ease', 'S shape transition', '', 7),
+
+              ('SCALE_AVERAGE', 'Scale Average', 'Scale to average value', '', 8),
               ('SCALE_LEFT', 'Scale Left', 'Scale anchor to left neighbor', '', 9),
-              ('SCALE_AVERAGE', 'Scale Average', 'Scale to average value', '', 10),
-              ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 11),
-              ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 12),
-              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 13),
-              ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 14)]
+              ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 10),
+
+              ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 11),
+              ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 12),
+
+              ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 13),
+              ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 14),
+              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 15)]
 
 
 def update_clone_move(self, context):

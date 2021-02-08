@@ -30,10 +30,13 @@ def attach_to_fcurve(key, source_key, target_fcurve, factor=1.0, is_gradual=True
 def get_selected_index(fcurve):
     """Creates a list of selected keys index"""
 
+    # if not utils.curve.valid_fcurve(context, obj, fcurve):
+    #     return
+
     keys = fcurve.keyframe_points
     keyframe_indexes = []
-    if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
-        return []  # we don't want to select keys on reference fcurves
+    # if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
+    #     return []  # we don't want to select keys on reference fcurves
 
     for index, key in keys.items():
         if key.select_control_point or key.select_left_handle or key.select_right_handle:
@@ -42,15 +45,33 @@ def get_selected_index(fcurve):
     return keyframe_indexes
 
 
-def some_selected_key(context):
-    objects = context.selected_objects
-    for obj in objects:
-        action = obj.animation_data.action
-        for fcurve in action.fcurves:
-            keys = fcurve.keyframe_points
-            for key in keys:
-                if key.select_control_point:
-                    return True
+def some_selected_key(context, obj):
+    fcurves = utils.curve.valid_anim(obj)
+
+    if not utils.curve.valid_obj(context, obj):
+        return
+
+    for fcurve in fcurves:
+        if not utils.curve.valid_fcurve(context, obj, fcurve):
+            continue
+        keys = fcurve.keyframe_points
+        for key in keys:
+            if key.select_control_point:
+                return True
+
+    return False
+
+
+def add_key(keys, x, y, select=False):
+    keys.add(1)
+    index = len(keys)-1
+    k = keys[index]
+    k.select_control_point = select
+    k.select_left_handle = select
+    k.select_right_handle = select
+    k.co_ui.x = x
+    k.co_ui.y = y
+    return k
 
 
 def set_handle(key, side, delta):
@@ -94,12 +115,10 @@ def first_and_last_selected(fcurve, keyframes):
 def on_current_frame(fcurve):
     """returns the index of the key in the current frame"""
 
-    current_index = None
     cur_frame = bpy.context.scene.frame_current
     for index, key in fcurve.keyframe_points.items():
         if key.co.x == cur_frame:
-            current_index = index
-    return current_index
+            return index
 
 
 def get_selected_neigbors(fcurve, keyframes):

@@ -37,7 +37,7 @@ def blend_button(layout, fac, text='', icon='NONE'):
 def reference_frames(context, layout, expand):
     tool = context.scene.animaide.tool
 
-    if tool.selector == 'BLEND_FRAME' or not expand:
+    if tool.selector == 'BLEND_FRAME':
 
         row = layout.row(align=True)
         # row.label(text='Referece frames:')
@@ -200,21 +200,26 @@ class ANIMAIDE_PT_curve_tools:
 
             tool_button(context, subrow)
             subrow.prop_menu_enum(tool, 'selector', text='', icon='FCURVE')
+            # subrow.prop(tool, 'selector', text='', icon='FCURVE', icon_only=True)
         else:
-            tool_button(context, col, 'ease_to_ease')
-            tool_button(context, col, 'ease')
             tool_button(context, col, 'blend_ease')
-            tool_button(context, col, 'blend_neighbor')
             tool_button(context, col, 'blend_frame')
+            tool_button(context, col, 'blend_infinite')
+            tool_button(context, col, 'blend_neighbor')
             tool_button(context, col, 'blend_offset')
-            tool_button(context, col, 'tween')
-            tool_button(context, col, 'push_pull')
-            tool_button(context, col, 'scale_left')
+            col.separator()
+            tool_button(context, col, 'ease')
+            tool_button(context, col, 'ease_to_ease')
+            col.separator()
             tool_button(context, col, 'scale_average')
+            tool_button(context, col, 'scale_left')
             tool_button(context, col, 'scale_right')
+            col.separator()
             tool_button(context, col, 'smooth')
-            tool_button(context, col, 'wave_noise')
+            tool_button(context, col, 'push_pull')
             tool_button(context, col, 'time_offset')
+            tool_button(context, col, 'tween')
+            tool_button(context, col, 'wave_noise')
 
         steps(context, box, tool, expand)
 

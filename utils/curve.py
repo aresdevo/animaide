@@ -250,58 +250,56 @@ def move_clone(objects):
 
 
 def valid_anim(obj):
-    """checks if the obj has an active action"""
-
     anim = obj.animation_data
     action = getattr(anim, 'action', None)
     fcurves = getattr(action, 'fcurves', None)
 
-    return bool(fcurves)
+    return fcurves
 
 
-def valid_fcurve(context, fcurve):
-    """Validates an fcurve to see if it can be used with animaide"""
-    # animaide = context.scene.animaide
-    # if animaide.tool.unselected_fcurves is False:
-    if context.area.type == 'GRAPH_EDITOR':
-        if fcurve.select is False:
-            return False
+def valid_obj(context, obj, strict=True):
 
-    # if context.area.type != 'VIEW_3D':
-    if fcurve.lock or fcurve.hide:
-        return False
-
-    if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
-        return False  # we don't want to select keys on reference fcurves
-
-    return True
-
-
-def valid_obj(context, obj):
     if not valid_anim(obj):
         return False
 
-    visible = obj.visible_get()
+    if strict:
+        visible = obj.visible_get()
 
-    # if not visible:
-    #     return False
-
-    if context.area.type != 'VIEW_3D':
-        if not context.space_data.dopesheet.show_hidden and not visible:
-            return False
+        if context.area.type != 'VIEW_3D':
+            if not context.space_data.dopesheet.show_hidden and not visible:
+                return False
 
     return True
 
 
-def poll_fcurve(context, obj, fcurve):
-    if not valid_fcurve(context, fcurve):
-        return
+def valid_fcurve(context, obj, fcurve, strict=True):
+
+    try:
+        prop = obj.path_resolve(fcurve.data_path)
+    except:
+        prop = None
+
+    if not prop:
+        return False
+
+    if strict:
+        if context.area.type == 'GRAPH_EDITOR':
+            if context.space_data.use_only_selected_curves_handles and not fcurve.select:
+                return False
+
+        # if context.area.type != 'VIEW_3D':
+        if fcurve.lock or fcurve.hide:
+            return False
+
+    if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
+        return False  # we don't want to select keys on reference fcurves
 
     if obj.type == 'ARMATURE':
 
         if getattr(fcurve.group, 'name', None) == 'Object Transforms':
             # When animating an object, by default its fcurves grouped with this name.
-            return
+            return False
+
         elif not fcurve.group:
             transforms = (
                 'location', 'rotation_euler', 'scale',
@@ -310,7 +308,7 @@ def poll_fcurve(context, obj, fcurve):
             )
             if fcurve.data_path.startswith(transforms):
                 # fcurve belongs to the  object, so skip it
-                return
+                return False
 
         # if fcurve.group.name not in bones_names:
             # return
@@ -319,21 +317,22 @@ def poll_fcurve(context, obj, fcurve):
         bone_name = split_data_path[1]
         bone = obj.data.bones.get(bone_name)
 
-        if bone is None or bone.hide:
-            return
+        if not bone:
+            return False
 
-        if context.area.type == 'VIEW_3D':
-            if not bone.select:
-                return
-        else:
-            only_selected = context.space_data.dopesheet.show_only_selected
-            if only_selected and not bone.select:
-                return
+        if strict:
+            if bone.hide:
+                return False
 
-        # if bone_name is None:
-            # return
+            if context.area.type == 'VIEW_3D':
+                if not bone.select:
+                    return False
+            else:
+                only_selected = context.space_data.dopesheet.show_only_selected
+                if only_selected and not bone.select:
+                    return False
 
     if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
-        return  # we don't want to select keys on reference fcurves
+        return False  # we don't want to select keys on reference fcurves
 
     return True
