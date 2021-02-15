@@ -152,6 +152,10 @@ class ANIMAIDE_PT_key_type:
         key_type_row(layout, 'Jitter', 'JITTER', 'KEYTYPE_JITTER_VEC')
         key_type_row(layout, 'Extreme', 'EXTREME', 'KEYTYPE_EXTREME_VEC')
 
+        layout.label(text='New keys will be:')
+
+        layout.prop(context.scene.tool_settings, 'keyframe_type', text='')
+
 
 class ANIMAIDE_PT_key_type_ge(Panel, ANIMAIDE_PT_key_type):
     bl_idname = 'ANIMAIDE_PT_key_type_ge'
@@ -190,7 +194,7 @@ class ANIMAIDE_PT_key_interp:
 
         layout.prop(key_tweak, 'interp', text='')
 
-        layout.separator()
+        # layout.separator()
 
         if key_tweak.interp == 'CONSTANT':
 
@@ -215,6 +219,18 @@ class ANIMAIDE_PT_key_interp:
             op.strict = False
 
         elif key_tweak.interp == 'BEZIER':
+
+            subrow = layout.row(align=True)
+
+            handles_type_row(context, subrow, 'free_act_on', 'Free', icon='HANDLE_FREE', handle_type='FREE')
+            handles_type_row(context, subrow, 'aligned_act_on', 'Aligned', icon='HANDLE_ALIGNED', handle_type='ALIGNED')
+            handles_type_row(context, subrow, 'vector_act_on', 'Vector', icon='HANDLE_VECTOR', handle_type='VECTOR')
+            handles_type_row(context, subrow, 'auto_act_on', 'Auto', icon='HANDLE_AUTO', handle_type='AUTO')
+            handles_type_row(context, subrow, 'auto_clamped_act_on', 'Auto Clamped', icon='HANDLE_AUTOCLAMPED', handle_type='AUTO_CLAMPED')
+
+            subrow = layout.row(align=True)
+
+            subrow.label(text='Handle selection:')
 
             subrow = layout.row(align=True)
 
@@ -249,11 +265,7 @@ class ANIMAIDE_PT_key_interp:
 
             subrow = layout.row(align=True)
 
-            handles_type_row(context, subrow, 'free_act_on', 'Free', icon='HANDLE_FREE', handle_type='FREE')
-            handles_type_row(context, subrow, 'aligned_act_on', 'Aligned', icon='HANDLE_ALIGNED', handle_type='ALIGNED')
-            handles_type_row(context, subrow, 'vector_act_on', 'Vector', icon='HANDLE_VECTOR', handle_type='VECTOR')
-            handles_type_row(context, subrow, 'auto_act_on', 'Auto', icon='HANDLE_AUTO', handle_type='AUTO')
-            handles_type_row(context, subrow, 'auto_clamped_act_on', 'Auto Clamped', icon='HANDLE_AUTOCLAMPED', handle_type='AUTO_CLAMPED')
+            subrow.prop(context.space_data, 'pivot_point', text='')
 
         elif key_tweak.interp == 'EASE':
 

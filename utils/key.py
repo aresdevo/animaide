@@ -121,7 +121,53 @@ def on_current_frame(fcurve):
             return index
 
 
-def get_selected_neigbors(fcurve, keyframes):
+def get_selected_neigbors(fcurve, keyframes, return_index=False):
+    """Get the left and right neighboring keys of the selected keys"""
+
+    left_neighbor = None
+    right_neighbor = None
+    left_index = []
+    right_index = []
+
+    if not keyframes:
+        index = on_current_frame(fcurve)
+        if index is None:
+            if return_index:
+                return left_neighbor, [left_index], right_neighbor, [right_index]
+            else:
+                return left_neighbor, right_neighbor
+        keyframes = [index]
+
+    every_key = fcurve.keyframe_points
+    # if keyframes.items() == []:
+    #     return left_neighbor, right_neighbor
+    first_index = keyframes[0]
+    i = len(keyframes) - 1
+    last_index = keyframes[i]
+
+    if first_index == 0:
+        left_index = first_index
+        left_neighbor = every_key[left_index]
+
+    elif first_index > 0:
+        left_index = first_index - 1
+        left_neighbor = every_key[left_index]
+
+    if last_index == len(fcurve.keyframe_points) - 1:
+        right_index = last_index
+        right_neighbor = every_key[right_index]
+
+    elif last_index < len(fcurve.keyframe_points) - 1:
+        right_index = last_index + 1
+        right_neighbor = every_key[right_index]
+
+    if return_index:
+        return left_neighbor, [left_index], right_neighbor, [right_index]
+    else:
+        return left_neighbor, right_neighbor
+
+
+def get_neigbors_of_neighbors(fcurve, keyframes):
     """Get the left and right neighboring keys of the selected keys"""
 
     left_neighbor = None
@@ -140,17 +186,17 @@ def get_selected_neigbors(fcurve, keyframes):
     i = len(keyframes) - 1
     last_index = keyframes[i]
 
-    if first_index == 0:
+    if first_index <= 1:
         left_neighbor = every_key[first_index]
 
-    elif first_index > 0:
-        left_neighbor = every_key[first_index - 1]
+    elif first_index > 1:
+        left_neighbor = every_key[first_index - 2]
 
-    if last_index == len(fcurve.keyframe_points) - 1:
+    if last_index >= len(fcurve.keyframe_points) - 2:
         right_neighbor = every_key[last_index]
 
-    elif last_index < len(fcurve.keyframe_points) - 1:
-        right_neighbor = every_key[last_index + 1]
+    elif last_index < len(fcurve.keyframe_points) - 2:
+        right_neighbor = every_key[last_index + 2]
 
     return left_neighbor, right_neighbor
 
@@ -170,25 +216,33 @@ def get_index_neighbors(fcurve, index, clamped=False):
     return left_neighbor, right_neighbor
 
 
-def get_frame_neighbors(fcurve, frame=None, clamped=False):
+def get_frame_neighbors(fcurve, frame=None, clamped=False, return_index=False):
     """Get neighboring keys of a frame"""
 
     if frame is None:
         frame = bpy.context.scene.frame_current
-    fcurve_keys = fcurve.keyframe_points
-    left_neighbor = fcurve_keys[0]
-    right_neighbor = fcurve_keys[len(fcurve_keys) - 1]
 
+    fcurve_keys = fcurve.keyframe_points
+
+    left_index = 0
+    right_index = len(fcurve_keys) - 1
+    left_neighbor = fcurve_keys[left_index]
+    right_neighbor = fcurve_keys[right_index]
+
+    index = 0
     for key in fcurve.keyframe_points:
         dif = key.co.x - frame
         if dif < 0:
             left = key
             if left.co.x > left_neighbor.co.x:
                 left_neighbor = left
+                left_index = index
         elif dif > 0:
             right = key
             if right.co.x < right_neighbor.co.x:
                 right_neighbor = right
+                right_index = index
+        index += 1
 
     if clamped is False:
         if left_neighbor.co.x == frame:
@@ -196,7 +250,10 @@ def get_frame_neighbors(fcurve, frame=None, clamped=False):
         if right_neighbor.co.x == frame:
             right_neighbor = None
 
-    return left_neighbor, right_neighbor
+    if return_index:
+        return left_neighbor, [left_index], right_neighbor, [right_index]
+    else:
+        return left_neighbor, right_neighbor
 
 
 def update_keyframe_points(context):

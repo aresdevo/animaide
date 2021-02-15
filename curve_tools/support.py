@@ -11,87 +11,6 @@ from .. import utils
 global_values = {}
 
 
-def scale_tools(self, scale_type):
-    """Increase or decrease the value of selected keys acording to the "scale_type"
-    L = use left neighboring key as anchor
-    R = use right neighboring key as anchor
-    Anything else =  use the average point as the anchor"""
-
-    factor = utils.clamp(self.factor, self.min_value, self.max_value)
-
-    y = 0
-    for index in self.selected_keys:
-        y = y + self.original_values[index]['y']
-    y_average = y / len(self.selected_keys)
-
-    for index in self.selected_keys:
-        k = self.fcurve.keyframe_points[index]
-
-        if scale_type == 'SCALE_LEFT':
-            delta = self.original_values[index]['y'] - self.left_neighbor['y']
-        elif scale_type == 'SCALE_RIGHT':
-            delta = self.original_values[index]['y'] - self.right_neighbor['y']
-        elif scale_type == 'SCALE_AVERAGE':
-            delta = self.original_values[index]['y'] - y_average
-        else:
-            delta = self.original_values[index]['y'] - y_average
-
-        k.co_ui.y = self.original_values[index]['y'] + delta * factor
-
-        # utils.key.set_handles(k)
-
-
-def ease_tools(self, ease_type):
-
-    local_y = self.right_neighbor['y'] - self.left_neighbor['y']
-    local_x = self.right_neighbor['x'] - self.left_neighbor['x']
-
-    if local_x == 0:
-        return
-
-    for index in self.selected_keys:
-
-        k = self.fcurve.keyframe_points[index]
-        x = k.co_ui.x - self.left_neighbor['x']
-        frame_ratio = x / local_x
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
-
-        flipflop = abs(factor)
-
-        if factor > 0:
-            shift = - 1
-            xshift = -1 - flipflop/20
-        else:
-            shift = 0
-            xshift = 0 + flipflop/20
-
-        if ease_type == 'EASE_TO_EASE':
-            transition = s_curve(frame_ratio, xshift=-factor)
-            k.co_ui.y = self.left_neighbor['y'] + local_y * transition
-
-        elif ease_type == 'EASE':
-            slope = 1 + (5 * flipflop)
-            ease_y = s_curve(frame_ratio, slope=slope, width=2, height=2, xshift=shift, yshift=shift)
-            k.co_ui.y = self.left_neighbor['y'] + local_y * ease_y
-
-        elif ease_type == 'BLEND_EASE':
-
-            source = self.original_values[index]['y']
-
-            if factor > 0:
-                delta = self.right_neighbor['y'] - source
-                base = source
-            else:
-                delta = source - self.left_neighbor['y']
-                base = self.left_neighbor['y']
-
-            slope = flipflop * 5
-            ease_y = s_curve(frame_ratio, slope=slope, width=2, height=2, xshift=shift, yshift=shift)
-            k.co_ui.y = base + delta * ease_y
-
-        # utils.key.set_handles(k)
-
-
 def add_noise(fcurve, strength=0.4, scale=1, phase=0):
     """Adds noise modifier to an fcurve"""
 
@@ -130,7 +49,7 @@ def to_execute(self, context, function, *args):
 
         stored_obj = global_values.get(obj.name)
 
-        self.keys_are_selected = global_values.get('keys_are_selected')
+        self.some_keys_selected = global_values.get('keys_are_selected')
 
         self.fcurves = obj.animation_data.action.fcurves
 
@@ -142,24 +61,27 @@ def to_execute(self, context, function, *args):
 
             self.global_fcurve = stored_obj.get(self.fcurve_index)
             self.selected_keys = self.global_fcurve.get('selected_keys')
+
             under_cursor = self.global_fcurve.get('under_cursor')
 
             if not self.selected_keys:
-                if self.keys_are_selected:
+                if self.some_keys_selected:
                     continue
                 elif under_cursor:
                     self.selected_keys = under_cursor
-                elif self.tool_type not in ('TWEEN', 'BLEND_INFINITE'):
+                elif self.tool_type in ('SMOOTH', 'TIME_OFFSET', 'WAVE_NOISE', 'SCALE_AVERAGE'):
+                    self.report({'WARNING'}, "This tool only works on frames with keys")
                     continue
 
             self.original_values = self.global_fcurve.get('original_values')
             self.left_neighbor = self.global_fcurve.get('left_neighbor')
             self.right_neighbor = self.global_fcurve.get('right_neighbor')
 
-            fcurve_key_added = function(*args)
+            # fcurve_key_added = function(*args)
+            function(*args)
 
-            if fcurve_key_added:
-                self.cursor_keys.append(fcurve_key_added)
+            # if fcurve_key_added:
+            #     self.cursor_keys.append(fcurve_key_added)
 
             self.fcurve.update()
 
@@ -245,8 +167,8 @@ def get_globals(context):
 
                 # stores coordinate of every key
                 handles = {'l': key.handle_left.y, 'r': key.handle_right.y}
-                co_ui = {'x': key.co_ui.x, 'y': key.co_ui.y}
-                values[key_index] = co_ui
+                co = {'x': key.co_ui.x, 'y': key.co_ui.y}
+                values[key_index] = co
                 values[key_index]['handles'] = handles
 
                 # stores every key
@@ -257,7 +179,7 @@ def get_globals(context):
                 if index is not None:
                     under_cursor = [index]
                     # left_neighbor, right_neighbor = utils.key.get_frame_neighbors(fcurve, frame=None, clamped=False)
-                if key.select_control_point:
+                if key.select_control_point and context.area.type != 'VIEW_3D':
                     # stores only selected keys
                     keyframes.append(key_index)
                     keys_are_selected = True
@@ -268,16 +190,16 @@ def get_globals(context):
                     if key_index - 1 not in keyframes:
                         values[key_index]['sy'] = 'book end'
                         prevkey_value = key.co_ui.y
-                        co_ui = {'x': key.co_ui.x, 'y': key.co_ui.y}
-                        curve_items['first_key'] = co_ui
+                        co = {'x': key.co_ui.x, 'y': key.co_ui.y}
+                        curve_items['first_key'] = co
                     else:
                         prevkey_value = fcurve.keyframe_points[key_index - 1].co_ui.y
 
                     if key_index + 1 not in keyframes:
                         values[key_index]['sy'] = 'book end'
                         nextkey_value = key.co_ui.y
-                        co_ui = {'x': key.co_ui.x, 'y': key.co_ui.y}
-                        curve_items['last_key'] = co_ui
+                        co = {'x': key.co_ui.x, 'y': key.co_ui.y}
+                        curve_items['last_key'] = co
                     else:
                         nextkey_value = fcurve.keyframe_points[key_index + 1].co_ui.y
 
@@ -286,7 +208,12 @@ def get_globals(context):
                     values[key_index]['sy'] = smooth
 
             if keyframes:
-                left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, keyframes)
+                # left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, keyframes)
+                # left_far, right_far = utils.key.get_neigbors_of_neighbors(fcurve, keyframes)
+                left_neighbor, left_index, right_neighbor, right_index = utils.key.get_selected_neigbors(
+                    fcurve, keyframes, return_index=True)
+                left_far, key = utils.key.get_selected_neigbors(fcurve, left_index)
+                key, right_far = utils.key.get_selected_neigbors(fcurve, right_index)
                 # first_key, last_key = utils.key.first_and_last_selected(fcurve, keyframes)
 
             # if selected:
@@ -294,10 +221,20 @@ def get_globals(context):
                 curve_items['selected_keys'] = keyframes
             else:
                 if under_cursor:
-                    left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, under_cursor)
+                    # left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, under_cursor)
+                    # left_far, right_far = utils.key.get_neigbors_of_neighbors(fcurve, under_cursor)
+                    left_neighbor, left_index, right_neighbor, right_index = utils.key.get_selected_neigbors(
+                        fcurve, under_cursor, return_index=True)
+                    left_far, key = utils.key.get_selected_neigbors(fcurve, left_index)
+                    key, right_far = utils.key.get_selected_neigbors(fcurve, right_index)
                 else:
                     cur_frame = context.scene.frame_current
-                    left_neighbor, right_neighbor = utils.key.get_frame_neighbors(fcurve, cur_frame)
+                    # left_neighbor, right_neighbor = utils.key.get_frame_neighbors(fcurve, cur_frame)
+                    left_neighbor, left_index, right_neighbor, right_index = utils.key.get_frame_neighbors(
+                        fcurve, cur_frame, return_index=True)
+                    left_far, key = utils.key.get_selected_neigbors(fcurve, left_index)
+                    key, right_far = utils.key.get_selected_neigbors(fcurve, right_index)
+
                 curve_items['selected_keys'] = None
                 curve_items['first_key'] = None
                 curve_items['last_key'] = None
@@ -306,15 +243,29 @@ def get_globals(context):
                 curve_items['left_neighbor'] = None
             else:
                 # stores coordinates of left neighboring key
-                co_ui = {'x': left_neighbor.co_ui.x, 'y': left_neighbor.co_ui.y}
-                curve_items['left_neighbor'] = co_ui
+                co = {'x': left_neighbor.co_ui.x, 'y': left_neighbor.co_ui.y}
+                curve_items['left_neighbor'] = co
 
             if right_neighbor is None:
                 curve_items['right_neighbor'] = None
             else:
                 # stores coordinates of right neighboring key
-                co_ui = {'x': right_neighbor.co_ui.x, 'y': right_neighbor.co_ui.y}
-                curve_items['right_neighbor'] = co_ui
+                co = {'x': right_neighbor.co_ui.x, 'y': right_neighbor.co_ui.y}
+                curve_items['right_neighbor'] = co
+
+            if left_far is None:
+                curve_items['left_far'] = None
+            else:
+                # stores coordinates of left neighboring key
+                co = {'x': left_far.co_ui.x, 'y': left_far.co_ui.y}
+                curve_items['left_far'] = co
+
+            if right_far is None:
+                curve_items['right_far'] = None
+            else:
+                # stores coordinates of right neighboring key
+                co = {'x': right_far.co_ui.x, 'y': right_far.co_ui.y}
+                curve_items['right_far'] = co
 
             # if original:
             # stores original values of every key

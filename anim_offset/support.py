@@ -16,11 +16,18 @@ last_op = None
 
 def magnet_handlers(scene):
     """Function to be run by the anim_offset Handler"""
+
     global last_op
 
     context = bpy.context
 
     external_op = context.active_operator
+
+    if context.scene.tool_settings.use_keyframe_insert_auto:
+        remove_mask(context)
+        reset_timeline_mask(context)
+        bpy.app.handlers.depsgraph_update_post.remove(magnet_handlers)
+        return
 
     animaide = context.scene.animaide
     anim_offset = animaide.anim_offset
@@ -44,7 +51,7 @@ def magnet_handlers(scene):
         return
     last_op = context.active_operator
 
-    context.scene.tool_settings.use_keyframe_insert_auto = False
+    # context.scene.tool_settings.use_keyframe_insert_auto = False
 
     selected_objects = context.selected_objects
 
