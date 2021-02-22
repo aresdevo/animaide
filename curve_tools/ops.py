@@ -1,3 +1,24 @@
+# licence
+'''
+Copyright (C) 2018 Ares Deveaux
+
+
+Created by Ares Deveaux
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import bpy
 import os
 import math
@@ -27,6 +48,7 @@ class ANIMAIDE_OT:
 
     def __init__(self):
         self.cursor_keys = []
+        self.display_info = ''
         pass
 
     def __del__(self):
@@ -82,12 +104,11 @@ class ANIMAIDE_OT:
     def modal(self, context, event):
         tool = context.scene.animaide.tool
         info_tool = tool.selector.title().replace('_', ' ')
-        info_factor = utils.clamp((self.factor * 100), -100, 100)
+        info_factor = int(utils.clamp((self.factor * 100), -100, 100))
 
-        context.window.workspace.status_text_set(
-            f"MOUSE-LB: drag to apply {info_tool}       "
-            f"MOUSE-RB: Exit {info_tool} mode"
-        )
+        # context.window.workspace.status_text_set()
+        self.display_info = f"{info_tool}: {info_factor:3d}%               " \
+                            f"MOUSE-RB: Exit {info_tool} mode"
 
         context.window.cursor_set("SCROLL_X")
         tool.show_factor = True
@@ -108,7 +129,7 @@ class ANIMAIDE_OT:
                     return self.end(context)
 
         if event.type == 'MOUSEMOVE' and self.activated:  # Use
-            context.window.workspace.status_text_set(f"{info_tool}: {info_factor:0.0f}%")
+            # context.window.workspace.status_text_set(self.display_info)
 
             tool_from_zero = (event.mouse_x - self.init_mouse_x) / 100
             self.factor = tool_from_zero
@@ -144,6 +165,8 @@ class ANIMAIDE_OT:
             self.activated = False
             tool.show_factor = False
             self.init_mouse_x = 0
+
+        self.warning = 'No keys selected or under the cursor. You need auto-key to add values'
 
         # The select operator(s) are bugged, and can fail to update selected keys, so
         # When you change the frame, then select keys, the previous keys will stay marked as selected
@@ -193,15 +216,17 @@ class ANIMAIDE_OT_ease_to_ease(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
-
-        local_y = self.right_neighbor['y'] - self.left_neighbor['y']
-        local_x = self.right_neighbor['x'] - self.left_neighbor['x']
-
-        if local_x == 0:
-            return
-
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            local_y = self.right_neighbor['y'] - self.left_neighbor['y']
+            local_x = self.right_neighbor['x'] - self.left_neighbor['x']
+
+            if local_x == 0:
+                return
+
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
                 x = k.co.x - self.left_neighbor['x']
@@ -216,8 +241,10 @@ class ANIMAIDE_OT_ease_to_ease(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
-
+        # else:
+        #     self.report({'INFO'}, self.warning)
         return
 
     def execute(self, context):
@@ -235,17 +262,20 @@ class ANIMAIDE_OT_ease(Operator, ANIMAIDE_OT):
     tool_type = 'EASE'
 
     def tool(self, context):
-        tool = context.scene.animaide.tool
-
-        local_y = self.right_neighbor['y'] - self.left_neighbor['y']
-        local_x = self.right_neighbor['x'] - self.left_neighbor['x']
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
-        flipflop = abs(factor)
-
-        if local_x == 0:
-            return
 
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            local_y = self.right_neighbor['y'] - self.left_neighbor['y']
+            local_x = self.right_neighbor['x'] - self.left_neighbor['x']
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            flipflop = abs(factor)
+
+            if local_x == 0:
+                return
+
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
                 x = k.co.x - self.left_neighbor['x']
@@ -264,8 +294,10 @@ class ANIMAIDE_OT_ease(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
-
+        # else:
+        #     self.report({'INFO'}, self.warning)
         return
 
     def execute(self, context):
@@ -282,16 +314,19 @@ class ANIMAIDE_OT_blend_ease(Operator, ANIMAIDE_OT):
     tool_type = 'BLEND_EASE'
 
     def tool(self, context):
-        tool = context.scene.animaide.tool
-
-        local_x = self.right_neighbor['x'] - self.left_neighbor['x']
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
-        flipflop = abs(factor)
-
-        if local_x == 0:
-            return
 
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            local_x = self.right_neighbor['x'] - self.left_neighbor['x']
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            flipflop = abs(factor)
+
+            if local_x == 0:
+                return
+
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
                 x = k.co_ui.x - self.left_neighbor['x']
@@ -317,8 +352,10 @@ class ANIMAIDE_OT_blend_ease(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
-
+        # else:
+        #     self.report({'INFO'}, self.warning)
         return
 
     def execute(self, context):
@@ -336,11 +373,12 @@ class ANIMAIDE_OT_blend_neighbor(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
-
-        factor = utils.clamp(abs(self.factor), 0, self.max_value)
-
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(abs(self.factor), 0, self.max_value)
             for index in self.selected_keys:
                 if self.factor < 0:
                     delta = self.left_neighbor['y'] - self.original_values[index]['y']
@@ -354,8 +392,10 @@ class ANIMAIDE_OT_blend_neighbor(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
-
+        # else:
+        #     self.report({'INFO'}, self.warning)
         return
 
     def execute(self, context):
@@ -373,23 +413,25 @@ class ANIMAIDE_OT_blend_infinite(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
-
-        factor = utils.clamp(abs(self.factor), self.min_value, self.max_value)
-        left_far = self.global_fcurve.get('left_far')
-        right_far = self.global_fcurve.get('right_far')
-
-        if self.factor < 0 and left_far:
-            o = left_far['y'] - self.left_neighbor['y']
-            a = left_far['x'] - self.left_neighbor['x']
-        elif self.factor >= 0 and right_far:
-            o = right_far['y'] - self.right_neighbor['y']
-            a = right_far['x'] - self.right_neighbor['x']
-        else:
-            a = 1
-            o = 1
-
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(abs(self.factor), self.min_value, self.max_value)
+            left_far = self.global_fcurve.get('left_far')
+            right_far = self.global_fcurve.get('right_far')
+
+            if self.factor < 0 and left_far:
+                o = left_far['y'] - self.left_neighbor['y']
+                a = left_far['x'] - self.left_neighbor['x']
+            elif self.factor >= 0 and right_far:
+                o = right_far['y'] - self.right_neighbor['y']
+                a = right_far['x'] - self.right_neighbor['x']
+            else:
+                a = 1
+                o = 1
+
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
                 if self.factor < 0:
@@ -412,8 +454,10 @@ class ANIMAIDE_OT_blend_infinite(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
-
+        # else:
+        #     self.report({'INFO'}, self.warning)
         return
 
     def execute(self, context):
@@ -431,13 +475,13 @@ class ANIMAIDE_OT_blend_frame(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
-
-        ref = self.global_fcurve['ref_frames']
-
-        factor = utils.clamp(abs(self.factor), 0, self.max_value)
-
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            ref = self.global_fcurve['ref_frames']
+            factor = utils.clamp(abs(self.factor), 0, self.max_value)
             for index in self.selected_keys:
                 if self.factor < 0:
                     delta = ref['left_y'] - self.original_values[index]['y']
@@ -451,8 +495,10 @@ class ANIMAIDE_OT_blend_frame(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
-
+        # else:
+        #     self.report({'INFO'}, self.warning)
         return
 
     def execute(self, context):
@@ -470,11 +516,12 @@ class ANIMAIDE_OT_blend_offset(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
-
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
-
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
             first_key_index = self.selected_keys[0]
             last_key_index = self.selected_keys[-1]
             if first_key_index is None or last_key_index is None:
@@ -492,7 +539,10 @@ class ANIMAIDE_OT_blend_offset(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
+        # else:
+        #     self.report({'INFO'}, self.warning)
 
         return
 
@@ -512,14 +562,15 @@ class ANIMAIDE_OT_tween(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
-
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
-        factor_zero_one = (factor+1)/2
-        local_y = self.right_neighbor['y'] - self.left_neighbor['y']
-        new_value = self.left_neighbor['y'] + local_y * factor_zero_one
-
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            factor_zero_one = (factor+1)/2
+            local_y = self.right_neighbor['y'] - self.left_neighbor['y']
+            new_value = self.left_neighbor['y'] + local_y * factor_zero_one
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
                 if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
@@ -528,8 +579,10 @@ class ANIMAIDE_OT_tween(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
-
+        # else:
+        #     self.report({'INFO'}, self.warning)
         return
 
     def execute(self, context):
@@ -546,14 +599,15 @@ class ANIMAIDE_OT_push_pull(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
-
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
-        factor_zero_two = factor + 1
-        local_y = self.right_neighbor['y'] - self.left_neighbor['y']
-        local_x = self.right_neighbor['x'] - self.left_neighbor['x']
-
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            factor_zero_two = factor + 1
+            local_y = self.right_neighbor['y'] - self.left_neighbor['y']
+            local_x = self.right_neighbor['x'] - self.left_neighbor['x']
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
                 x = k.co_ui.x - self.left_neighbor['x']
@@ -567,8 +621,10 @@ class ANIMAIDE_OT_push_pull(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
-
+        # else:
+        #     self.report({'INFO'}, self.warning)
         return
 
     def execute(self, context):
@@ -583,27 +639,28 @@ class ANIMAIDE_OT_smooth(Operator, ANIMAIDE_OT):
 
     tool_type = 'SMOOTH'
 
-    def tool(self):
+    def tool(self, context):
 
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
+        if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
 
-        for index in self.selected_keys:
-            k = self.fcurve.keyframe_points[index]
-
-            if 'sy' not in self.original_values[index]:
-                continue
-
-            smooth_y = self.original_values[index]['sy']
-
-            if smooth_y == 'book end':
-                delta = 0
-            else:
-                delta = self.original_values[index]['y'] - smooth_y
-
-            k.co_ui.y = self.original_values[index]['y'] - delta * factor / 5
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            for index in self.selected_keys:
+                k = self.fcurve.keyframe_points[index]
+                if 'sy' not in self.original_values[index]:
+                    continue
+                smooth_y = self.original_values[index]['sy']
+                if smooth_y == 'book end':
+                    delta = 0
+                else:
+                    delta = self.original_values[index]['y'] - smooth_y
+                k.co_ui.y = self.original_values[index]['y'] - delta * factor / 5
+        # else:
+        #     self.report({'INFO'}, 'Some selected keys needed for this tool')
 
     def execute(self, context):
-        return support.to_execute(self, context, self.tool)
+        return support.to_execute(self, context, self.tool, context)
 
 
 class ANIMAIDE_OT_time_offset(Operator, ANIMAIDE_OT):
@@ -614,28 +671,35 @@ class ANIMAIDE_OT_time_offset(Operator, ANIMAIDE_OT):
 
     tool_type = 'TIME_OFFSET'
 
-    def tool(self):
+    def tool(self, context):
 
-        cycle = self.animaide.clone.cycle
+        if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
 
-        clone_name = '%s.%d.clone' % (self.fcurve.data_path, self.fcurve.array_index)
-        clone = utils.curve.duplicate_from_data(self.fcurves,
-                                                self.global_fcurve,
-                                                clone_name,
-                                                before=cycle,
-                                                after=cycle)
+            cycle = self.animaide.clone.cycle
 
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            clone_name = '%s.%d.clone' % (self.fcurve.data_path, self.fcurve.array_index)
+            clone = utils.curve.duplicate_from_data(self.fcurves,
+                                                    self.global_fcurve,
+                                                    clone_name,
+                                                    before=cycle,
+                                                    after=cycle)
 
-        for index in self.selected_keys:
-            k = self.fcurve.keyframe_points[index]
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
-            k.co_ui.y = clone.evaluate(k.co.x - 20 * factor)
+            for index in self.selected_keys:
+                k = self.fcurve.keyframe_points[index]
 
-        self.fcurves.remove(clone)
+                k.co_ui.y = clone.evaluate(k.co.x - 20 * factor)
+
+            self.fcurves.remove(clone)
+
+        # else:
+        #     self.report({'INFO'}, 'Some selected keys needed for this tool')
 
     def execute(self, context):
-        return support.to_execute(self, context, self.tool)
+        return support.to_execute(self, context, self.tool, context)
 
 
 class ANIMAIDE_OT_wave_noise(Operator, ANIMAIDE_OT):
@@ -649,47 +713,54 @@ class ANIMAIDE_OT_wave_noise(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
+        if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
 
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            tool = context.scene.animaide.tool
 
-        if factor > 0:
-            clone = utils.curve.duplicate_from_data(self.fcurves,
-                                                    self.global_fcurve,
-                                                    'animaide')
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
-            phase = self.animaide.tool.noise_phase + self.noise_steps
-            scale = self.animaide.tool.noise_scale
+            if factor > 0:
+                clone = utils.curve.duplicate_from_data(self.fcurves,
+                                                        self.global_fcurve,
+                                                        'animaide')
 
-            support.add_noise(clone, strength=1, scale=scale, phase=phase)
+                phase = self.animaide.tool.noise_phase + self.noise_steps
+                scale = self.animaide.tool.noise_scale
 
-            for index in self.selected_keys:
-                k = self.fcurve.keyframe_points[index]
+                support.add_noise(clone, strength=1, scale=scale, phase=phase)
 
-                delta = clone.evaluate(k.co.x) - self.original_values[index]['y']
-                new_value = self.original_values[index]['y'] + delta * factor
-                if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
-                    k.co.y = new_value
-                else:
-                    k.co_ui.y = new_value
+                for index in self.selected_keys:
+                    k = self.fcurve.keyframe_points[index]
 
-            self.fcurves.remove(clone)
-        else:
-            n = 0
-            for index in self.selected_keys:
-                n += 1
-                if n == 1:
-                    direction = 1
-                else:
-                    direction = -1
-                k = self.fcurve.keyframe_points[index]
-                new_value = self.original_values[index]['y'] + (factor * direction)/5
-                if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
-                    k.co.y = new_value
-                else:
-                    k.co_ui.y = new_value
-                if n == 2:
-                    n = 0
+                    delta = clone.evaluate(k.co.x) - self.original_values[index]['y']
+                    new_value = self.original_values[index]['y'] + delta * factor
+                    if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
+                        k.co.y = new_value
+                    else:
+                        k.co_ui.y = new_value
+
+                self.fcurves.remove(clone)
+            else:
+                n = 0
+                for index in self.selected_keys:
+                    n += 1
+                    if n == 1:
+                        direction = 1
+                    else:
+                        direction = -1
+                    k = self.fcurve.keyframe_points[index]
+                    new_value = self.original_values[index]['y'] + (factor * direction)/5
+                    if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
+                        k.co.y = new_value
+                    else:
+                        k.co_ui.y = new_value
+                    if n == 2:
+                        n = 0
+
+        # else:
+        #     self.report({'INFO'}, 'Some selected keys needed for this tool')
 
     def execute(self, context):
         return support.to_execute(self, context, self.tool, context)
@@ -706,11 +777,12 @@ class ANIMAIDE_OT_scale_left(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
-
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
-
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
                 delta = self.original_values[index]['y'] - self.left_neighbor['y']
@@ -721,7 +793,10 @@ class ANIMAIDE_OT_scale_left(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
+        # else:
+        #     self.report({'INFO'}, self.warning)
 
     def execute(self, context):
         return support.to_execute(self, context, self.tool, context)
@@ -738,11 +813,12 @@ class ANIMAIDE_OT_scale_right(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
-
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
-
         if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
                 delta = self.original_values[index]['y'] - self.right_neighbor['y']
@@ -753,7 +829,10 @@ class ANIMAIDE_OT_scale_right(Operator, ANIMAIDE_OT):
                     k.co_ui.y = new_value
 
         elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
             self.add_key(context, self.fcurve)
+        # else:
+        #     self.report({'INFO'}, self.warning)
 
     def execute(self, context):
         return support.to_execute(self, context, self.tool, context)
@@ -770,24 +849,28 @@ class ANIMAIDE_OT_scale_average(Operator, ANIMAIDE_OT):
 
     def tool(self, context):
 
-        tool = context.scene.animaide.tool
+        if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
 
-        factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            y = 0
+            for index in self.selected_keys:
+                y = y + self.original_values[index]['y']
+            y_average = y / len(self.selected_keys)
 
-        y = 0
-        for index in self.selected_keys:
-            y = y + self.original_values[index]['y']
-        y_average = y / len(self.selected_keys)
+            for index in self.selected_keys:
+                k = self.fcurve.keyframe_points[index]
+                delta = self.original_values[index]['y'] - y_average
 
-        for index in self.selected_keys:
-            k = self.fcurve.keyframe_points[index]
-            delta = self.original_values[index]['y'] - y_average
-
-            new_value = self.original_values[index]['y'] + delta * factor
-            if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
-                k.co.y = new_value
-            else:
-                k.co_ui.y = new_value
+                new_value = self.original_values[index]['y'] + delta * factor
+                if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
+                    k.co.y = new_value
+                else:
+                    k.co_ui.y = new_value
+        # else:
+        #     self.report({'INFO'}, 'Some selected keys needed for this tool')
 
     def execute(self, context):
         return support.to_execute(self, context, self.tool, context)
