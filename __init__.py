@@ -55,13 +55,13 @@ class Preferences(AddonPreferences):
             return
 
         if self.key_manager_ui == 'HEADERS':
-            bpy.types.TIME_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset)
+            bpy.types.TIME_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset_mask)
             bpy.types.GRAPH_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset_mask)
             bpy.types.DOPESHEET_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset_mask)
             for cls in key_manager.ui.header_classes:
                 bpy.utils.register_class(cls)
             bpy.types.TIME_MT_editor_menus.append(key_manager.ui.draw_key_manager)
-            bpy.types.TIME_MT_editor_menus.append(anim_offset.ui.draw_anim_offset)
+            bpy.types.TIME_MT_editor_menus.append(anim_offset.ui.draw_anim_offset_mask)
             bpy.types.DOPESHEET_MT_editor_menus.append(key_manager.ui.draw_key_manager)
             bpy.types.DOPESHEET_MT_editor_menus.append(anim_offset.ui.draw_anim_offset_mask)
             bpy.types.GRAPH_MT_editor_menus.append(key_manager.ui.draw_key_interpolation)
