@@ -33,7 +33,7 @@ def magnet_handlers(scene):
     anim_offset = animaide.anim_offset
 
     preferences = context.preferences
-    pref = preferences.addons['animaide'].preferences
+    pref = preferences.addons[utils.addon_name].preferences
 
     if context.scene.animaide.anim_offset.mask_in_use:
         cur_frame = context.scene.frame_current

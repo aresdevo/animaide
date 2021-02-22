@@ -133,7 +133,7 @@ class ANIMAIDE_OT:
 
     def invoke(self, context, event):
         preferences = bpy.context.preferences
-        self.pref = preferences.addons['animaide'].preferences
+        self.pref = preferences.addons[utils.addon_name].preferences
         animaide = context.scene.animaide
         tool = animaide.tool
 
@@ -908,7 +908,7 @@ class ANIMAIDE_OT_push_bookmark(Operator):
 
     def execute(self, context):
         preferences = context.preferences
-        pref = preferences.addons['animaide'].preferences
+        pref = preferences.addons[utils.addon_name].preferences
         animaide = context.scene.animaide
         tool = animaide.tool
         index = tool.bookmark_index
@@ -945,7 +945,7 @@ class ANIMAIDE_OT_get_ref_frame(Operator):
     def execute(self, context):
 
         preferences = context.preferences
-        pref = preferences.addons['animaide'].preferences
+        pref = preferences.addons[utils.addon_name].preferences
 
         animaide = context.scene.animaide
 

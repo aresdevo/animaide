@@ -291,7 +291,7 @@ def get_globals(context):
 
 def set_ref_marker(context):
     preferences = context.preferences
-    pref = preferences.addons['animaide'].preferences
+    pref = preferences.addons[utils.addon_name].preferences
     tool = context.scene.animaide.tool
     # if tool.use_markers:
     if pref.ct_use_markers:

@@ -41,11 +41,12 @@ from bpy.types import AddonPreferences, PropertyGroup, Operator
 
 pref = ''
 
+utils.addon_name = __package__
 
 class Preferences(AddonPreferences):
     # this must match the addon name, use '__package__'
     # when defining this in a submodule of a python package.
-    bl_idname = 'animaide'
+    bl_idname = utils.addon_name
 
     def key_manager_update(self, context):
         global pref
@@ -174,7 +175,7 @@ def register():
     bpy.utils.register_class(Preferences)
 
     preferences = bpy.context.preferences
-    pref = preferences.addons['animaide'].preferences
+    pref = preferences.addons[utils.addon_name].preferences
 
     if pref.key_manager_ui == 'PANEL':
         key_manager_ui_classes = ui_classes + key_manager.ui.panel_classes
@@ -214,7 +215,7 @@ def unregister():
     global pref
 
     preferences = bpy.context.preferences
-    pref = preferences.addons['animaide'].preferences
+    pref = preferences.addons[utils.addon_name].preferences
 
     if pref.key_manager_ui == 'PANEL':
         key_manager_ui_classes = ui_classes + key_manager.ui.panel_classes

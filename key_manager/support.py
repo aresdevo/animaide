@@ -374,7 +374,6 @@ def delete_by_type(context, key_type):
             keys = fcurve.keyframe_points
 
             for index, key in keys.items():
-                print(f'selected keys: {selected_keys}')
 
                 if selected_keys and not key.select_control_point:
                     continue
