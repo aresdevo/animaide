@@ -187,7 +187,7 @@ def insert_frames(context, amount):
             fcurve.update()
 
 
-def set_handles_type(context, act_on='SELECTION', handle_type='NONE', strict=True):
+def set_handles_type(context, act_on='SELECTION', handle_type='NONE', check_ui=True):
     """lets you select or unselect either handle or control point of a key"""
 
     objects = context.selected_objects
@@ -196,43 +196,45 @@ def set_handles_type(context, act_on='SELECTION', handle_type='NONE', strict=Tru
         return
 
     for obj in objects:
-        if not utils.curve.valid_obj(context, obj, strict=strict):
+        if not utils.curve.valid_obj(context, obj, check_ui=check_ui):
             continue
 
         action = obj.animation_data.action
 
         for fcurve in action.fcurves:
-            if not utils.curve.valid_fcurve(context, obj, fcurve, strict=strict):
+            if not utils.curve.valid_fcurve(context, obj, fcurve, check_ui=check_ui):
                 continue
 
             selected_keys_index = utils.key.get_selected_index(fcurve)
 
             some_selected_key = utils.key.some_selected_key(context, obj)
 
+            key_tweak = context.scene.animaide.key_tweak
+
             first_key = fcurve.keyframe_points[0]
             last_index = len(fcurve.keyframe_points) - 1
             last_key = fcurve.keyframe_points[last_index]
             kwargs = dict(left=True, right=True, handle_type=handle_type)
 
-            if selected_keys_index:
-                if act_on == 'SELECTION':
-                    for index in selected_keys_index:
-                        key = fcurve.keyframe_points[index]
-                        handle_type_asignment(key,
-                                              left=key.select_left_handle,
-                                              right=key.select_right_handle,
-                                              handle_type=handle_type)
-            elif not some_selected_key:
-                if act_on == 'ALL':
-                    for index, key in fcurve.keyframe_points.items():
-                        handle_type_asignment(key, **kwargs)
-                elif act_on == 'FIRST':
-                    handle_type_asignment(first_key, **kwargs)
-                elif act_on == 'LAST':
-                    handle_type_asignment(last_key, **kwargs)
-                elif act_on == 'BOTH':
-                    handle_type_asignment(last_key, **kwargs)
-                    handle_type_asignment(first_key, **kwargs)
+            if act_on == 'SELECTION' and selected_keys_index:
+                for index in selected_keys_index:
+                    key = fcurve.keyframe_points[index]
+                    handle_type_asignment(key,
+                                          left=key.select_left_handle,
+                                          right=key.select_right_handle,
+                                          handle_type=handle_type)
+
+            elif act_on == 'ALL':
+                for index, key in fcurve.keyframe_points.items():
+                    # set_handles_interp(context, interp=key_tweak.interp)
+                    handle_type_asignment(key, **kwargs)
+            elif act_on == 'FIRST':
+                handle_type_asignment(first_key, **kwargs)
+            elif act_on == 'LAST':
+                handle_type_asignment(last_key, **kwargs)
+            elif act_on == 'BOTH':
+                handle_type_asignment(last_key, **kwargs)
+                handle_type_asignment(first_key, **kwargs)
 
             fcurve.update()
 
@@ -281,27 +283,32 @@ def select_key_parts(context,  left=False, right=False, point=False):
 
 
 def assign_interp(key, interp, easing, strength):
+    if interp == 'EASE':
+        interp = 'NONE'
+
     if interp != 'NONE':
         key.interpolation = interp
-    if easing != 'NONE':
-        key.easing = easing
+
     if strength != 'NONE':
         key.interpolation = strength
 
+    if easing != 'NONE':
+        key.easing = easing
 
-def set_handles_interp(context, act_on='SELECTION', interp='NONE', easing='NONE', strength='NONE', strict=True):
+
+def set_handles_interp(context, act_on='SELECTION', interp='NONE', easing='NONE', strength='NONE', check_ui=True):
     """lets you select or unselect either handle or control point of a key"""
 
     objects = context.selected_objects
 
     for obj in objects:
-        if not utils.curve.valid_obj(context, obj, strict=strict):
+        if not utils.curve.valid_obj(context, obj, check_ui=check_ui):
             continue
 
         action = obj.animation_data.action
 
         for fcurve in action.fcurves:
-            if not utils.curve.valid_fcurve(context, obj, fcurve, strict=strict):
+            if not utils.curve.valid_fcurve(context, obj, fcurve, check_ui=check_ui):
                 continue
 
             selected_keys_index = utils.key.get_selected_index(fcurve)
@@ -367,11 +374,12 @@ def delete_by_type(context, key_type):
             keys = fcurve.keyframe_points
 
             for index, key in keys.items():
-                if selected_keys:
-                    if not key.select_control_point:
-                        continue
+                print(f'selected keys: {selected_keys}')
 
-                while key.type == key_type:
+                if selected_keys and not key.select_control_point:
+                    continue
+
+                while key.type == key_type and key.select_control_point:
                     obj.keyframe_delete(fcurve.data_path,
                                         fcurve.array_index,
                                         key.co_ui.x,

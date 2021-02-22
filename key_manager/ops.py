@@ -13,7 +13,8 @@ class AAT_OT_move_key(Operator):
 
     bl_idname = 'anim.aide_move_key'
     bl_label = "Move Key"
-    bl_options = {'REGISTER'}
+    bl_options = {'UNDO_GROUPED'}
+
     amount: FloatProperty(default=1.0)
     direction: EnumProperty(
         items=[('RIGHT', ' ', 'Move right', 'TRIA_RIGHT', 1),
@@ -39,7 +40,7 @@ class AAT_OT_insert_frames(Operator):
 
     bl_idname = 'anim.aide_insert_frames'
     bl_label = "Space between Keys"
-    bl_options = {'REGISTER'}
+    bl_options = {'UNDO_GROUPED'}
 
     amount: IntProperty(default=1)
     # amount: EnumProperty(
@@ -64,7 +65,7 @@ class AAT_OT_set_key_type(Operator):
 
     bl_idname = 'anim.aide_set_key_type'
     bl_label = "Set Key Type"
-    bl_options = {'REGISTER'}
+    bl_options = {'UNDO_GROUPED'}
 
     type: EnumProperty(
         items=props.key_type_t,
@@ -95,7 +96,7 @@ class AAT_OT_delete_key_type(Operator):
 
     bl_idname = 'anim.aide_delete_key_type'
     bl_label = "Delete Key Type"
-    bl_options = {'REGISTER'}
+    bl_options = {'UNDO_GROUPED'}
 
     type: EnumProperty(
         items=props.key_type_t,
@@ -119,7 +120,7 @@ class AAT_OT_select_key_type(Operator):
 
     bl_idname = 'anim.aide_select_key_type'
     bl_label = "Key selection Type"
-    bl_options = {'REGISTER'}
+    bl_options = {'UNDO_GROUPED'}
 
     selection: BoolProperty()
 
@@ -145,9 +146,9 @@ class AAT_OT_set_handles_type(Operator):
 
     bl_idname = 'anim.aide_set_handles_type'
     bl_label = "Set Handles Type"
-    bl_options = {'REGISTER'}
+    bl_options = {'UNDO_GROUPED'}
 
-    strict: BoolProperty(
+    check_ui: BoolProperty(
         default=True
     )
 
@@ -173,11 +174,7 @@ class AAT_OT_set_handles_type(Operator):
 
     def execute(self, context):
 
-        support.set_handles_type(
-            context,
-            act_on=self.act_on,
-            handle_type=self.handle_type,
-            strict=self.strict)
+        support.set_handles_type(context, act_on=self.act_on, handle_type=self.handle_type, check_ui=self.check_ui)
 
         return {'FINISHED'}
 
@@ -187,7 +184,7 @@ class AAT_OT_select_key_parts(Operator):
 
     bl_idname = 'anim.aide_select_key_parts'
     bl_label = "Select Key Part"
-    bl_options = {'REGISTER'}
+    bl_options = {'UNDO_GROUPED'}
 
     left: BoolProperty()
     right: BoolProperty()
@@ -219,9 +216,9 @@ class AAT_OT_set_handles_interp(Operator):
 
     bl_idname = 'anim.aide_set_handles_interp'
     bl_label = "Set Handles Interpolation"
-    bl_options = {'REGISTER'}
+    bl_options = {'UNDO_GROUPED'}
 
-    strict: BoolProperty(
+    check_ui: BoolProperty(
         default=True
     )
 
@@ -273,11 +270,8 @@ class AAT_OT_set_handles_interp(Operator):
 
     def execute(self, context):
 
-        support.set_handles_interp(context, act_on=self.act_on,
-                                   interp=self.interp,
-                                   easing=self.easing,
-                                   strength=self.strength,
-                                   strict=self.strict)
+        support.set_handles_interp(context, act_on=self.act_on, interp=self.interp, easing=self.easing,
+                                   strength=self.strength, check_ui=self.check_ui)
 
         return {'FINISHED'}
 

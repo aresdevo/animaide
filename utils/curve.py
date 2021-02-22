@@ -257,12 +257,12 @@ def valid_anim(obj):
     return fcurves
 
 
-def valid_obj(context, obj, strict=True):
+def valid_obj(context, obj, check_ui=True):
 
     if not valid_anim(obj):
         return False
 
-    if strict:
+    if check_ui:
         visible = obj.visible_get()
 
         if context.area.type != 'VIEW_3D':
@@ -272,7 +272,7 @@ def valid_obj(context, obj, strict=True):
     return True
 
 
-def valid_fcurve(context, obj, fcurve, strict=True):
+def valid_fcurve(context, obj, fcurve, check_ui=True):
 
     try:
         prop = obj.path_resolve(fcurve.data_path)
@@ -282,7 +282,7 @@ def valid_fcurve(context, obj, fcurve, strict=True):
     if not prop:
         return False
 
-    if strict:
+    if check_ui:
         if context.area.type == 'GRAPH_EDITOR':
             if context.space_data.use_only_selected_curves_handles and not fcurve.select:
                 return False
@@ -320,7 +320,7 @@ def valid_fcurve(context, obj, fcurve, strict=True):
         if not bone:
             return False
 
-        if strict:
+        if check_ui:
             if bone.hide:
                 return False
 

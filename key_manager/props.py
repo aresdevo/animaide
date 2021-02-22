@@ -65,41 +65,13 @@ amount_t = [('2', '2', 'Preset amounts to choose from', '', 1),
             ('100', '100', 'Preset amounts to choose from', '', 8)]
 
 
-def set_strict(act_on):
-    if act_on == 'SELECTION':
-        return True
-    else:
-        return False
+def update_handle_type(self, context):
+    support.set_handles_type(context, handle_type=self.handle_type, check_ui=True)
 
 
-def update_free(self, context):
-    strict = set_strict(self.free_act_on)
-    support.set_handles_type(context, act_on=self.free_act_on, handle_type='FREE', strict=strict)
-    # self.free_act_on = 'SELECTION'
-
-
-def update_aligned(self, context):
-    strict = set_strict(self.aligned_act_on)
-    support.set_handles_type(context, act_on=self.aligned_act_on,handle_type='ALIGNED', strict=strict)
-    # self.free_act_on = 'SELECTION'
-
-
-def update_vector(self, context):
-    strict = set_strict(self.vector_act_on)
-    support.set_handles_type(context, act_on=self.vector_act_on, handle_type='VECTOR', strict=strict)
-    # self.free_act_on = 'SELECTION'
-
-
-def update_auto(self, context):
-    strict = set_strict(self.auto_act_on)
-    support.set_handles_type(context, act_on=self.auto_act_on, handle_type='AUTO', strict=strict)
-    # self.free_act_on = 'SELECTION'
-
-
-def update_auto_clamped(self, context):
-    strict = set_strict(self.auto_clamped_act_on)
-    support.set_handles_type(context, act_on=self.auto_clamped_act_on, handle_type='AUTO_CLAMPED', strict=strict)
-    # self.free_act_on = 'SELECTION'
+def update_act_on(self, context):
+    support.set_handles_interp(context, act_on=self.act_on, interp=self.interp)
+    support.set_handles_type(context, act_on=self.act_on, handle_type=self.handle_type, check_ui=False)
 
 
 def interp_update(self, context):
@@ -125,57 +97,26 @@ def amount_update(self, context):
 
 class KeyTweak(PropertyGroup):
 
+    panel_pref: StringProperty(default='PANEL')
+
     frames: IntProperty(default=1, min=1)
 
     left: BoolProperty(default=False)
     right: BoolProperty(default=False)
     point: BoolProperty(default=False)
 
+    handle_type: EnumProperty(
+        items=handle_type_t,
+        name="Handle_type",
+        default='AUTO_CLAMPED',
+        update=update_handle_type
+    )
+
     act_on: EnumProperty(
         items=act_on_t,
         name="Act-on",
         default='ALL',
-    )
-
-    free_act_on: EnumProperty(
-        items=act_on_t,
-        name="Instantly apply to:",
-        default='ALL',
-        update=update_free
-    )
-
-    aligned_act_on: EnumProperty(
-        items=act_on_t,
-        name="Instantly apply to:",
-        default='ALL',
-        update=update_aligned
-    )
-
-    vector_act_on: EnumProperty(
-        items=act_on_t,
-        name="Instantly apply to:",
-        default='ALL',
-        update=update_vector
-    )
-
-    auto_act_on: EnumProperty(
-        items=act_on_t,
-        name="Instantly apply to:",
-        default='ALL',
-        update=update_auto
-    )
-
-    auto_clamped_act_on: EnumProperty(
-        items=act_on_t,
-        name="Instantly apply to:",
-        default='ALL',
-        update=update_auto_clamped
-    )
-
-    handle_type: EnumProperty(
-        items=handle_type_t,
-        name="Handle Type",
-        default='AUTO_CLAMPED'
+        update=update_act_on
     )
 
     interp: EnumProperty(

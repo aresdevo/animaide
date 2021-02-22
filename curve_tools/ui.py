@@ -110,13 +110,16 @@ def steps(context, layout, tool, expand):
 
     # -------- selector -----------
 
-    if not expand:
+    if expand:
         selected = utils.general.get_items(context, any_mode=True)
         # row = box.row(align=True)
         row = layout.row(align=True)
         if not selected:
             row.active = False
-        row.prop(tool, 'selector', text='')
+        if context.area.type == 'VIEW_3D':
+            row.prop(tool, 'selector_3d', text='')
+        else:
+            row.prop(tool, 'selector', text='')
 
 
 def tool_button(context, layout_type, tool_type=''):
@@ -128,14 +131,22 @@ def tool_button(context, layout_type, tool_type=''):
     else:
         rango = 'factor_overshoot'
 
+    if area == 'VIEW_3D':
+        selector = tool.selector_3d
+    else:
+        selector = tool.selector
+
     if tool_type == '':
         same_type = True
-        tool_type = str(tool.selector).lower()
+        tool_type = str(selector).lower()
+        # On this alternative the button will be whatever option is on the selector
     else:
-        same_type = (str(tool.selector).lower() == tool_type)
+        same_type = (str(selector).lower() == tool_type)
+        # Checks if the tool button matches the option in the selector
 
     if tool.show_factor and same_type and area == tool.area:
         layout_type.prop(tool, rango, text='', slider=True)
+        # substitute the button with a slider of the factor
     else:
         layout_type.operator('anim.aide_%s' % tool_type, emboss=True)
 
@@ -151,89 +162,69 @@ class ANIMAIDE_PT_curve_tools:
         tool = animaide.tool
         clone = animaide.clone
 
-        if context.area.type == 'VIEW_3D':
-            expand = tool.expand_3d
-            expand_text = 'expand_3d'
-        else:
-            expand = tool.expand
-            expand_text = 'expand'
-
-        if expand:
-            icon = 'RIGHTARROW'
-            title = 'Compact'
-        else:
-            title = 'Expanded'
-            icon = 'DOWNARROW_HLT'
-
         layout = self.layout
-
-        # flow = layout.column_flow(columns=2)
-        # sub = flow.row(align=True)
-        # sub.alignment = 'LEFT'
-        # sub.prop(tool, expand_text, text=title, icon=icon, emboss=False)
-        # # sub.label(text=title)
-        # sub = flow.row(align=True)
-        # sub.alignment = 'RIGHT'
-        # sub.operator('anim.aide_tools_settings', text='', icon='PREFERENCES', emboss=False)
-
-        # split = layout.split(factor=0.9)
-        row = layout.row(align=True)
-        # split.alignment = 'LEFT'
-        row.prop(tool, expand_text, text=' ', icon=icon, emboss=False)
-        # sub.label(text=title)
-        # subsplit = split.split(factor=80)
-        # sub = flow.row(align=True)
-        # row.alignment = 'RIGHT'
-        row.prop(tool, 'overshoot', text='', toggle=1, invert_checkbox=False, icon='SNAP_INCREMENT')
-        row.operator('anim.aide_tools_settings', text='', icon='PREFERENCES', emboss=False)
 
         box = layout.box()
         col = box.column(align=True)
 
         selected = utils.general.get_items(context, any_mode=True)
 
-        if expand:
+        if context.area.type == 'VIEW_3D':
+            expand = tool.expand_3d
+            expand_text = 'expand_3d'
+            selector_text = 'selector_3d'
+        else:
+            expand = tool.expand
+            expand_text = 'expand'
+            selector_text = 'selector'
+
+        if not expand:
             subrow = col.row(align=True)
 
             if not selected:
                 subrow.active = False
-
+            subrow.prop(tool, expand_text, text='', icon='RIGHTARROW', emboss=True, icon_only=True)
             tool_button(context, subrow)
-            subrow.prop_menu_enum(tool, 'selector', text='', icon='FCURVE')
+            subrow.prop(tool, 'overshoot', text='', toggle=1, invert_checkbox=False, icon='SNAP_INCREMENT')
+            subrow.prop_menu_enum(tool, selector_text, text='', icon='FCURVE')
             # subrow.prop(tool, 'selector', text='', icon='FCURVE', icon_only=True)
         else:
-            tool_button(context, col, 'blend_ease')
+            col.prop(tool, expand_text, text='', icon='DOWNARROW_HLT', emboss=True)
+            if context.area.type != 'VIEW_3D':
+                tool_button(context, col, 'blend_ease')
             tool_button(context, col, 'blend_frame')
             tool_button(context, col, 'blend_infinite')
             tool_button(context, col, 'blend_neighbor')
-            tool_button(context, col, 'blend_offset')
+            if context.area.type != 'VIEW_3D':
+                tool_button(context, col, 'blend_offset')
+                col.separator()
+                tool_button(context, col, 'ease')
+                tool_button(context, col, 'ease_to_ease')
             col.separator()
-            tool_button(context, col, 'ease')
-            tool_button(context, col, 'ease_to_ease')
-            col.separator()
-            tool_button(context, col, 'scale_average')
+            if context.area.type != 'VIEW_3D':
+                tool_button(context, col, 'scale_average')
             tool_button(context, col, 'scale_left')
             tool_button(context, col, 'scale_right')
             col.separator()
-            tool_button(context, col, 'smooth')
+            if context.area.type != 'VIEW_3D':
+                tool_button(context, col, 'smooth')
             tool_button(context, col, 'push_pull')
             tool_button(context, col, 'time_offset')
             tool_button(context, col, 'tween')
-            tool_button(context, col, 'wave_noise')
+            if context.area.type != 'VIEW_3D':
+                tool_button(context, col, 'wave_noise')
 
         steps(context, box, tool, expand)
 
         layout.use_property_split = True
         layout.use_property_decorate = False
 
+        if context.area.type == 'GRAPH_EDITOR':
+            layout.prop(tool, 'sticky_handles', text='Sticky handles')
+
         if tool.selector == 'TIME_OFFSET':
 
-            # subrow = layout.row(align=True)
-            layout.label(text='Cicle Options:')
-            layout.prop(clone, 'cycle', text='')
-
-            # subrow = layout.row(align=True)
-            # subrow.prop(clone, 'cycle_after', text='Cycle After')
+            layout.prop(clone, 'cycle', text='Cicle Options')
 
         reference_frames(context, layout, expand)
 
@@ -249,6 +240,7 @@ class ANIMAIDE_PT_curve_tools_de(Panel, ANIMAIDE_PT_curve_tools):
 
 
 class ANIMAIDE_PT_curve_tools_3d(Panel, ANIMAIDE_PT_curve_tools):
+    bl_label = "On Frame Curve Tools"
     bl_idname = 'ANIMAIDE_PT_curve_tools_3d'
     bl_space_type = 'VIEW_3D'
 
@@ -294,24 +286,163 @@ class ANIMAIDE_PT_frame_bookmarks_ge(Panel, ANIMAIDE_PT_frame_bookmarks):
     bl_parent_id = 'ANIMAIDE_PT_curve_tools_ge'
 
 
-class ANIMAIDE_PT_frame_bookmarks_de(Panel, ANIMAIDE_PT_frame_bookmarks):
-    bl_idname = 'ANIMAIDE_PT_frame_bookmarks_de'
-    bl_space_type = 'DOPESHEET_EDITOR'
-    bl_parent_id = 'ANIMAIDE_PT_curve_tools_de'
-
-
 class ANIMAIDE_PT_frame_bookmarks_3d(Panel, ANIMAIDE_PT_frame_bookmarks):
     bl_idname = 'ANIMAIDE_PT_frame_bookmarks_3d'
     bl_space_type = 'VIEW_3D'
     bl_parent_id = 'ANIMAIDE_PT_curve_tools_3d'
 
 
+# class ANIMAIDE_PT_frame_bookmarks_de(Panel, ANIMAIDE_PT_frame_bookmarks):
+#     bl_idname = 'ANIMAIDE_PT_frame_bookmarks_de'
+#     bl_space_type = 'DOPESHEET_EDITOR'
+#     # bl_parent_id = 'ANIMAIDE_PT_curve_tools_de'
+
+
+# class ANIMAIDE_PT_frame_bookmarks_3d(Panel, ANIMAIDE_PT_frame_bookmarks):
+#     bl_idname = 'ANIMAIDE_PT_frame_bookmarks_3d'
+#     bl_space_type = 'VIEW_3D'
+#     bl_parent_id = 'ANIMAIDE_PT_curve_tools_3d'
+
+
+class ANIMAIDE_MT_curve_tools(Menu):
+    bl_idname = 'ANIMAIDE_MT_curve_tools'
+    bl_label = "Curve Tools"
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def draw(self, context):
+        layout = self.layout
+
+        if context.area.type != 'VIEW_3D':
+            layout.operator('anim.aide_blend_ease')
+        layout.operator('anim.aide_blend_frame')
+        layout.operator('anim.aide_blend_infinite')
+        layout.operator('anim.aide_blend_neighbor')
+        if context.area.type != 'VIEW_3D':
+            layout.operator('anim.aide_blend_offset')
+
+            layout.operator('anim.aide_ease')
+            layout.operator('anim.aide_ease_to_ease')
+
+            layout.operator('anim.aide_scale_average')
+        layout.operator('anim.aide_scale_left')
+        layout.operator('anim.aide_scale_right')
+
+        if context.area.type != 'VIEW_3D':
+            layout.operator('anim.aide_smooth')
+        layout.operator('anim.aide_push_pull')
+        layout.operator('anim.aide_time_offset')
+        layout.operator('anim.aide_tween')
+        if context.area.type != 'VIEW_3D':
+            layout.operator('anim.aide_wave_noise')
+
+
+class ANIMAIDE_MT_tweak(Menu):
+    bl_idname = 'ANIMAIDE_MT_tweak'
+    bl_label = "Tweak"
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def draw(self, context):
+        layout = self.layout
+
+        blend_button(layout, -0.10, text="Tweak Left")
+        blend_button(layout, 0.10, text="Tweak Right")
+        blend_button(layout, -1, text="Match Left")
+        blend_button(layout, 1, text="Match Right")
+
+
+class ANIMAIDE_MT_pie_menus(Menu):
+    bl_idname = 'ANIMAIDE_MT_pie_menus'
+    bl_label = "Pie Curve Tools"
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator('wm.call_menu_pie', text="Group A").name = 'ANIMAIDE_MT_pie_tools_a'
+        layout.operator('wm.call_menu_pie', text="Group B").name = 'ANIMAIDE_MT_pie_tools_b'
+
+
+class ANIMAIDE_MT_pie_curve_tools_a(Menu):
+    bl_idname = "ANIMAIDE_MT_pie_curve_tools_a"
+    bl_label = "Curve Tools A"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        pie.operator("anim.aide_ease_to_ease")
+        pie.operator("anim.aide_tween")
+        pie.operator("anim.aide_blend_ease")
+        pie.operator("anim.aide_ease")
+        pie.operator("anim.aide_blend_neighbor")
+        pie.operator("anim.aide_scale_average")
+        pie.operator("anim.aide_push_pull")
+        pie.operator("anim.aide_blend_frame")
+
+
+class ANIMAIDE_MT_pie_curve_tools_b(Menu):
+    bl_idname = "ANIMAIDE_MT_pie_curve_tools_b"
+    bl_label = "Curve Tools B"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        pie.operator("anim.aide_scale_left")
+        pie.operator("anim.aide_scale_right")
+        pie.operator("anim.aide_wave_noise")
+        pie.operator("anim.aide_smooth")
+        pie.operator("anim.aide_blend_offset")
+        pie.operator("anim.aide_time_offset")
+        pie.operator('anim.aide_blend_infinite')
+
+
+class ANIMAIDE_MT_pie_curve_tools_3d(Menu):
+    bl_idname = "ANIMAIDE_MT_pie_curve_tools_3d"
+    bl_label = "Curve Tools"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        pie.operator("anim.aide_tween")
+        pie.operator("anim.aide_blend_neighbor")
+        pie.operator("anim.aide_push_pull")
+        pie.operator("anim.aide_blend_frame")
+        pie.operator("anim.aide_scale_left")
+        pie.operator("anim.aide_scale_right")
+        pie.operator("anim.aide_time_offset")
+        pie.operator('anim.aide_blend_infinite')
+
+
+def draw_bookmarks(self, context):
+    layout = self.layout
+    row = layout.row(align=False)
+    row.popover(panel="ANIMAIDE_PT_frame_bookmarks_ge", text="", icon='BOOKMARKS')
+    row.separator()
+
+
 classes = (
     ANIMAIDE_PT_curve_tools_ge,
-    ANIMAIDE_PT_curve_tools_de,
+    # ANIMAIDE_PT_curve_tools_de,
     ANIMAIDE_PT_curve_tools_3d,
     ANIMAIDE_UL_frame_bookmarks,
     ANIMAIDE_PT_frame_bookmarks_ge,
-    ANIMAIDE_PT_frame_bookmarks_de,
+    # ANIMAIDE_PT_frame_bookmarks_de,
     ANIMAIDE_PT_frame_bookmarks_3d,
+    ANIMAIDE_MT_pie_curve_tools_a,
+    ANIMAIDE_MT_pie_curve_tools_b,
+    ANIMAIDE_MT_pie_curve_tools_3d,
+    ANIMAIDE_MT_curve_tools,
+    ANIMAIDE_MT_tweak,
+    ANIMAIDE_MT_pie_menus
 )

@@ -2,7 +2,7 @@ import bpy
 from . import support
 from .. import utils
 from bpy.props import BoolProperty, EnumProperty, StringProperty, \
-    IntProperty, FloatProperty, CollectionProperty
+    IntProperty, FloatProperty, CollectionProperty, PointerProperty
 from bpy.types import PropertyGroup
 
 
@@ -25,6 +25,19 @@ menu_items = [('BLEND_EASE', 'Blend Ease', 'From current to C shape', '', 1),
               ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 13),
               ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 14),
               ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 15)]
+
+
+menu_items_3d = [('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 1),
+                 ('BLEND_INFINITE', 'Blend Infinite', 'Adds or adjust keys to conform to the adjacent slope', '', 2),
+                 ('BLEND_NEIGHBOR', 'Blend Neighbor', 'From current to neighbors', '', 3),
+
+                 ('SCALE_LEFT', 'Scale Left', 'Scale anchor to left neighbor', '', 4),
+                 ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 5),
+
+                 ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 6),
+
+                 ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 7),
+                 ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 8)]
 
 
 def update_clone_move(self, context):
@@ -121,10 +134,13 @@ class AnimAideTool(PropertyGroup):
     flip: BoolProperty(default=True,
                        description='Changes how the tools modal work')
 
-    expand: BoolProperty(default=True,
+    expand: BoolProperty(default=False,
+                         name='Expand',
                          description='Toggle between compact and expanded modes for the Tools')
 
-    expand_3d: BoolProperty(default=True)
+    expand_3d: BoolProperty(default=False,
+                            name='Expand',
+                            description='Toggle between compact and expanded modes for the Tools')
 
     area: StringProperty()
 
@@ -144,7 +160,14 @@ class AnimAideTool(PropertyGroup):
                          description='Determine how sharp the trasition is')
 
     overshoot: BoolProperty(update=update_overshoot,
+                            name='Overshoot',
                             description='Allows for higher values')
+
+    sticky_handles: BoolProperty(default=False,
+                                 name='Sticky Handles',
+                                 description='If On key points will be modified independetly\n' \
+                                 'from its handles if the interpolation is "Free"\n' \
+                                 'or "Aligned"')
 
     left_ref_frame: IntProperty()
 
@@ -154,6 +177,13 @@ class AnimAideTool(PropertyGroup):
         items=menu_items,
         name="Ease Tool Selector",
         default='EASE_TO_EASE',
+        update=update_selector
+    )
+
+    selector_3d: EnumProperty(
+        items=menu_items_3d,
+        name="Ease Tool Selector",
+        default='BLEND_NEIGHBOR',
         update=update_selector
     )
 

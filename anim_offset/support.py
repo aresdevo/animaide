@@ -32,22 +32,22 @@ def magnet_handlers(scene):
     animaide = context.scene.animaide
     anim_offset = animaide.anim_offset
 
+    preferences = context.preferences
+    pref = preferences.addons['animaide'].preferences
+
     if context.scene.animaide.anim_offset.mask_in_use:
-        left_margin = scene.frame_start
-        right_margin = scene.frame_end
         cur_frame = context.scene.frame_current
-        if cur_frame < left_margin or cur_frame > right_margin:
+        if cur_frame < scene.frame_start or cur_frame > scene.frame_end:
             if anim_offset.insert_outside_keys:
-                autokey = True
-            else:
-                autokey = False
-            context.scene.tool_settings.use_keyframe_insert_auto = autokey
+                add_keys(context)
             return
 
     # Doesn't refresh if fast mask is selected:
     # Each time an operator is used is a different one, so this tests
     # if any transform on an object is steel been applied
-    if external_op is last_op and anim_offset.fast_mask:
+
+    # if external_op is last_op and anim_offset.fast_mask:
+    if external_op is last_op and pref.ao_fast_offset:
         return
     last_op = context.active_operator
 
@@ -74,6 +74,46 @@ def magnet_handlers(scene):
             magnet(context, obj, fcurve)
 
     return
+
+
+def add_keys(context):
+    selected_objects = context.selected_objects
+
+    for obj in selected_objects:
+        action = getattr(obj.animation_data, 'action', None)
+
+        for fcurve in getattr(action, 'fcurves', list()):
+            scene = context.scene
+            anim_offset = scene.animaide.anim_offset
+
+            if fcurve.lock:
+                return
+
+            if getattr(fcurve.group, 'name', None) == 'animaide':
+                return  # we don't want to select keys on reference fcurves
+
+            # if context.scene.animaide.anim_offset.mask_in_use:
+            #     cur_frame = context.scene.frame_current
+            #     if cur_frame < scene.frame_start or cur_frame > scene.frame_end:
+            # if anim_offset.insert_outside_keys:
+            # if context.area.type == 'GRAPH_EDITOR':
+            #     bpy.ops.graph.keyframe_insert(type='ALL')
+            # else:
+            # bpy.ops.anim.keyframe_insert_menu(type='Available')
+
+            keys = fcurve.keyframe_points
+            cur_index = utils.key.on_current_frame(fcurve)
+            delta_y = get_delta(context, obj, fcurve)
+
+            if not cur_index:
+                cur_frame = context.scene.frame_current
+                y = fcurve.evaluate(cur_frame) + delta_y
+                # keys.insert(cur_frame, y)
+                utils.key.insert_key(keys, cur_frame, y)
+                # utils.key.add_key(keys, x, y, select=False)
+            else:
+                key = keys[cur_index]
+                key.co_ui.y += delta_y
 
 
 def magnet(context, obj, fcurve):
@@ -104,7 +144,7 @@ def magnet(context, obj, fcurve):
         else:
             factor = 0
 
-        k.co.y = k.co.y + (delta_y * factor)
+        k.co_ui.y = k.co_ui.y + (delta_y * factor)
 
     fcurve.update()
 

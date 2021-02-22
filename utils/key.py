@@ -45,6 +45,17 @@ def get_selected_index(fcurve):
     return keyframe_indexes
 
 
+def deselect_keys(fcurve):
+    """Deselect every key"""
+
+    keys = fcurve.keyframe_points
+
+    for key in keys:
+        key.select_control_point = False
+        key.select_left_handle = False
+        key.select_right_handle = False
+
+
 def some_selected_key(context, obj):
     fcurves = utils.curve.valid_anim(obj)
 
@@ -62,15 +73,26 @@ def some_selected_key(context, obj):
     return False
 
 
-def add_key(keys, x, y, select=False):
+def add_key(keys, x, y, select=False, index=-1):
     keys.add(1)
-    index = len(keys)-1
+    if index == -1:
+        index = len(keys)-1
     k = keys[index]
     k.select_control_point = select
     k.select_left_handle = select
     k.select_right_handle = select
     k.co_ui.x = x
     k.co_ui.y = y
+    return k
+
+
+def insert_key(keys, x, y, select=False):
+    k = keys.insert(x, y)
+    # index = on_current_frame(fcurve)
+    # k = keys[index]
+    k.select_control_point = select
+    k.select_left_handle = select
+    k.select_right_handle = select
     return k
 
 

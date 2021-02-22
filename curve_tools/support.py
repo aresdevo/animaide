@@ -290,8 +290,11 @@ def get_globals(context):
 
 
 def set_ref_marker(context):
+    preferences = context.preferences
+    pref = preferences.addons['animaide'].preferences
     tool = context.scene.animaide.tool
-    if tool.use_markers:
+    # if tool.use_markers:
+    if pref.ct_use_markers:
         markers = context.scene.timeline_markers
         left = 0
         right = 0
