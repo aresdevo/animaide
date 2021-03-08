@@ -23,7 +23,7 @@ import bpy
 import os
 
 # from utils.key import global_values
-from .. import utils
+from .. import utils, prefe
 
 # Anim_transform global variables
 
@@ -54,7 +54,7 @@ def magnet_handlers(scene):
     anim_offset = animaide.anim_offset
 
     preferences = context.preferences
-    pref = preferences.addons[utils.addon_name].preferences
+    pref = preferences.addons[prefe.addon_name].preferences
 
     if context.scene.animaide.anim_offset.mask_in_use:
         cur_frame = context.scene.frame_current

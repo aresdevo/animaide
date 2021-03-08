@@ -158,7 +158,7 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
     def poll(cls, context):
         return support.poll(context)
 
-    def marign_blend_info(self, context, side):
+    def margin_blend_info(self, context, side):
         # status bar info when the blends are being modified
         margin = None
         blend = None
@@ -332,8 +332,8 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
 
                     elif event.alt:
                         # -------------- Move range -------------
-                        left_info = self.marign_blend_info(context, 'Left')
-                        right_info = self.marign_blend_info(context, 'Right')
+                        left_info = self.margin_blend_info(context, 'Left')
+                        right_info = self.margin_blend_info(context, 'Right')
                         context.window.workspace.status_text_set(left_info + right_info)
 
                         distance = frame - self.leftmouse_frame
@@ -351,12 +351,12 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
                         if end_distance < start_distance:
                             scene.frame_end = self.constraint(scene.frame_start, 'L', frame, gap=1)
                             scene.frame_preview_end = scene.frame_end + self.delta_end
-                            info = self.marign_blend_info(context, 'Right')
+                            info = self.margin_blend_info(context, 'Right')
                             context.window.workspace.status_text_set(info)
                         else:
                             scene.frame_start = self.constraint(scene.frame_end, 'R', frame, gap=1)
                             scene.frame_preview_start = scene.frame_start - self.delta_start
-                            info = self.marign_blend_info(context, 'Left')
+                            info = self.margin_blend_info(context, 'Left')
                             context.window.workspace.status_text_set(info)
 
                         support.set_blend_values(context)
@@ -472,25 +472,28 @@ class ANIMAIDE_OT_anim_offset_settings(Operator):
 
     def draw(self, context):
         anim_offset = context.scene.animaide.anim_offset
+        mask_in_use = context.scene.animaide.anim_offset.mask_in_use
 
         layout = self.layout
 
         layout.label(text='Settings')
         layout.separator()
+        if not mask_in_use:
+            layout.active = False
         # layout.prop(anim_offset, 'end_on_release', text='masking ends on mouse release')
-        layout.prop(anim_offset, 'fast_mask', text='Fast offset calculation')
-        if context.area.type != 'VIEW_3D':
-            layout.prop(anim_offset, 'insert_outside_keys', text='Auto Key outside margins')
-            layout.separator()
-            # layout.label(text='Mask blend interpolation')
-            # row = layout.row(align=True)
-            # row.prop(anim_offset, 'easing', text='', icon_only=False)
-            # row.prop(anim_offset, 'interp', text='', expand=True)
-            # layout.prop(anim.aide_anim_offset, 'use_markers', text='Use Markers')
+        # layout.prop(anim_offset, 'fast_mask', text='Fast offset calculation')
+        # if context.area.type != 'VIEW_3D':
+        layout.prop(anim_offset, 'insert_outside_keys', text='Auto Key outside margins')
+        layout.separator()
+        layout.label(text='Mask blend interpolation')
+        row = layout.row(align=True)
+        row.prop(anim_offset, 'easing', text='', icon_only=False)
+        row.prop(anim_offset, 'interp', text='', expand=True)
+        # layout.prop(anim.aide_anim_offset, 'use_markers', text='Use Markers')
 
 
 classes = (
-    ANIMAIDE_OT_modal_test,
+    # ANIMAIDE_OT_modal_test,
     ANIMAIDE_OT_add_anim_offset_mask,
     ANIMAIDE_OT_activate_anim_offset,
     ANIMAIDE_OT_deactivate_anim_offset,

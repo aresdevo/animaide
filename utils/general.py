@@ -23,8 +23,6 @@ import bpy
 
 # from curve_tools.support import get_items
 
-addon_name = ''
-
 
 def gradual(key_y, target_y, delta=1.0, factor=0.15):
     """Gradualy transition the value of key_y to target_y"""

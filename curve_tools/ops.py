@@ -26,7 +26,7 @@ import math
 # import utils.general
 # import utils.key
 from . import support
-from .. import utils
+from .. import utils, prefe
 # from .utils import curve, key
 from bpy.props import StringProperty, FloatProperty
 from bpy.types import Operator
@@ -154,7 +154,7 @@ class ANIMAIDE_OT:
 
     def invoke(self, context, event):
         preferences = bpy.context.preferences
-        self.pref = preferences.addons[utils.addon_name].preferences
+        self.pref = preferences.addons[prefe.addon_name].preferences
         animaide = context.scene.animaide
         tool = animaide.tool
 

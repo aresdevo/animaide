@@ -20,4 +20,4 @@ Created by Ares Deveaux
 '''
 
 from . import props, ops, ui, support
-classes = props.classes + ops.classes + ui.classes
+classes = props.classes + ops.classes + ui.menu_classes # + ui.panel_classes

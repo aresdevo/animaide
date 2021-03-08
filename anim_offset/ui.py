@@ -33,6 +33,7 @@ class ANIMAIDE_PT:
     def draw(self, context):
 
         anim_offset = context.scene.animaide.anim_offset
+        mask_in_use = context.scene.animaide.anim_offset.mask_in_use
 
         layout = self.layout
 
@@ -41,34 +42,57 @@ class ANIMAIDE_PT:
         # layout.label(text='header next to Animaide')
         # layout.label(text='menu')
 
-        row = layout.row(align=True)
-
         if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
-            row.operator("anim.aide_deactivate_anim_offset", text='Deactivate', depress=True, icon='OVERLAY')
+            layout.operator("anim.aide_deactivate_anim_offset", text='Deactivate', depress=True, icon='TEMP')
         else:
-            row.operator("anim.aide_activate_anim_offset", text='Activate', icon='OVERLAY')
-
-        row.operator('anim.aide_anim_offset_settings', text='', icon='PREFERENCES', emboss=True)
+            layout.operator("anim.aide_activate_anim_offset", text='Activate', icon='TEMP')
 
         row = layout.row(align=True)
 
-        if context.area.type != 'VIEW_3D':
-            mask_in_use = context.scene.animaide.anim_offset.mask_in_use
-            if mask_in_use:
-                name = 'Modify Mask'
-                depress = True
+        if mask_in_use:
+            row.operator("anim.aide_delete_anim_offset_mask", text='Deactivate Mask', depress=True, icon='SELECT_SUBTRACT')
+            sub = row.row(align=True)
+            sub.active = True
+            op = sub.operator("anim.aide_add_anim_offset_mask", text='', icon='GREASEPENCIL')
+            op.sticky = True
 
-            else:
-                name = 'Mask'
-                depress = False
+        else:
+            op = row.operator("anim.aide_add_anim_offset_mask", text='Mask', icon='SELECT_SUBTRACT')
+            op.sticky = False
+            sub = row.row(align=True)
+            sub.active = False
 
-            row.operator("anim.aide_add_anim_offset_mask", text=name, depress=depress, icon='SELECT_SUBTRACT')
-            row.operator("anim.aide_delete_anim_offset_mask", text='', icon='TRASH')
-            if mask_in_use:
-                layout.label(text='Mask blend interpolation:')
-                row = layout.row(align=True)
-                row.prop(anim_offset, 'easing', text='', icon_only=False)
-                row.prop(anim_offset, 'interp', text='', expand=True)
+        # row = layout.row(align=False)
+        # row.active = status
+        sub.operator('anim.aide_anim_offset_settings', text='', icon='PREFERENCES', emboss=True)
+        # sub.popover(panel="ANIMAIDE_PT_preferences", text="")
+
+        # if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
+        #     row.operator("anim.aide_deactivate_anim_offset", text='Deactivate', depress=True, icon='OVERLAY')
+        # else:
+        #     row.operator("anim.aide_activate_anim_offset", text='Activate', icon='OVERLAY')
+
+        # row.operator('anim.aide_anim_offset_settings', text='', icon='PREFERENCES', emboss=True)
+        #
+        # row = layout.row(align=True)
+        #
+        # if context.area.type != 'VIEW_3D':
+        #     mask_in_use = context.scene.animaide.anim_offset.mask_in_use
+        #     if mask_in_use:
+        #         name = 'Modify Mask'
+        #         depress = True
+        #
+        #     else:
+        #         name = 'Mask'
+        #         depress = False
+        #
+        #     row.operator("anim.aide_add_anim_offset_mask", text=name, depress=depress, icon='SELECT_SUBTRACT')
+        #     row.operator("anim.aide_delete_anim_offset_mask", text='', icon='TRASH')
+        # if mask_in_use:
+        #     layout.label(text='Mask blend interpolation:')
+        #     row = layout.row(align=True)
+        #     row.prop(anim_offset, 'easing', text='', icon_only=False)
+        #     row.prop(anim_offset, 'interp', text='', expand=True)
 
 
 class ANIMAIDE_PT_anim_offset_3d(Panel, ANIMAIDE_PT):
@@ -158,6 +182,7 @@ class ANIMAIDE_PT_preferences(Panel):
         # layout.prop(anim_offset, 'end_on_release', text='masking ends on mouse release')
         # layout.prop(anim_offset, 'fast_mask', text='Fast offset calculation')
         # if context.area.type != 'VIEW_3D':
+
         layout.prop(anim_offset, 'insert_outside_keys', text='Auto Key outside margins')
         layout.separator()
         layout.label(text='Mask blend interpolation:')
@@ -174,9 +199,9 @@ def draw_anim_offset(self, context):
     row.separator()
 
     if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
-        row.operator("anim.aide_deactivate_anim_offset", text='', depress=True, icon='PROP_ON')
+        row.operator("anim.aide_deactivate_anim_offset", text='', depress=True, icon='TEMP')
     else:
-        row.operator("anim.aide_activate_anim_offset", text='', icon='PROP_ON')
+        row.operator("anim.aide_activate_anim_offset", text='', icon='TEMP')
 
 
 def draw_anim_offset_mask(self, context):
@@ -185,9 +210,9 @@ def draw_anim_offset_mask(self, context):
     row.separator()
 
     if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
-        row.operator("anim.aide_deactivate_anim_offset", text='', depress=True, icon='PROP_ON')
+        row.operator("anim.aide_deactivate_anim_offset", text='', depress=True, icon='TEMP')
     else:
-        row.operator("anim.aide_activate_anim_offset", text='', icon='PROP_ON')
+        row.operator("anim.aide_activate_anim_offset", text='', icon='TEMP')
 
     mask_in_use = context.scene.animaide.anim_offset.mask_in_use
     if mask_in_use:
@@ -197,19 +222,23 @@ def draw_anim_offset_mask(self, context):
         sub = row.row(align=True)
         sub.active = True
     else:
-        row.operator("anim.aide_add_anim_offset_mask", text='', icon='SELECT_SUBTRACT')
+        op = row.operator("anim.aide_add_anim_offset_mask", text='', icon='SELECT_SUBTRACT')
+        op.sticky = False
         sub = row.row(align=True)
         sub.active = False
 
     sub.popover(panel="ANIMAIDE_PT_preferences", text="")
 
 
-classes = (
-    # ANIMAIDE_PT_anim_offset_3d,
-    # ANIMAIDE_PT_anim_offset_ge,
-    # ANIMAIDE_PT_anim_offset_de,
+menu_classes = (
     ANIMAIDE_MT_anim_offset,
     ANIMAIDE_MT_anim_offset_mask,
     ANIMAIDE_MT_pie_anim_offset,
     ANIMAIDE_PT_preferences,
+)
+
+panel_classes = (
+    ANIMAIDE_PT_anim_offset_3d,
+    ANIMAIDE_PT_anim_offset_ge,
+    ANIMAIDE_PT_anim_offset_de,
 )

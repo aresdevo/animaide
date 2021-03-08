@@ -346,6 +346,8 @@ def draw_key_manager(self, context):
     layout = self.layout
     row = layout.row(align=False)
     row.popover(panel="ANIMAIDE_PT_key_manager_header", text="", icon='CON_ACTION')
+    if context.area.type == 'GRAPH_EDITOR':
+        row.popover(panel="ANIMAIDE_PT_key_interp_header", text="", icon='FORCE_HARMONIC')
     # row.separator()
 
 

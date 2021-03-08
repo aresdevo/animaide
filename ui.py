@@ -48,11 +48,11 @@ class ANIMAIDE_PT_info:
 
         layout = self.layout
 
-        layout.label(text='-Anim offset buttons')
-        layout.label(text='now located in the Timeline')
-        layout.label(text='and Graph Editor headers.')
-        layout.label(text='-Some preferences are now')
-        layout.label(text='located in the addon tab')
+        layout.label(text='-Anim-offset and Key-manager')
+        layout.label(text='can now be put on the headers')
+        layout.label(text='instead of the panels.')
+        layout.label(text='-that and other preferences are')
+        layout.label(text='now located in the addon tab')
         layout.label(text='in Blender Preferences.')
         layout.label(text='Because of that Blender')
         layout.label(text='will remember them after')

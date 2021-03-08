@@ -26,7 +26,7 @@ import math
 # from utils.curve import valid_anim, valid_fcurve, valid_obj
 # from utils.curve import poll_fcurve
 # from utils import get_items
-from .. import utils
+from .. import utils, prefe
 
 
 global_values = {}
@@ -312,7 +312,7 @@ def get_globals(context):
 
 def set_ref_marker(context):
     preferences = context.preferences
-    pref = preferences.addons[utils.addon_name].preferences
+    pref = preferences.addons[prefe.addon_name].preferences
     tool = context.scene.animaide.tool
     # if tool.use_markers:
     if pref.ct_use_markers:
