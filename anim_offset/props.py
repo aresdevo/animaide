@@ -1,3 +1,24 @@
+# licence
+'''
+Copyright (C) 2018 Ares Deveaux
+
+
+Created by Ares Deveaux
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import bpy
 from . import support
 from bpy.props import BoolProperty, EnumProperty, IntProperty
@@ -9,10 +30,10 @@ def interpolation_update(self, context):
     blends_curves = getattr(blends_action, 'fcurves', None)
     if blends_curves:
         keys = blends_curves[0].keyframe_points
-        support.mask_interpolation(keys)
+        support.mask_interpolation(keys, context)
 
 
-class AnimAideAnimOffset(PropertyGroup):
+class AnimAideOffset(PropertyGroup):
 
     user_preview_start: IntProperty()
 
@@ -42,7 +63,7 @@ class AnimAideAnimOffset(PropertyGroup):
                ('CUBIC', ' ', 'Curve slope 3', 'IPO_CUBIC', 3),
                ('QUART', ' ', 'Curve Slope 4', 'IPO_QUART', 4),
                ('QUINT', ' ', 'Curve Slope 5', 'IPO_QUINT', 5)],
-        name="Interpolation",
+        name="Mask Blend Interpolation",
         default='SINE',
         update=interpolation_update
     )
@@ -51,12 +72,12 @@ class AnimAideAnimOffset(PropertyGroup):
         items=[('EASE_IN', 'Ease in', 'Sets Mask transition type', 'IPO_EASE_IN', 1),
                ('EASE_IN_OUT', 'Ease in-out', 'Sets Mask transition type', 'IPO_EASE_IN_OUT', 2),
                ('EASE_OUT', 'Ease-out', 'Sets Mask transition type', 'IPO_EASE_OUT', 3)],
-        name="Easing",
+        name="Mask Blend Easing",
         default='EASE_IN_OUT',
         update=interpolation_update
     )
 
 
 classes = (
-    AnimAideAnimOffset,
+    AnimAideOffset,
 )

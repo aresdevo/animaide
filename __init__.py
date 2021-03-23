@@ -24,7 +24,7 @@ bl_info = {
     "name": "AnimAide",
     "description": "Helpful tools to manipulate keys on f-curves",
     "author": "Ares Deveaux",
-    "version": (1, 0, 1),
+    "version": (1, 0, 3),
     "blender": (2, 91, 0),
     "location": "Graph Editor - Dope Sheet - Timeline - 3D View - sidebar and menu bar",
     "warning": "This addon is still in development.",
@@ -34,57 +34,28 @@ bl_info = {
 }
 
 import bpy
-from . import ui, curve_tools, anim_offset
-from bpy.props import BoolProperty, EnumProperty, PointerProperty, CollectionProperty
-from bpy.types import AddonPreferences, PropertyGroup
+from . import ui, curve_tools, anim_offset, key_manager, prefe
+from bpy.props import BoolProperty, EnumProperty, PointerProperty, CollectionProperty, StringProperty
+from bpy.types import AddonPreferences, PropertyGroup, Operator
 
 
-class myPreferences(AddonPreferences):
-    # this must match the addon name, use '__package__'
-    # when defining this in a submodule of a python package.
-    bl_idname = 'animaide'
-
-    tools: BoolProperty(
-        name="Sliders",
-        default=True,
-    )
-
-    offset: BoolProperty(
-        name="AnimOffset",
-        default=True,
-    )
-
-    def draw(self, context):
-        layout = self.layout
-        layout.prop(self, "tools", text="Use curveTools")
-        layout.prop(self, "offset", text="Use animOffset")
-
-
-def draw_graph_menu(self, context):
-    layout = self.layout
-    layout.menu('ANIMAIDE_MT_menu_operators')
+prefe.addon_name = __package__
 
 
 class AnimAideScene(PropertyGroup):
     clone: PointerProperty(type=curve_tools.props.AnimAideClone)
-    tool: PointerProperty(type=curve_tools.props.Tool)
-    anim_offset: PointerProperty(type=anim_offset.props.AnimAideAnimOffset)
+    tool: PointerProperty(type=curve_tools.props.AnimAideTool)
+    anim_offset: PointerProperty(type=anim_offset.props.AnimAideOffset)
+    key_tweak: PointerProperty(type=key_manager.props.KeyTweak)
 
-# key_manager.classes + \
+
 classes = \
     anim_offset.classes + \
     curve_tools.classes + \
-    ui.classes + \
+    key_manager.classes + \
+    ui.menu_classes + \
+    prefe.classes + \
     (AnimAideScene,)
-
-# classes = \
-#     curve_tools.props.classes + \
-#     curve_tools.ops.classes + \
-#     ops.classes + \
-#     ui.classes + \
-#     curve_tools.ui.classes + \
-#     anim_offset.classes + \
-#     (AnimAideScene,)
 
 
 def register():
@@ -92,32 +63,62 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    # bpy.types.GRAPH_MT_key.append(draw_graph_menu)
-    bpy.types.GRAPH_MT_editor_menus.append(draw_graph_menu)
-
-    bpy.types.DOPESHEET_MT_editor_menus.append(draw_graph_menu)
-
-    bpy.types.TIME_MT_editor_menus.append(draw_graph_menu)
-
-    bpy.types.VIEW3D_MT_editor_menus.append(draw_graph_menu)
-
-    # bpy.utils.register_class(myPreferences)
-
     bpy.types.Scene.animaide = PointerProperty(type=AnimAideScene)
+
+    preferences = bpy.context.preferences
+    pref = preferences.addons[prefe.addon_name].preferences
+
+    # bpy.types.TIME_MT_editor_menus.append(curve_tools.ui.draw_bookmarks)
+    bpy.types.DOPESHEET_MT_editor_menus.append(ui.draw_menu)
+    bpy.types.GRAPH_MT_editor_menus.append(ui.draw_menu)
+    bpy.types.VIEW3D_MT_editor_menus.append(ui.draw_menu)
+    # bpy.types.TIME_MT_editor_menus.append(ui.draw_menu)
+
+    if pref.key_manager_ui == 'PANEL':
+        prefe.add_key_manager_panel()
+
+    if pref.anim_offset_ui == 'PANEL':
+        prefe.add_anim_offset_panel()
+
+    if pref.key_manager_ui == 'HEADERS':
+        prefe.add_key_manager_header()
+
+    if pref.anim_offset_ui == 'HEADERS':
+        prefe.add_anim_offset_header()
+
+    if pref.info_panel:
+        for cls in ui.info_classes:
+            bpy.utils.register_class(cls)
 
 
 def unregister():
 
+    preferences = bpy.context.preferences
+    pref = preferences.addons[prefe.addon_name].preferences
+
+    # bpy.types.TIME_MT_editor_menus.remove(curve_tools.ui.draw_bookmarks)
+    bpy.types.DOPESHEET_MT_editor_menus.remove(ui.draw_menu)
+    bpy.types.GRAPH_MT_editor_menus.remove(ui.draw_menu)
+    bpy.types.VIEW3D_MT_editor_menus.remove(ui.draw_menu)
+    # bpy.types.TIME_MT_editor_menus.remove(ui.draw_menu)
+
+    if pref.key_manager_ui == 'PANEL':
+        prefe.remove_key_manager_panel()
+
+    if pref.anim_offset_ui == 'PANEL':
+        prefe.remove_anim_offset_panel()
+
+    if pref.key_manager_ui == 'HEADERS':
+        prefe.remove_key_manager_header()
+
+    if pref.anim_offset_ui == 'HEADERS':
+        prefe.remove_anim_offset_header()
+
+    if pref.info_panel:
+        for cls in reversed(ui.info_classes):
+            bpy.utils.unregister_class(cls)
+
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
-
-    # bpy.types.GRAPH_MT_key.remove(draw_graph_menu)
-    bpy.types.GRAPH_MT_editor_menus.remove(draw_graph_menu)
-
-    bpy.types.DOPESHEET_MT_editor_menus.remove(draw_graph_menu)
-
-    bpy.types.TIME_MT_editor_menus.remove(draw_graph_menu)
-
-    # bpy.utils.unregister_class(myPreferences)
 
     del bpy.types.Scene.animaide

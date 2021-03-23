@@ -1,7 +1,26 @@
+# licence
+'''
+Copyright (C) 2018 Ares Deveaux
+
+
+Created by Ares Deveaux
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import bpy
 from .. import utils
-
-# from . import key
 
 group_name = 'animaide'
 user_preview_range = {}
@@ -105,7 +124,7 @@ def remove_helpers(objects):
 
 def get_slope(fcurve):
     """Gets the slope of a curve at a specific range"""
-    selected_keys = utils.key.get_selected(fcurve)
+    selected_keys = utils.key.get_selected_index(fcurve)
     first_key, last_key = utils.key.first_and_last_selected(fcurve, selected_keys)
     slope = (first_key.co.y**2 - last_key.co.y**2) / (first_key.co.x**2 - last_key.co.x**2)
     return slope
@@ -238,7 +257,7 @@ def move_clone(objects):
         for aclone in aclones:
             clone = action.fcurves[aclone.fcurve.index]
             fcurve = action.fcurves[aclone.original_fcurve.index]
-            selected_keys = utils.key.get_selected(fcurve)
+            selected_keys = utils.key.get_selected_index(fcurve)
             key1, key2 = utils.key.first_and_last_selected(fcurve, selected_keys)
             amount = abs(key2.co.x - key1.co.x)
             for key in clone.keyframe_points:
@@ -249,3 +268,91 @@ def move_clone(objects):
             utils.key.attach_selection_to_fcurve(fcurve, clone, is_gradual=False)
 
             fcurve.update()
+
+
+def valid_anim(obj):
+    anim = obj.animation_data
+    action = getattr(anim, 'action', None)
+    fcurves = getattr(action, 'fcurves', None)
+
+    return fcurves
+
+
+def valid_obj(context, obj, check_ui=True):
+
+    if not valid_anim(obj):
+        return False
+
+    if check_ui:
+        visible = obj.visible_get()
+
+        if context.area.type != 'VIEW_3D':
+            if not context.space_data.dopesheet.show_hidden and not visible:
+                return False
+
+    return True
+
+
+def valid_fcurve(context, obj, fcurve, check_ui=True):
+
+    try:
+        prop = obj.path_resolve(fcurve.data_path)
+    except:
+        prop = None
+
+    if not prop:
+        return False
+
+    if check_ui and context.area.type == 'GRAPH_EDITOR':
+        if context.space_data.use_only_selected_curves_handles and not fcurve.select:
+            return False
+
+        # if context.area.type != 'VIEW_3D':
+        if fcurve.lock or fcurve.hide:
+            return False
+
+    if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
+        return False  # we don't want to select keys on reference fcurves
+
+    if obj.type == 'ARMATURE':
+
+        if getattr(fcurve.group, 'name', None) == 'Object Transforms':
+            # When animating an object, by default its fcurves grouped with this name.
+            return False
+
+        elif not fcurve.group:
+            transforms = (
+                'location', 'rotation_euler', 'scale',
+                'rotation_quaternion', 'rotation_axis_angle',
+                '[\"',  # custom property
+            )
+            if fcurve.data_path.startswith(transforms):
+                # fcurve belongs to the  object, so skip it
+                return False
+
+        # if fcurve.group.name not in bones_names:
+            # return
+
+        split_data_path = fcurve.data_path.split(sep='"')
+        bone_name = split_data_path[1]
+        bone = obj.data.bones.get(bone_name)
+
+        if not bone:
+            return False
+
+        if check_ui:
+            if bone.hide:
+                return False
+
+            if context.area.type == 'VIEW_3D':
+                if not bone.select:
+                    return False
+            else:
+                only_selected = context.space_data.dopesheet.show_only_selected
+                if only_selected and not bone.select:
+                    return False
+
+    if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
+        return False  # we don't want to select keys on reference fcurves
+
+    return True

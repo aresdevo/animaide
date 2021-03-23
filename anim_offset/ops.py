@@ -1,3 +1,24 @@
+# licence
+'''
+Copyright (C) 2018 Ares Deveaux
+
+
+Created by Ares Deveaux
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import bpy
 
 from . import support
@@ -53,13 +74,13 @@ class ANIMAIDE_OT_modal_test(Operator):
         return {'RUNNING_MODAL'}
 
 
-class ANIMAIDE_OT_without_magnet_mask(Operator):
+class ANIMAIDE_OT_activate_anim_offset(Operator):
     """Activates Anim Offset without maks"""
 
-    bl_idname = "anim.aide_without_magnet_mask"
-    bl_label = "Without Mask"
+    bl_idname = "anim.aide_activate_anim_offset"
+    bl_label = "AnimOffset"
 
-    # bl_options = {'REGISTER'}
+    # bl_options = {'UNDO_GROUPED'}
 
     @classmethod
     def poll(cls, context):
@@ -71,7 +92,7 @@ class ANIMAIDE_OT_without_magnet_mask(Operator):
         anim_offset = scene.animaide.anim_offset
 
         anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
-        support.store_user_timeline_ranges()
+        support.store_user_timeline_ranges(context)
 
         scene.tool_settings.use_keyframe_insert_auto = False
 
@@ -89,11 +110,11 @@ class ANIMAIDE_OT_without_magnet_mask(Operator):
         return {'FINISHED'}
 
 
-class ANIMAIDE_OT_deactivate_magnet(Operator):
+class ANIMAIDE_OT_deactivate_anim_offset(Operator):
     """Deactivates Anim Offset"""
 
-    bl_idname = "anim.aide_deactivate_magnet"
-    bl_label = "Deactivate"
+    bl_idname = "anim.aide_deactivate_anim_offset"
+    bl_label = "AnimOffset off"
 
     # bl_options = {'REGISTER'}
 
@@ -110,8 +131,8 @@ class ANIMAIDE_OT_deactivate_magnet(Operator):
         anim_offset = scene.animaide.anim_offset
 
         if anim_offset.mask_in_use:
-            support.remove_mask()
-            support.reset_timeline_mask()
+            support.remove_mask(context)
+            support.reset_timeline_mask(context)
 
         scene.tool_settings.use_keyframe_insert_auto = anim_offset.user_scene_auto
 
@@ -124,18 +145,20 @@ class ANIMAIDE_OT_deactivate_magnet(Operator):
         return {'FINISHED'}
 
 
-class ANIMAIDE_OT_add_magnet_mask(Operator):
-    """Adds of modifies Anim Offset mask and activates it"""
+class ANIMAIDE_OT_add_anim_offset_mask(Operator):
+    """Adds or modifies Anim Offset mask and activates it"""
 
-    bl_idname = "anim.aide_add_magnet_mask"
-    bl_label = "Add Mask"
-    # bl_options = {'UNDO_GROUPED'}
+    bl_idname = "anim.aide_add_anim_offset_mask"
+    bl_label = "AnimOffset Mask"
+    bl_options = {'UNDO_GROUPED'}
+
+    sticky: BoolProperty(default=False)
 
     @classmethod
     def poll(cls, context):
         return support.poll(context)
 
-    def marign_blend_info(self, context, side):
+    def margin_blend_info(self, context, side):
         # status bar info when the blends are being modified
         margin = None
         blend = None
@@ -246,7 +269,8 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
         # info for the status bar
         self.info(context, event)
 
-        if self.created and not event.shift and not event.alt and not event.ctrl:
+        # if not self.sticky:
+        if self.created and not event.shift and not event.alt and not event.ctrl and not self.sticky:
             # if there are not modifier keys leaves msking
             self.finish_mask(context)
             return {'FINISHED'}
@@ -304,12 +328,12 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                                 f"Left Blend: {scene.frame_preview_start}     "
                             )
 
-                        support.set_blend_values()
+                        support.set_blend_values(context)
 
                     elif event.alt:
                         # -------------- Move range -------------
-                        left_info = self.marign_blend_info(context, 'Left')
-                        right_info = self.marign_blend_info(context, 'Right')
+                        left_info = self.margin_blend_info(context, 'Left')
+                        right_info = self.margin_blend_info(context, 'Right')
                         context.window.workspace.status_text_set(left_info + right_info)
 
                         distance = frame - self.leftmouse_frame
@@ -317,7 +341,7 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                         scene.frame_start = self.init_start + distance
                         scene.frame_end = self.init_end + distance
                         scene.frame_preview_end = self.init_preview_end + distance
-                        support.set_blend_values()
+                        support.set_blend_values(context)
 
                     else:
                         # -------------- Move margins -------------
@@ -327,15 +351,15 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                         if end_distance < start_distance:
                             scene.frame_end = self.constraint(scene.frame_start, 'L', frame, gap=1)
                             scene.frame_preview_end = scene.frame_end + self.delta_end
-                            info = self.marign_blend_info(context, 'Right')
+                            info = self.margin_blend_info(context, 'Right')
                             context.window.workspace.status_text_set(info)
                         else:
                             scene.frame_start = self.constraint(scene.frame_end, 'R', frame, gap=1)
                             scene.frame_preview_start = scene.frame_start - self.delta_start
-                            info = self.marign_blend_info(context, 'Left')
+                            info = self.margin_blend_info(context, 'Left')
                             context.window.workspace.status_text_set(info)
 
-                        support.set_blend_values()
+                        support.set_blend_values(context)
 
                 else:
                     # --------------- Add mask ----------------
@@ -363,7 +387,7 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
                         scene.frame_end = self.leftmouse_frame
                         scene.frame_preview_end = self.leftmouse_frame
 
-                    support.set_blend_values()
+                    support.set_blend_values(context)
 
         elif event.type in {'RIGHTMOUSE', 'ESC'}:
             self.finish_mask(context)
@@ -385,8 +409,10 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
 
         if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
             anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
-            support.store_user_timeline_ranges()
+            support.store_user_timeline_ranges(context)
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
+
+        scene.tool_settings.use_keyframe_insert_auto = False
 
         support.add_blends()
         # scene.use_preview_range = True
@@ -395,11 +421,11 @@ class ANIMAIDE_OT_add_magnet_mask(Operator):
         return {'RUNNING_MODAL'}
 
 
-class ANIMAIDE_OT_delete_magnet_mask(Operator):
+class ANIMAIDE_OT_delete_anim_offset_mask(Operator):
     """Deletes Anim Offset mask and deactivates it"""
 
-    bl_idname = "anim.aide_delete_magnet_mask"
-    bl_label = "Delete Mask"
+    bl_idname = "anim.aide_delete_anim_offset_mask"
+    bl_label = "AnimOffset Mask off"
 
     # bl_options = {'REGISTER'}
 
@@ -412,8 +438,8 @@ class ANIMAIDE_OT_delete_magnet_mask(Operator):
         # if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
         #     bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
 
-        support.remove_mask()
-        support.reset_timeline_mask()
+        support.remove_mask(context)
+        support.reset_timeline_mask(context)
 
         context.area.tag_redraw()
         # bpy.ops.wm.redraw_timer()
@@ -446,13 +472,17 @@ class ANIMAIDE_OT_anim_offset_settings(Operator):
 
     def draw(self, context):
         anim_offset = context.scene.animaide.anim_offset
+        mask_in_use = context.scene.animaide.anim_offset.mask_in_use
 
         layout = self.layout
 
         layout.label(text='Settings')
         layout.separator()
+        if not mask_in_use:
+            layout.active = False
         # layout.prop(anim_offset, 'end_on_release', text='masking ends on mouse release')
-        layout.prop(anim_offset, 'fast_mask', text='Fast offset calculation')
+        # layout.prop(anim_offset, 'fast_mask', text='Fast offset calculation')
+        # if context.area.type != 'VIEW_3D':
         layout.prop(anim_offset, 'insert_outside_keys', text='Auto Key outside margins')
         layout.separator()
         layout.label(text='Mask blend interpolation')
@@ -463,10 +493,10 @@ class ANIMAIDE_OT_anim_offset_settings(Operator):
 
 
 classes = (
-    ANIMAIDE_OT_modal_test,
-    ANIMAIDE_OT_add_magnet_mask,
-    ANIMAIDE_OT_without_magnet_mask,
-    ANIMAIDE_OT_deactivate_magnet,
-    ANIMAIDE_OT_delete_magnet_mask,
+    # ANIMAIDE_OT_modal_test,
+    ANIMAIDE_OT_add_anim_offset_mask,
+    ANIMAIDE_OT_activate_anim_offset,
+    ANIMAIDE_OT_deactivate_anim_offset,
+    ANIMAIDE_OT_delete_anim_offset_mask,
     ANIMAIDE_OT_anim_offset_settings,
 )

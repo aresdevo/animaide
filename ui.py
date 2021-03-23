@@ -1,3 +1,24 @@
+# licence
+'''
+Copyright (C) 2018 Ares Deveaux
+
+
+Created by Ares Deveaux
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 from bpy.types import Panel, Menu
 from .curve_tools.ui import blend_button
 
@@ -18,52 +39,44 @@ class ANIMAIDE_PT_help:
         row.operator('anim.aide_demo', text='', icon='FILE_MOVIE', emboss=False)
 
 
-class ANIMAIDE_MT_pie_tools_a(Menu):
-    bl_idname = "ANIMAIDE_MT_pie_tools_a"
-    bl_label = "Tools A"
+class ANIMAIDE_PT_info:
+    bl_label = "Info"
+    bl_region_type = 'UI'
+    bl_category = 'AnimAide'
 
     def draw(self, context):
+
         layout = self.layout
-        pie = layout.menu_pie()
 
-        pie.operator("anim.aide_ease_to_ease")
-        pie.operator("anim.aide_tween")
-        pie.operator("anim.aide_blend_ease")
-        pie.operator("anim.aide_ease")
-        pie.operator("anim.aide_blend_neighbor")
-        pie.operator("anim.aide_scale_average")
-        pie.operator("anim.aide_push_pull")
-        pie.operator("anim.aide_blend_frame")
-
-
-class ANIMAIDE_MT_pie_tools_b(Menu):
-    bl_idname = "ANIMAIDE_MT_pie_tools_b"
-    bl_label = "Tools B"
-
-    def draw(self, context):
-        layout = self.layout
-        pie = layout.menu_pie()
-
-        pie.operator("anim.aide_scale_left")
-        pie.operator("anim.aide_scale_right")
-        pie.operator("anim.aide_wave_noise")
-        pie.operator("anim.aide_smooth")
-        pie.operator("anim.aide_blend_offset")
-        pie.operator("anim.aide_time_offset")
+        layout.label(text='-Anim-offset and Key-manager')
+        layout.label(text='can now be put on the headers')
+        layout.label(text='instead of the panels.')
+        layout.label(text='-that and other preferences are')
+        layout.label(text='now located in the addon tab')
+        layout.label(text='in Blender Preferences.')
+        layout.label(text='Because of that Blender')
+        layout.label(text='will remember them after')
+        layout.label(text='you quit.')
+        layout.label(text='-This info panel can also')
+        layout.label(text='be removed in the addon')
+        layout.label(text='preferences.')
+        layout.label(text='Find more information at:')
+        layout.label(text='https://github.com/aresdevo/animaide')
 
 
-class ANIMAIDE_MT_pie_anim_offset(Menu):
-    bl_idname = "ANIMAIDE_MT_pie_anim_offset"
-    bl_label = "AnimOffset"
+class ANIMAIDE_PT_info_3d(Panel, ANIMAIDE_PT_info):
+    bl_idname = 'ANIMAIDE_PT_info_3d'
+    bl_space_type = 'VIEW_3D'
 
-    def draw(self, context):
-        layout = self.layout
-        pie = layout.menu_pie()
 
-        pie.operator('anim.aide_without_magnet_mask', text='AnimOffset Without Mask')
-        pie.operator('anim.aide_add_magnet_mask', text='Add AnimOffset Mask')
-        pie.operator('anim.aide_delete_magnet_mask', text='Delete AnimOffset Mask')
-        pie.operator('anim.aide_deactivate_magnet', text='Deactivate AnimOffset')
+class ANIMAIDE_PT_info_ge(Panel, ANIMAIDE_PT_info):
+    bl_idname = 'ANIMAIDE_PT_info_ge'
+    bl_space_type = 'GRAPH_EDITOR'
+
+
+class ANIMAIDE_PT_info_de(Panel, ANIMAIDE_PT_info):
+    bl_idname = 'ANIMAIDE_PT_info_de'
+    bl_space_type = 'DOPESHEET_EDITOR'
 
 
 class ANIMAIDE_MT_operators(Menu):
@@ -77,49 +90,36 @@ class ANIMAIDE_MT_operators(Menu):
     def draw(self, context):
         layout = self.layout
 
-        layout.operator('wm.call_menu_pie', text="Pie Menu A").name = 'ANIMAIDE_MT_pie_tools_a'
-        layout.operator('wm.call_menu_pie', text="Pie Menu B").name = 'ANIMAIDE_MT_pie_tools_b'
-        layout.operator('wm.call_menu_pie', text="Pie AnimOffset").name = 'ANIMAIDE_MT_pie_anim_offset'
-        layout.separator()
+        if context.area.type != 'DOPESHEET_EDITOR':
+            if context.area.type == 'GRAPH_EDITOR':
+                layout.menu('ANIMAIDE_MT_curve_tools_pie')
 
-        layout.operator('anim.aide_ease_to_ease')
-        layout.operator('anim.aide_ease')
-        layout.operator('anim.aide_blend_ease')
+            if context.area.type == 'VIEW_3D':
+                layout.menu('ANIMAIDE_MT_curve_tools', text='On Frame Curve Tools')
+            else:
+                layout.menu('ANIMAIDE_MT_curve_tools')
+                layout.menu('ANIMAIDE_MT_tweak')
 
-        layout.operator('anim.aide_blend_neighbor')
-        layout.operator('anim.aide_blend_frame')
-        layout.operator('anim.aide_blend_offset')
+            layout.separator()
 
-        layout.operator('anim.aide_tween')
-        layout.operator('anim.aide_push_pull')
-
-        layout.operator('anim.aide_scale_left')
-        layout.operator('anim.aide_scale_average')
-        layout.operator('anim.aide_scale_right')
-
-        layout.operator('anim.aide_smooth')
-        layout.operator('anim.aide_wave_noise')
-
-        layout.operator('anim.aide_time_offset')
-
-        layout.separator()
-
-        blend_button(layout, -0.10, text="Tweak Left")
-        blend_button(layout, 0.10, text="Tweak Right")
-        blend_button(layout, -1, text="Match Left")
-        blend_button(layout, 1, text="Match Right")
-
-        layout.separator()
-
-        layout.operator('anim.aide_without_magnet_mask', text='AnimOffset Without Mask')
-        layout.operator('anim.aide_add_magnet_mask', text='Add AnimOffset Mask')
-        layout.operator('anim.aide_delete_magnet_mask', text='Delete AnimOffset Mask')
-        layout.operator('anim.aide_deactivate_magnet', text='Deactivate AnimOffset')
+        if context.area.type != 'VIEW_3D':
+            layout.operator('wm.call_menu_pie', text="Pie AnimOffset").name = 'ANIMAIDE_MT_pie_anim_offset'
+        layout.menu('ANIMAIDE_MT_anim_offset')
+        if context.area.type != 'VIEW_3D':
+            layout.menu('ANIMAIDE_MT_anim_offset_mask')
 
 
-classes = (
-    ANIMAIDE_MT_pie_tools_a,
-    ANIMAIDE_MT_pie_tools_b,
-    ANIMAIDE_MT_pie_anim_offset,
+def draw_menu(self, context):
+    layout = self.layout
+    layout.menu('ANIMAIDE_MT_menu_operators')
+
+
+menu_classes = (
     ANIMAIDE_MT_operators,
+)
+
+info_classes = (
+    ANIMAIDE_PT_info_3d,
+    ANIMAIDE_PT_info_ge,
+    ANIMAIDE_PT_info_de,
 )

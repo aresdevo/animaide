@@ -1,25 +1,64 @@
+# licence
+'''
+Copyright (C) 2018 Ares Deveaux
+
+
+Created by Ares Deveaux
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import bpy
 from . import support
 from .. import utils
 from bpy.props import BoolProperty, EnumProperty, StringProperty, \
-    IntProperty, FloatProperty, CollectionProperty
+    IntProperty, FloatProperty, CollectionProperty, PointerProperty
 from bpy.types import PropertyGroup
 
 
-menu_items = [('EASE_TO_EASE', 'Ease To Ease', 'S shape transition', '', 1),
-              ('EASE', 'Ease', 'C shape transition', '', 2),
-              ('BLEND_EASE', 'Blend Ease', 'From current to C shape', '', 3),
+menu_items = [('BLEND_EASE', 'Blend Ease', 'From current to C shape', '', 1),
+              ('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 2),
+              ('BLEND_INFINITE', 'Blend Infinite', 'Adds or adjust keys to conform to the adjacent slope', '', 3),
               ('BLEND_NEIGHBOR', 'Blend Neighbor', 'From current to neighbors', '', 4),
-              ('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 5),
-              ('BLEND_OFFSET', 'Blend Offset', 'Offset key values to neighbors', '', 6),
-              ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 7),
-              ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 8),
+              ('BLEND_OFFSET', 'Blend Offset', 'Offset key values to neighbors', '', 5),
+
+              ('EASE', 'Ease', 'C shape transition', '', 6),
+              ('EASE_TO_EASE', 'Ease To Ease', 'S shape transition', '', 7),
+
+              ('SCALE_AVERAGE', 'Scale Average', 'Scale to average value', '', 8),
               ('SCALE_LEFT', 'Scale Left', 'Scale anchor to left neighbor', '', 9),
-              ('SCALE_AVERAGE', 'Scale Average', 'Scale to average value', '', 10),
-              ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 11),
-              ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 12),
-              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 13),
-              ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 14)]
+              ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 10),
+
+              ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 11),
+              ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 12),
+
+              ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 13),
+              ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 14),
+              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 15)]
+
+
+menu_items_3d = [('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 1),
+                 ('BLEND_INFINITE', 'Blend Infinite', 'Adds or adjust keys to conform to the adjacent slope', '', 2),
+                 ('BLEND_NEIGHBOR', 'Blend Neighbor', 'From current to neighbors', '', 3),
+
+                 ('SCALE_LEFT', 'Scale Left', 'Scale anchor to left neighbor', '', 4),
+                 ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 5),
+
+                 ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 6),
+
+                 ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 7),
+                 ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 8)]
 
 
 def update_clone_move(self, context):
@@ -45,7 +84,7 @@ def update_overshoot(self, context):
 def update_selector(self, context):
     # change values when selector property is changed
 
-    support.get_globals()
+    support.get_globals(context)
     # self.overshoot = False
     self.show_factor = False
 
@@ -77,32 +116,32 @@ class AnimAideClone(PropertyGroup):
                      ('REPEAT_OFFSET', 'Repeat with Offset', '', '', 3),
                      ('MIRROR', 'Mirrored', '', '', 4)]
 
-    cycle_before: EnumProperty(
+    cycle: EnumProperty(
         items=cycle_options,
         name='Before',
         default='REPEAT_OFFSET'
     )
 
-    cycle_after: EnumProperty(
-        items=cycle_options,
-        name='Before',
-        default='REPEAT_OFFSET'
-    )
+    # cycle_after: EnumProperty(
+    #     items=cycle_options,
+    #     name='Before',
+    #     default='REPEAT_OFFSET'
+    # )
 
 
-class FrameBookmark(PropertyGroup):
+class AnimAideFrameBookmark(PropertyGroup):
     frame: IntProperty()
     name: StringProperty()
 
 
-class Tool(PropertyGroup):
+class AnimAideTool(PropertyGroup):
 
     use_markers: BoolProperty(default=True,
                               description='use markers for the reference frames',
                               update=toggle_tool_markers)
 
-    unselected_fcurves: BoolProperty(default=False,
-                                     description='Affect unselected fcurves')
+    # unselected_fcurves: BoolProperty(default=False,
+    #                                  description='Affect unselected fcurves')
 
     keys_under_cursor: BoolProperty(default=False,
                                     description='Affect unselected keys when cursor is over them')
@@ -116,10 +155,13 @@ class Tool(PropertyGroup):
     flip: BoolProperty(default=True,
                        description='Changes how the tools modal work')
 
-    expand: BoolProperty(default=True,
+    expand: BoolProperty(default=False,
+                         name='Expand',
                          description='Toggle between compact and expanded modes for the Tools')
 
-    expand_3d: BoolProperty(default=True)
+    expand_3d: BoolProperty(default=False,
+                            name='Expand',
+                            description='Toggle between compact and expanded modes for the Tools')
 
     area: StringProperty()
 
@@ -139,7 +181,14 @@ class Tool(PropertyGroup):
                          description='Determine how sharp the trasition is')
 
     overshoot: BoolProperty(update=update_overshoot,
+                            name='Overshoot',
                             description='Allows for higher values')
+
+    sticky_handles: BoolProperty(default=False,
+                                 name='Sticky Handles',
+                                 description='If On key points will be modified independetly\n' \
+                                 'from its handles if the interpolation is "Free"\n' \
+                                 'or "Aligned"')
 
     left_ref_frame: IntProperty()
 
@@ -149,6 +198,13 @@ class Tool(PropertyGroup):
         items=menu_items,
         name="Ease Tool Selector",
         default='EASE_TO_EASE',
+        update=update_selector
+    )
+
+    selector_3d: EnumProperty(
+        items=menu_items_3d,
+        name="Ease Tool Selector",
+        default='BLEND_NEIGHBOR',
         update=update_selector
     )
 
@@ -162,13 +218,13 @@ class Tool(PropertyGroup):
                                     max=2.0
                                     )
 
-    frame_bookmarks: CollectionProperty(type=FrameBookmark)
+    frame_bookmarks: CollectionProperty(type=AnimAideFrameBookmark)
 
     bookmark_index: IntProperty()
 
 
 classes = (
     AnimAideClone,
-    FrameBookmark,
-    Tool,
+    AnimAideFrameBookmark,
+    AnimAideTool,
 )
