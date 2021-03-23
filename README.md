@@ -1,6 +1,8 @@
 # Animaide 1.0.3
 
-*CurveTools* - *AnimOffset* - *KeyManager**
+*CurveTools* - *AnimOffset* - *KeyManager*
+
+*Tested on Blender 2.9 and up. There is also a version of the addon for Blender 2.83*
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
 
@@ -84,9 +86,15 @@
 
 > ## Installation
 >
-> First download the add-on by clicking on this link:
+> First download the add-on by clicking one of this links:
+> 
+> For Blender 2.9 version and up:
 > 
 > <https://github.com/aresdevo/animaide/archive/master.zip>
+> 
+> For Blender 2.83 version:
+> 
+> <https://github.com/aresdevo/animaide/archive/LTE.zip>
 >
 > Then in Blender, go to the "Add-ons" tab in the preference window. There click on the "Install" button and navigate to the
 > folder where you downloaded the addon. After you select the file and click "Install Add-on", AnimAide will be installed
