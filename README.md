@@ -88,11 +88,11 @@
 >
 > First download the add-on by clicking one of this links:
 > 
-> For Blender 2.9 version and up:
+> For Blender 2.9 and up:
 > 
 > <https://github.com/aresdevo/animaide/archive/master.zip>
 > 
-> Old version of the addon for Blender 2.83 version (working on the update):
+> Old version of the addon for Blender 2.83 (working on the update):
 > 
 > <https://github.com/aresdevo/animaide/archive/LTE.zip>
 >
