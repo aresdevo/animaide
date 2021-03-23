@@ -1,14 +1,24 @@
-#Animaide 1.0.3
+# Animaide 1.0.3
+
 *CurveTools* - *AnimOffset* - *KeyManager**
 
+> ![Shortcut Troubleshoot](images/animaide.jpg)
+>
+> In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
+> with the vertices on a geometry. That is where **AnimAide** comes in.
+>
+> There are some Blender options to manipulate keys, but **AnimAide** open the door to new possibilities. Not only has a
+> wider range of tools but when working with a group of f-curves each one will have their local space.
+>
+> This kind of tools is standard in the game and film industry.
 
-> ### New in this version:
+> ### New on this version:
 >
 > **In General:**
 > - Because there is a big change, there is an "info" panel with important information. It can be removed on the addon
 > preference window.
-> - Some settings were moved to the addon preferences. By been there you options will persist even after the Blender 
-    > session is over.
+> - Some settings were moved to the addon preferences. By been there your options will persist even after the Blender 
+    session is over.
 > - A new group of tools called **KeyManager** has been added to its own panel.
 > - Some panels can now be moved to the animation views headers.
 > - Animaide menu has been organized better.
@@ -16,23 +26,23 @@
 > 
 > **CurveTools:**
 > - A new "Infinite" tool has been added
-> - The "Noise" tool no add a wave when sliding to the left
-> - Tools are now grouped in "expand" mode for ease of use.
-> - Overshoot option is now available next to the tool.
+> - The "Noise" has been renamed "Wave-Noise". It now adds a wave when sliding to the left.
+> - Tools are now grouped in the "expand" mode for ease of use.
+> - Overshoot option button is now available next to the curveTool.
 > - If keys are not selected the tools will act on the keys under the cursor.
 > - If auto-key is on most tools will add a keyframe if no key under the cursor and no key is selected.
+> - Time-Offset works with cycles now.
 >
 > **AnimOffset:**
 > - Panels can now be moved to the animation views headers to make them more accessible. On this version they
 > are in panels by default not to confuse the users, but in a future version will be on the headers by default.
 > - Interactive mask creation. New edit button appears after a mask has been created to make the process easier. The
 > new edit button is persistent
-> - AnimOffset is turned off automatically now if autokey is selected (because they can not be active at the same time 
-    > by nature).
+> - AnimOffset is turned off automatically now if autokey is selected (because they can not be active at the same time).
 > - There is a new pie menu for AnimOffset on the Animaide menu.
 > 
 > **KeyManager** (New):
-> - This panel can be moved to the animation views headers to make them more accessible.
+> - This panel can be moved to the animation views headers to make it more accessible.
 > 
 > - Has three main sections:
 >   - **Move-insert:**
@@ -41,43 +51,34 @@
 >       - *Inset* frames between keys by a specified amount. If some keys are selected, frames will be inserted
 > betwee those. If non is selected frames will be inserted where the cursor is.
 >   - **Type:**
->       - Uses the colored Blender key types (Keyframe, Breakdown, Jitter, Extreme), and let you "assign", "select",
-> "unselect" and "delete" them by type when selected.
->       - It also incorporates a Blender option that lets you select the key type auto key will use.
+>       - Uses the colored Blender key types (Keyframe, Breakdown, Jitter, Extreme), and lets you "assign", "select",
+> "unselect" and "delete" them by type.
+>       - It also incorporates a Blender option that lets you select the key type that auto-key will use.
 >   - **Interpolation:**
 >       - Lest you quickly assign interpolation types to key handles, just like Blender does, but with the added benefit of
 > been able to assign it to every key in the selected object with the click of a button.
->       - When dealing with "Bezier" curves, it lets you the left or right handles of every selected key to easily interact
-> with a group of handles at once.
+>       - When dealing with "Bezier" curves, it lets you select the left or right handles of every selected key to 
+          easily interact with a group of handles at once.
 
 > ### IMPORTANT
-> If you are coming from the previous version, you might have some issues with the shortcuts. The reason is that
-> If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel.
+> - It is a good practice to remove the previous version of the addon (if you have one) before installing the new one.
 > 
-> ![Local Space](images/shortcut_troubleshoot.gif)
 > 
->  ####Also:
+> - If you are coming from the previous version, you might have some issues with the shortcuts.
+>   If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel to
+>   delete any previous shortcut that might be conflicting.
 > 
-> Because of the introduction of settings in the addon prefernce window, I've added a new (in your face) "info panel":
+>   ![Local Space](images/shortcut_troubleshoot.gif)
 >
-> ![Info Panel](images/info.jpg)
 > 
-> You can disable this view in the addon preferene window (that is the window where the addon appears when you 
-> install it):
+> - Because of the introduction of settings in the addon prefernce window, I've added a new (kind of ugly) "info panel":
+>
+>   ![Info Panel](images/info.jpg)
 > 
-> ![Info Panel setting](images/info_panel_setting.jpg)
-
-> ## Introduction: 
+>   The idea is that you don't miss it, but you can disable this view in the addon preferene window (that is the window 
+    where the addon appears when you install it):
 > 
-> ![Shortcut Troubleshoot](images/animaide.jpg)
->
-> In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
-> with the vertices on a geometry. That is where **AnimAide** comes in. 
->
-> There are some Blender options to manipulate keys, but **AnimAide** open the door to new possibilities. Not only has a
-> wider range of tools but when working with a group of f-curves each one will have their local space.
->
-> This kind of tools is standard in the game and film industry.
+>   ![Info Panel setting](images/info_panel_setting.jpg)
 
 > ## Installation
 >
@@ -94,6 +95,18 @@
 > Make sure the addon check-mark is active:
 > 
 > ![Installing 3](images/installing3.jpg)
+>
+>> ### New:
+>>
+>> You can add most the panels to the headers now by selecting the new options on the addon
+>> preferences:
+>>
+>> ![preferences](images/preferences.jpg)
+>>
+>> As you can see, you can also find others settings there that used to be
+>> in the main Blender interface:
+>>
+>> ![settingns in preferences](images/preferences_preferences.jpg)
 
 > ### Where to find the tools
 >
@@ -108,26 +121,14 @@
 > 
 >You can show the sidebar by using the "n" shortcut while in one of the mentioned editors or go to the "View" menu
 > on those areas and open it there.
-> 
->> ###New:
->>
->> You can add most the panels to the headers now by selecting the new options on the addon
->> preferences:
->>
->> ![preferences](images/preferences.jpg)
->>
->> As you can see, you can also others settings there that used to be
->> in the main Blender interface:
->>
->> ![settingns in preferences](images/preferences_preferences.jpg)
 
 > ### Menu:
 >
-> All the tools are also available in the **Animaide** menu under the Graph, DopeSheet, and 3D View editors.
+> All the tools are also available in the **Animaide** menu under the GraphEditor, DopeSheet, and 3DView editors.
 > Each menu is a bit different according to what can be used on each view. The one that has
-> all the most tools is the on in the Graph Editor
+> all the tools is the one in the GraphEditor.
 > 
-> Graph Editor menu:
+> GraphEditor menu:
 > 
 > ![Graph Editor menu](images/ge_menu.gif)
 >
@@ -151,8 +152,9 @@ At the moment, Animaide has Three main panels:
 > multiple f-curves from either animated objects or animated bones in an armature.
 >
 > In most cases these tools affect the selected keys using the neighboring
-> unselected keys as reference. When activated from the 3D View it will act on all the f-curves in the selected object or
-> bone, but when is activated in one of the 3 animation editors we support it will only act on the selected channels.
+> unselected keys as reference. When activated from the 3DView it will act on all the f-curves in the current frame of
+> the selected object or bone, but when it is used in the GraphEditor it will act on the selected keys of the selected 
+> channels.
 
 > ### How the interface works:
 >
@@ -200,10 +202,10 @@ At the moment, Animaide has Three main panels:
 >
 > ![Overshoot](images/expanded_settings.jpg)
 
-> ####Note:
+> #### Note:
 >
-> Some **CurveTools** don't make much sence when used on the 3D View, for that reason
-> Only the tools that make sense are available on that view:
+> Some **CurveTools** don't make much sence when used on the 3D-View, for that reason
+> Only the a few are available there:
 >
 > ![3D view CurveTools](images/3d_tools_expand.jpg)
 
@@ -215,7 +217,7 @@ At the moment, Animaide has Three main panels:
 >
 > - **Activate on release:**
     When this option is selected tools will behave similar to previous version
-    in the sense that they will become active as soon as you select them. If you unselect it  tools will become
+    in the sense that they will become active as soon as you select them. If you unselect it, tools will become
     active only after you left-click and drag.
 >
 >   ![Installing 2](images/not_on_mouse_release.gif)
@@ -236,9 +238,9 @@ At the moment, Animaide has Three main panels:
 >
 >   ![sticky handles](images/sticky_handles.gif)
 >
->   This used to be a bug but now that improved API tools took that away, I thought to bring it back because can be
->   at times. Basically, when active the key handles are left behind when the keyframe points are modified if the
->   handle type is either "free" or "aligned".
+>   This used to be a bug but now that improved API tools took that away I thought to bring it back because can be
+>   usefull at times. Basically, when active the key handles are left behind when the keyframe points are modified if
+>   the handle type is either "free" or "aligned".
 >   This is a simple use case for this tool:
 >
 >   ![sticky handles use case](images/sticky_handles_use_case.gif)
@@ -256,7 +258,7 @@ At the moment, Animaide has Three main panels:
 >
 >   ![tools with auto key](images/tools_with_autokey.gif)
 >
->   When no key is selected and "auto key" is on most **curveTools** will add a key here the cursor is.
+>   When no key is selected and "auto key" is on most **curveTools** will add a key where the cursor is.
 
 At the moment there are 15 different tools:
 
@@ -289,6 +291,8 @@ At the moment there are 15 different tools:
 > ### Blend Infinite
 >
 > ![Blend Frame](images/blend_infinite.gif)
+> 
+> Lets you position the keys based on the slope created by the two neighboring keys to the left or the right.
 
 > ### Blend Neighbor
 >
@@ -299,13 +303,13 @@ At the moment there are 15 different tools:
 
 > ### Blend Offset
 >
-> Move the selected keys as a block until it reaches either neighboring key
+> Moves the selected keys as a block until it reaches either neighboring key
 >
 > ![Blend Offset](images/blend_offset.gif)
 
 > ### Ease
 >
-> With this one, you just have either an ease-in or an ease-out, but sometimes that is just what you want. It does not
+> With this one, you arch the f_curve with either an ease-in or an ease-out. It does not
 > remember how the curve was before activating the tool
 >
 > ![Ease](images/ease.gif)
@@ -359,9 +363,9 @@ At the moment there are 15 different tools:
 >
 > ![Tween](images/tween.gif)
 
-> ### Noise-Noise
+> ### Wave-Noise
 >
-> It adds random values to the selected keys. The more you move the slider to the right de more the intensity grows.
+> It adds random values to the selected keys when moving to the right and a wave pattern when moving to the left.
 >
 > ![Noise](images/wave-noise.gif)
 
@@ -377,7 +381,7 @@ At the moment there are 15 different tools:
 > ![AnimOffset](images/anim_offset_basic.gif)
 >
 > With this tool you can modify any animated object, and the change will propagate to the animation range. It can be
-> filter by a mask. You can find the panel in all the animation editors.
+> filter by a mask. You can find the panel in all the animation editors, but the mask option just in the GraphEditor.
 >
 > The mask has the option of adding a blending border that fades the effect of the tool. The interpolation can be adjusted
 > in the preferences with the interpolation options.
@@ -386,13 +390,13 @@ At the moment there are 15 different tools:
 > 
 > ![AnimOffset panel](images/anim_offset_panel.gif)
 > 
->> ####New:
+>> #### New:
 >> 
->> Lives on Animaide panel but can be put on the animation views headers by going to the addon preferences:
+>> It is on a panel by default but can be put on the animation views headers by going to the addon preferences window:
 >>
 >> ![AnimOffset preferences](images/anim_offset_header_setting.jpg)
 >>
->> This is how the header looks:
+>> This is how the header looks like:
 >>
 >> ![AnimOffset header](images/anim_offset_header.jpg)
 >>
@@ -421,22 +425,23 @@ At the moment there are 15 different tools:
 >>- **Alt:**
     Let you move the entire range at once. By holding it down keeps the range manipulation alive.
 >
+> The status bar shows important information, including what the modifier keys do.
+> 
 > ![Anim Offset Status Bar](images/anim_offset_status_bar.gif)
 >
-> Now it shows important information on the status bar, including what the modifier keys do.
->
-> ![AnimOffset header in use](images/anim_offset_header_in_use.jpg)
->
 > When a mask has been created and the tools in on the header, a new pencil icon shows up in the Graph Editor.
-> When in use this pencil tool enter in to a mask edit mode that you can get out by using the "Escape" key or the
-> right click on your mouse.
+> This pencil activates a mask edit-mode that you can get out by using the "Escape" key, or your mouse
+> right click button.
+> 
+> ![AnimOffset header in use](images/anim_offset_header_in_use.jpg)
 
+> AnimOffset only works if the current frame is inside
+> the margins. For this reason, when the mask is created or
+> modified, the cursor will be position in the middle of the mask. 
+> 
 > ![Key outside margin](images/key_outside_margin.gif)
 > 
-> This tool only works if the current frame is inside
-> the margins. For this reason, when the mask is created or
-> modified, the cursor will be position in the middle of the mask. There is an option
-> in the preferences called "autokey outside margins", if selected , any time
+> There is an option in the preferences called "autokey outside margins", if selected , any time
 > the cursor is outside the margins while manipulating the object it will create a key.
 
 > ![Fast calculation setting](images/fast_calculation_setting.jpg)
@@ -450,7 +455,7 @@ At the moment there are 15 different tools:
 > 
 > ![Mask Blend Settings](images/anim_offset_mask_slope.gif)
 
->> ####New
+>> #### New
 >>
 >> Now **AnimOffst** works seamlessly with Blender's auto key:
 >>
@@ -462,7 +467,7 @@ At the moment there are 15 different tools:
 > 
 > You can find it on the **Animaide** menu in the Graph Editor.
 
-> ##KeyManager:
+> ## KeyManager:
 > ###
 > 
 > ![Key Manager](images/key_manager_panel.jpg)
@@ -474,14 +479,14 @@ At the moment there are 15 different tools:
 > - **Type**
 > - **Interpolation**
 
-> ###Move-Insert
+> ### Move-Insert
 > 
 > **Move:**
 > 
 > ![Move Keys](images/move_keys.gif)
 > 
 > Move keys in time by a specified amount. If some keys are selected just those will be affected. 
-> If non are selected the key under the cursor will.
+> If non are selected the key under the cursor will be affected.
 > 
 > **Insert:** 
 > 
@@ -491,22 +496,16 @@ At the moment there are 15 different tools:
 > betwee those. If non is selected frames will be inserted where the cursor is.
 > 
 
-> ###Type
+> ### Type
 > 
 > ![Key Type](images/key_type.gif)
 > 
-> Uses the colored Blender key types, and let you "assign", "select",
-"unselect" and "delete" them by type when selected.
+> Uses the colored Blender key types, and lets you "assign", "select",
+"unselect" and "delete" them by type.
 > 
-> Key types:
-> - Keyframe 
-> - Breakdown
-> - Jitter
-> - Extreme
-> 
-> It also incorporates a Blender option that lets you select the key type auto key will use.
+> It also incorporates a Blender option that lets you select the key type the auto-key will use.
 
-> ###Interpolation
+> ### Interpolation
 > 
 > ![Key interpolation](images/key_interpolation.gif)
 > 
@@ -533,6 +532,6 @@ At the moment there are 15 different tools:
 > 
 > - And another one that has all the options for the handles:
 > 
->  ![Key Manager header handles](images/key_manager_header_b.jpg)
+>   ![Key Manager header handles](images/key_manager_header_b.jpg)
 > 
->   You can find this one only on the Graph editor header
+>    You can find this one only on the Graph editor header
