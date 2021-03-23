@@ -2,7 +2,7 @@
 
 *CurveTools* - *AnimOffset* - *KeyManager*
 
-*Tested on Blender 2.9 and up. There is also a version of the addon for Blender 2.83*
+*Tested on Blender 2.9 and up. There is also an old version of the addon for Blender 2.83 (working on the update)*
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
 
@@ -92,7 +92,7 @@
 > 
 > <https://github.com/aresdevo/animaide/archive/master.zip>
 > 
-> For Blender 2.83 version:
+> Old version of the addon for Blender 2.83 version (working on the update):
 > 
 > <https://github.com/aresdevo/animaide/archive/LTE.zip>
 >
