@@ -535,3 +535,6 @@ At the moment there are 15 different tools:
 >   ![Key Manager header handles](images/key_manager_header_b.jpg)
 > 
 >    You can find this one only on the Graph editor header
+> 
+
+### Enjoy the addon :)
