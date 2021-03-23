@@ -91,7 +91,7 @@ def update_handle_type(self, context):
 
 
 def update_act_on(self, context):
-    support.set_handles_interp(context, act_on=self.act_on, interp=self.interp)
+    # support.set_handles_interp(context, act_on=self.act_on, interp=self.interp)
     support.set_handles_type(context, act_on=self.act_on, handle_type=self.handle_type, check_ui=False)
 
 

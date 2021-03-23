@@ -655,7 +655,7 @@ class ANIMAIDE_OT_smooth(Operator, ANIMAIDE_OT):
                     delta = 0
                 else:
                     delta = self.original_values[index]['y'] - smooth_y
-                k.co_ui.y = self.original_values[index]['y'] - delta * factor / 5
+                k.co_ui.y = self.original_values[index]['y'] - delta * factor
         # else:
         #     self.report({'INFO'}, 'Some selected keys needed for this tool')
 
@@ -991,7 +991,7 @@ class ANIMAIDE_OT_push_bookmark(Operator):
 
     def execute(self, context):
         preferences = context.preferences
-        pref = preferences.addons[utils.addon_name].preferences
+        pref = preferences.addons[prefe.addon_name].preferences
         animaide = context.scene.animaide
         tool = animaide.tool
         index = tool.bookmark_index
@@ -1028,7 +1028,7 @@ class ANIMAIDE_OT_get_ref_frame(Operator):
     def execute(self, context):
 
         preferences = context.preferences
-        pref = preferences.addons[utils.addon_name].preferences
+        pref = preferences.addons[prefe.addon_name].preferences
 
         animaide = context.scene.animaide
 

@@ -379,8 +379,8 @@ class ANIMAIDE_MT_tweak(Menu):
         blend_button(layout, 1, text="Match Right")
 
 
-class ANIMAIDE_MT_pie_menus(Menu):
-    bl_idname = 'ANIMAIDE_MT_pie_menus'
+class ANIMAIDE_MT_curve_tools_pie(Menu):
+    bl_idname = 'ANIMAIDE_MT_curve_tools_pie'
     bl_label = "Pie Curve Tools"
 
     @classmethod
@@ -390,8 +390,8 @@ class ANIMAIDE_MT_pie_menus(Menu):
     def draw(self, context):
         layout = self.layout
 
-        layout.operator('wm.call_menu_pie', text="Group A").name = 'ANIMAIDE_MT_pie_tools_a'
-        layout.operator('wm.call_menu_pie', text="Group B").name = 'ANIMAIDE_MT_pie_tools_b'
+        layout.operator('wm.call_menu_pie', text="Group A").name = 'ANIMAIDE_MT_pie_curve_tools_a'
+        layout.operator('wm.call_menu_pie', text="Group B").name = 'ANIMAIDE_MT_pie_curve_tools_b'
 
 
 class ANIMAIDE_MT_pie_curve_tools_a(Menu):
@@ -467,5 +467,5 @@ classes = (
     ANIMAIDE_MT_pie_curve_tools_3d,
     ANIMAIDE_MT_curve_tools,
     ANIMAIDE_MT_tweak,
-    ANIMAIDE_MT_pie_menus
+    ANIMAIDE_MT_curve_tools_pie
 )

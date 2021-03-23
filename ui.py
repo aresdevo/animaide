@@ -57,9 +57,11 @@ class ANIMAIDE_PT_info:
         layout.label(text='Because of that Blender')
         layout.label(text='will remember them after')
         layout.label(text='you quit.')
-        layout.label(text='-This info panel can be')
-        layout.label(text='removed in the addon')
-        layout.label(text='preferences')
+        layout.label(text='-This info panel can also')
+        layout.label(text='be removed in the addon')
+        layout.label(text='preferences.')
+        layout.label(text='Find more information at:')
+        layout.label(text='https://github.com/aresdevo/animaide')
 
 
 class ANIMAIDE_PT_info_3d(Panel, ANIMAIDE_PT_info):
@@ -90,7 +92,7 @@ class ANIMAIDE_MT_operators(Menu):
 
         if context.area.type != 'DOPESHEET_EDITOR':
             if context.area.type == 'GRAPH_EDITOR':
-                layout.menu('ANIMAIDE_MT_pie_menus')
+                layout.menu('ANIMAIDE_MT_curve_tools_pie')
 
             if context.area.type == 'VIEW_3D':
                 layout.menu('ANIMAIDE_MT_curve_tools', text='On Frame Curve Tools')

@@ -303,10 +303,9 @@ def valid_fcurve(context, obj, fcurve, check_ui=True):
     if not prop:
         return False
 
-    if check_ui:
-        if context.area.type == 'GRAPH_EDITOR':
-            if context.space_data.use_only_selected_curves_handles and not fcurve.select:
-                return False
+    if check_ui and context.area.type == 'GRAPH_EDITOR':
+        if context.space_data.use_only_selected_curves_handles and not fcurve.select:
+            return False
 
         # if context.area.type != 'VIEW_3D':
         if fcurve.lock or fcurve.hide:

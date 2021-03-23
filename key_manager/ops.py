@@ -173,6 +173,12 @@ class AAT_OT_set_handles_type(Operator):
         default=True
     )
 
+    interp: EnumProperty(
+        items=props.interp_t,
+        name="Interpolation",
+        default='BEZIER'
+    )
+
     handle_type: EnumProperty(
         items=props.handle_type_t,
         name="Handle Type",
@@ -196,6 +202,7 @@ class AAT_OT_set_handles_type(Operator):
     def execute(self, context):
 
         support.set_handles_type(context, act_on=self.act_on, handle_type=self.handle_type, check_ui=self.check_ui)
+        support.set_handles_interp(context, act_on=self.act_on, interp=self.interp)
 
         return {'FINISHED'}
 

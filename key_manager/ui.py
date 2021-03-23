@@ -264,7 +264,13 @@ class ANIMAIDE_PT_key_interp:
 
             key_tweak = context.scene.animaide.key_tweak
             row.prop(key_tweak, 'handle_type', icon_only=True)
-            row.prop(key_tweak, 'act_on', text='', icon='CHECKMARK', icon_only=True)
+            # row.prop(key_tweak, 'act_on', text='', icon='CHECKMARK', icon_only=True)
+            op = row.operator('anim.aide_set_handles_type',
+                              text='',
+                              emboss=True, icon='CHECKMARK')
+            op.handle_type = key_tweak.handle_type
+            op.act_on = 'ALL'
+            op.check_ui = False
 
             subrow = layout.row(align=True)
 
