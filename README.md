@@ -2,15 +2,17 @@
 
 *CurveTools* - *AnimOffset* - *KeyManager**
 
-> ![Shortcut Troubleshoot](images/animaide.jpg)
->
-> In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
-> with the vertices on a geometry. That is where **AnimAide** comes in.
->
-> There are some Blender options to manipulate keys, but **AnimAide** open the door to new possibilities. Not only has a
-> wider range of tools but when working with a group of f-curves each one will have their local space.
->
-> This kind of tools is standard in the game and film industry.
+ ![Shortcut Troubleshoot](images/animaide.jpg)
+
+ In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
+ with the vertices on a geometry. That is where **AnimAide** comes in.
+
+ There are some Blender options to manipulate keys, but **AnimAide** open the door to new possibilities. Not only has a
+ wider range of tools but when working with a group of f-curves each one will have their local space.
+
+ This kind of tools is standard in the game and film industry.
+
+##
 
 > ### New on this version:
 >
