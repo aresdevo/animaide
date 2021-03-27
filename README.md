@@ -2,7 +2,7 @@
 
 *CurveTools* - *AnimOffset* - *KeyManager*
 
-*Tested on Blender 2.9 and up. There is also a version of the addon for Blender 2.83*
+*Tested on Blender 2.9 and up. There is also a version of the addon for Blender 2.83* (based on an older release of the addon)
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
 
@@ -10,7 +10,7 @@
  with the vertices on a geometry. That is where **AnimAide** comes in.
 
  There are some Blender options to manipulate keys, but **AnimAide** open the door to new possibilities. Not only has a
- wider range of tools but when working with a group of f-curves each one will have their local space.
+ wider range of tools but when working with a group of f-curves each one will act on their local space.
 
  This kind of tools is standard in the game and film industry.
 
@@ -34,7 +34,7 @@
 > - Tools are now grouped in the "expand" mode for ease of use.
 > - Overshoot option button is now available next to the curveTool.
 > - If keys are not selected the tools will act on the keys under the cursor.
-> - If auto-key is on most tools will add a keyframe if no key under the cursor and no key is selected.
+> - If auto-key is on, most tools will add a keyframe if no key is under the cursor and no key is selected.
 > - Time-Offset works with cycles now.
 >
 > **AnimOffset:**
@@ -92,7 +92,7 @@
 > 
 > <https://github.com/aresdevo/animaide/archive/master.zip>
 > 
-> For Blender 2.83 version:
+> For Blender 2.83 version. It is an older version of the addon (working on an update):
 > 
 > <https://github.com/aresdevo/animaide/archive/LTE.zip>
 >
