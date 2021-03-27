@@ -175,10 +175,10 @@ class AnimAideTool(PropertyGroup):
                                max=2,
                                description='Change noise scale')
 
-    slope: FloatProperty(default=1.0,
-                         min=1.0,
-                         max=10.0,
-                         description='Determine how sharp the trasition is')
+    # slope: FloatProperty(default=1.0,
+    #                      min=1.0,
+    #                      max=10.0,
+    #                      description='Determine how sharp the trasition is')
 
     overshoot: BoolProperty(update=update_overshoot,
                             name='Overshoot',

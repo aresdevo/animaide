@@ -28,7 +28,7 @@ import math
 from . import support
 from .. import utils, prefe
 # from .utils import curve, key
-from bpy.props import StringProperty, FloatProperty
+from bpy.props import StringProperty, FloatProperty, EnumProperty
 from bpy.types import Operator
 
 
@@ -39,10 +39,16 @@ class ANIMAIDE_OT:
     """Slider Operators Preset"""
     bl_options = {'UNDO_GROUPED'}
 
-    slope: FloatProperty(default=2.0)
-    factor: FloatProperty(default=0.0)
-    # slot_index: IntProperty(default=-1)
+    # slope: FloatProperty(default=2.0)
+    factor: FloatProperty(default=1.0)
     op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
+    op_context: EnumProperty(
+        items=[('INVOKE_DEFAULT', 'Slider', 'Execute as slider', '', 1),
+               ('EXEC_DEFAULT', 'Steps', 'Execute as steps', '', 2)],
+        name="Mode",
+        options={'SKIP_SAVE'},
+        default='INVOKE_DEFAULT'
+    )
 
     tool_type = None
 
@@ -179,7 +185,7 @@ class ANIMAIDE_OT:
 
         tool.factor = 0.0
         tool.factor_overshoot = 0.0
-        self.slope = tool.slope
+        # self.slope = tool.slope
         self.phase = tool.noise_phase
 
         # self.init_mouse_x = event.mouse_x

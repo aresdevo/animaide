@@ -41,8 +41,8 @@ def step_button(layout, tool, factor, icon='',
     step = layout.operator(**buttons)
 
     step.factor = factor
-    if getattr(step, 'slope', None):
-        step.slope = tool.slope
+    # if getattr(step, 'slope', None):
+    #     step.slope = tool.slope
     if getattr(step, 'phase', None):
         step.phase = tool.noise_phase
 
