@@ -41,7 +41,7 @@ class ANIMAIDE_OT:
 
     # slope: FloatProperty(default=2.0)
     factor: FloatProperty(default=1.0)
-    op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
+    # op_context: StringProperty(default='INVOKE_DEFAULT', options={'SKIP_SAVE'})
     op_context: EnumProperty(
         items=[('INVOKE_DEFAULT', 'Slider', 'Execute as slider', '', 1),
                ('EXEC_DEFAULT', 'Steps', 'Execute as steps', '', 2)],
