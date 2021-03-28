@@ -53,7 +53,7 @@
 >       - *Move* keys in time by a specified amount. If some keys are selected just those will be affected.
 > If non are selected the key under the cursor will.
 >       - *Inset* frames between keys by a specified amount. If some keys are selected, frames will be inserted
-> betwee those. If non is selected frames will be inserted where the cursor is.
+> between those. If non is selected frames will be inserted where the cursor is.
 >   - **Type:**
 >       - Uses the colored Blender key types (Keyframe, Breakdown, Jitter, Extreme), and lets you "assign", "select",
 > "unselect" and "delete" them by type.
@@ -75,7 +75,7 @@
 >   ![Local Space](images/shortcut_troubleshoot.gif)
 >
 > 
-> - Because of the introduction of settings in the addon prefernce window, I've added a new (kind of ugly) "info panel":
+> - Because of the introduction of settings in the addon preference window, I've added a new (kind of ugly) "info panel":
 >
 >   ![Info Panel](images/info.jpg)
 > 
