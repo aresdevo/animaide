@@ -20,6 +20,7 @@ Created by Ares Deveaux
 '''
 
 import bpy
+import blf
 
 # from curve_tools.support import get_items
 
@@ -157,3 +158,47 @@ def get_items(context, any_mode=False):
         return selected
     else:
         return bpy.data.objects
+
+
+text_handle = None
+dopesheet_color = None
+graph_color = None
+nla_color = None
+
+
+def add_message(message):
+
+    global text_handle, dopesheet_color, graph_color, nla_color
+    dopesheet_color = bpy.context.preferences.themes[0].dopesheet_editor.space.header[:]
+    graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
+    nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
+    warning_color = (0.5, 0.3, 0.2, 1)
+
+    bpy.context.preferences.use_preferences_save = False
+
+    def draw_text_callback(info):
+        font_id = 0
+        # draw some text
+        bpy.context.preferences.themes[0].dopesheet_editor.space.header = warning_color
+        bpy.context.preferences.themes[0].nla_editor.space.header = warning_color
+        bpy.context.preferences.themes[0].graph_editor.space.header = warning_color
+        blf.position(font_id, 5, 80, 0)
+        blf.size(font_id, 30, 72)
+        blf.color(font_id, 1, 1, 1, .5)
+        blf.draw(font_id, info)
+
+    text_handle = bpy.types.SpaceView3D.draw_handler_add(
+        draw_text_callback, (message,),
+        'WINDOW', 'POST_PIXEL')
+
+
+def remove_message():
+    bpy.context.preferences.use_preferences_save = True
+    bpy.types.SpaceView3D.draw_handler_remove(text_handle, 'WINDOW')
+    if dopesheet_color is not None:
+        bpy.context.preferences.themes[0].dopesheet_editor.space.header = dopesheet_color
+    if graph_color is not None:
+        bpy.context.preferences.themes[0].nla_editor.space.header = graph_color
+    if nla_color is not None:
+        bpy.context.preferences.themes[0].graph_editor.space.header = nla_color
+    print('message removed')

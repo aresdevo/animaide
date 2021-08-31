@@ -20,6 +20,7 @@ Created by Ares Deveaux
 '''
 
 import bpy
+from .. import utils
 
 from . import support
 # from .utils import curve, key
@@ -79,6 +80,7 @@ class ANIMAIDE_OT_activate_anim_offset(Operator):
 
     bl_idname = "anim.aide_activate_anim_offset"
     bl_label = "AnimOffset"
+    message = "AnimOffset Active"
 
     # bl_options = {'UNDO_GROUPED'}
 
@@ -98,6 +100,14 @@ class ANIMAIDE_OT_activate_anim_offset(Operator):
 
         if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
+
+        # anim_offset_info = bpy.types.SpaceView3D.draw_handler_add(
+        #     utils.info_text,
+        #     (self, context, self.bl_label),
+        #     'WINDOW',
+        #     'POST_PIXEL')
+
+        utils.add_message(self.message)
 
         # support.remove_mask(context)
 
@@ -126,6 +136,8 @@ class ANIMAIDE_OT_deactivate_anim_offset(Operator):
 
         if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
+
+        utils.remove_message()
 
         scene = context.scene
         anim_offset = scene.animaide.anim_offset
@@ -163,10 +175,10 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
         margin = None
         blend = None
 
-        if side is 'Left':
+        if side == 'Left':
             blend = context.scene.frame_preview_start
             margin = context.scene.frame_start
-        elif side is 'Right':
+        elif side == 'Right':
             blend = context.scene.frame_preview_end
             margin = context.scene.frame_end
 
@@ -175,9 +187,9 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
 
         if margin == blend:
             return margin_info
-        elif side is 'Left':
+        elif side == 'Left':
             return margin_info + blend_info
-        elif side is 'Right':
+        elif side == 'Right':
             return blend_info + margin_info
 
     def finish_mask(self, context):

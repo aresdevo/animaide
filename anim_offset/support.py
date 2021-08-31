@@ -21,6 +21,7 @@ Created by Ares Deveaux
 
 import bpy
 import os
+import mathutils
 
 # from utils.key import global_values
 from .. import utils, prefe
@@ -44,10 +45,16 @@ def magnet_handlers(scene):
 
     external_op = context.active_operator
 
-    if context.scene.tool_settings.use_keyframe_insert_auto:
-        remove_mask(context)
-        reset_timeline_mask(context)
+    if context.scene.tool_settings.use_keyframe_insert_auto or \
+            (context.mode != "OBJECT" and context.mode != "POSE"):
+
+        anim_offset = scene.animaide.anim_offset
+        if anim_offset.mask_in_use:
+            remove_mask(context)
+            reset_timeline_mask(context)
+
         bpy.app.handlers.depsgraph_update_post.remove(magnet_handlers)
+        utils.remove_message()
         return
 
     animaide = context.scene.animaide
@@ -165,7 +172,10 @@ def magnet(context, obj, fcurve):
         else:
             factor = 0
 
-        k.co_ui.y = k.co_ui.y + (delta_y * factor)
+        # new_trans = obj.matrix @
+        # mathutils.
+
+        # k.co_ui.y = k.co_ui.y + (delta_y * factor)
 
     fcurve.update()
 
@@ -231,7 +241,7 @@ def add_blends():
     set_animaide_action()
     blends_curve = add_animaide_fcurve(action_group='Magnet')
     keys = blends_curve.keyframe_points
-    if len(keys) is 0:
+    if len(keys) == 0:
         keys.add(4)
 
     blends_curve.lock = True

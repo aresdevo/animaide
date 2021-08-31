@@ -24,7 +24,7 @@ bl_info = {
     "name": "AnimAide",
     "description": "Helpful tools to manipulate keys on f-curves",
     "author": "Ares Deveaux",
-    "version": (1, 0, 3),
+    "version": (1, 0, 31),
     "blender": (2, 92, 0),
     "location": "Graph Editor - Dope Sheet - Timeline - 3D View - sidebar and menu bar",
     "warning": "This addon is still in development.",
@@ -34,7 +34,8 @@ bl_info = {
 }
 
 import bpy
-from . import ui, curve_tools, anim_offset, key_manager, prefe
+import atexit
+from . import ui, curve_tools, anim_offset, key_manager, prefe, utils
 from bpy.props import BoolProperty, EnumProperty, PointerProperty, CollectionProperty, StringProperty
 from bpy.types import AddonPreferences, PropertyGroup, Operator
 
@@ -69,6 +70,7 @@ def register():
     pref = preferences.addons[prefe.addon_name].preferences
 
     # bpy.types.TIME_MT_editor_menus.append(curve_tools.ui.draw_bookmarks)
+
     bpy.types.DOPESHEET_MT_editor_menus.append(ui.draw_menu)
     bpy.types.GRAPH_MT_editor_menus.append(ui.draw_menu)
     bpy.types.VIEW3D_MT_editor_menus.append(ui.draw_menu)
@@ -86,17 +88,23 @@ def register():
     if pref.anim_offset_ui == 'HEADERS':
         prefe.add_anim_offset_header()
 
-    if pref.info_panel:
-        for cls in ui.info_classes:
-            bpy.utils.register_class(cls)
+    # if pref.info_panel:
+    #     for cls in ui.info_classes:
+    #         bpy.utils.register_class(cls)
+
+    # atexit.register(utils.remove_message)
 
 
 def unregister():
 
+    utils.remove_message()
+
     preferences = bpy.context.preferences
+
     pref = preferences.addons[prefe.addon_name].preferences
 
     # bpy.types.TIME_MT_editor_menus.remove(curve_tools.ui.draw_bookmarks)
+
     bpy.types.DOPESHEET_MT_editor_menus.remove(ui.draw_menu)
     bpy.types.GRAPH_MT_editor_menus.remove(ui.draw_menu)
     bpy.types.VIEW3D_MT_editor_menus.remove(ui.draw_menu)
@@ -114,9 +122,9 @@ def unregister():
     if pref.anim_offset_ui == 'HEADERS':
         prefe.remove_anim_offset_header()
 
-    if pref.info_panel:
-        for cls in reversed(ui.info_classes):
-            bpy.utils.unregister_class(cls)
+    # if pref.info_panel:
+    #     for cls in reversed(ui.info_classes):
+    #         bpy.utils.unregister_class(cls)
 
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

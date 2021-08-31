@@ -134,13 +134,13 @@ class Preferences(AddonPreferences):
                     side=side)
         return
 
-    def info_panel_update(self, context):
-        if self.info_panel:
-            for cls in ui.info_classes:
-                bpy.utils.register_class(cls)
-        else:
-            for cls in reversed(ui.info_classes):
-                bpy.utils.unregister_class(cls)
+    # def info_panel_update(self, context):
+    #     if self.info_panel:
+    #         for cls in ui.info_classes:
+    #             bpy.utils.register_class(cls)
+    #     else:
+    #         for cls in reversed(ui.info_classes):
+    #             bpy.utils.unregister_class(cls)
 
     key_manager_ui: EnumProperty(
         items=[('PANEL', 'Panel', 'Choose if you want "Key Manager" on a panel', '', 1),
@@ -167,8 +167,8 @@ class Preferences(AddonPreferences):
 
     ao_fast_offset: BoolProperty(default=False)
 
-    info_panel: BoolProperty(default=True,
-                             update=info_panel_update)
+    # info_panel: BoolProperty(default=True,
+    #                          update=info_panel_update)
 
     def draw(self, context):
         layout = self.layout
@@ -182,8 +182,8 @@ class Preferences(AddonPreferences):
         col.prop(self, 'ct_use_markers', text='Use markers', toggle=False)
         col = layout.column(heading='Anim Offset')
         col.prop(self, 'ao_fast_offset', text='Fast calculation', toggle=False)
-        col = layout.column(heading='Info')
-        col.prop(self, 'info_panel', text='Panel', toggle=False)
+        # col = layout.column(heading='Info')
+        # col.prop(self, 'info_panel', text='Panel', toggle=False)
 
 
 classes = (

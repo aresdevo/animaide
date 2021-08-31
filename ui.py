@@ -23,60 +23,60 @@ from bpy.types import Panel, Menu
 from .curve_tools.ui import blend_button
 
 
-class ANIMAIDE_PT_help:
-    bl_label = "Help"
-    bl_region_type = 'UI'
-    bl_category = 'AnimAide'
-    bl_options = {'DEFAULT_CLOSED'}
-
-    def draw(self, context):
-
-        layout = self.layout
-
-        row = layout.row(align=True)
-
-        row.operator('anim.aide_manual', text='', icon='HELP', emboss=False)
-        row.operator('anim.aide_demo', text='', icon='FILE_MOVIE', emboss=False)
-
-
-class ANIMAIDE_PT_info:
-    bl_label = "Info"
-    bl_region_type = 'UI'
-    bl_category = 'AnimAide'
-
-    def draw(self, context):
-
-        layout = self.layout
-
-        layout.label(text='-Anim-offset and Key-manager')
-        layout.label(text='can now be put on the headers')
-        layout.label(text='instead of the panels.')
-        layout.label(text='-that and other preferences are')
-        layout.label(text='now located in the addon tab')
-        layout.label(text='in Blender Preferences.')
-        layout.label(text='Because of that Blender')
-        layout.label(text='will remember them after')
-        layout.label(text='you quit.')
-        layout.label(text='-This info panel can also')
-        layout.label(text='be removed in the addon')
-        layout.label(text='preferences.')
-        layout.label(text='Find more information at:')
-        layout.label(text='https://github.com/aresdevo/animaide')
+# class ANIMAIDE_PT_help:
+#     bl_label = "Help"
+#     bl_region_type = 'UI'
+#     bl_category = 'AnimAide'
+#     bl_options = {'DEFAULT_CLOSED'}
+#
+#     def draw(self, context):
+#
+#         layout = self.layout
+#
+#         row = layout.row(align=True)
+#
+#         row.operator('anim.aide_manual', text='', icon='HELP', emboss=False)
+#         row.operator('anim.aide_demo', text='', icon='FILE_MOVIE', emboss=False)
 
 
-class ANIMAIDE_PT_info_3d(Panel, ANIMAIDE_PT_info):
-    bl_idname = 'ANIMAIDE_PT_info_3d'
-    bl_space_type = 'VIEW_3D'
+# class ANIMAIDE_PT_info:
+#     bl_label = "Info"
+#     bl_region_type = 'UI'
+#     bl_category = 'AnimAide'
+#
+#     def draw(self, context):
+#
+#         layout = self.layout
+#
+#         layout.label(text='-Anim-offset and Key-manager')
+#         layout.label(text='can now be put on the headers')
+#         layout.label(text='instead of the panels.')
+#         layout.label(text='-that and other preferences are')
+#         layout.label(text='now located in the addon tab')
+#         layout.label(text='in Blender Preferences.')
+#         layout.label(text='Because of that Blender')
+#         layout.label(text='will remember them after')
+#         layout.label(text='you quit.')
+#         layout.label(text='-This info panel can also')
+#         layout.label(text='be removed in the addon')
+#         layout.label(text='preferences.')
+#         layout.label(text='Find more information at:')
+#         layout.label(text='https://github.com/aresdevo/animaide')
 
 
-class ANIMAIDE_PT_info_ge(Panel, ANIMAIDE_PT_info):
-    bl_idname = 'ANIMAIDE_PT_info_ge'
-    bl_space_type = 'GRAPH_EDITOR'
-
-
-class ANIMAIDE_PT_info_de(Panel, ANIMAIDE_PT_info):
-    bl_idname = 'ANIMAIDE_PT_info_de'
-    bl_space_type = 'DOPESHEET_EDITOR'
+# class ANIMAIDE_PT_info_3d(Panel, ANIMAIDE_PT_info):
+#     bl_idname = 'ANIMAIDE_PT_info_3d'
+#     bl_space_type = 'VIEW_3D'
+#
+#
+# class ANIMAIDE_PT_info_ge(Panel, ANIMAIDE_PT_info):
+#     bl_idname = 'ANIMAIDE_PT_info_ge'
+#     bl_space_type = 'GRAPH_EDITOR'
+#
+#
+# class ANIMAIDE_PT_info_de(Panel, ANIMAIDE_PT_info):
+#     bl_idname = 'ANIMAIDE_PT_info_de'
+#     bl_space_type = 'DOPESHEET_EDITOR'
 
 
 class ANIMAIDE_MT_operators(Menu):
@@ -110,16 +110,17 @@ class ANIMAIDE_MT_operators(Menu):
 
 
 def draw_menu(self, context):
-    layout = self.layout
-    layout.menu('ANIMAIDE_MT_menu_operators')
+    if context.mode == 'OBJECT' or context.mode == 'POSE':
+        layout = self.layout
+        layout.menu('ANIMAIDE_MT_menu_operators')
 
 
 menu_classes = (
     ANIMAIDE_MT_operators,
 )
 
-info_classes = (
-    ANIMAIDE_PT_info_3d,
-    ANIMAIDE_PT_info_ge,
-    ANIMAIDE_PT_info_de,
-)
+# info_classes = (
+#     ANIMAIDE_PT_info_3d,
+#     ANIMAIDE_PT_info_ge,
+#     ANIMAIDE_PT_info_de,
+# )
