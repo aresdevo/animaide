@@ -161,6 +161,7 @@ def get_items(context, any_mode=False):
 
 
 text_handle = None
+pref_autosave = None
 dopesheet_color = None
 graph_color = None
 nla_color = None
@@ -168,7 +169,8 @@ nla_color = None
 
 def add_message(message):
 
-    global text_handle, dopesheet_color, graph_color, nla_color
+    global text_handle, dopesheet_color, graph_color, nla_color, pref_autosave
+    pref_autosave = bpy.context.preferences.use_preferences_save
     dopesheet_color = bpy.context.preferences.themes[0].dopesheet_editor.space.header[:]
     graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
     nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
@@ -193,7 +195,7 @@ def add_message(message):
 
 
 def remove_message():
-    bpy.context.preferences.use_preferences_save = True
+    bpy.context.preferences.use_preferences_save = pref_autosave
     bpy.types.SpaceView3D.draw_handler_remove(text_handle, 'WINDOW')
     if dopesheet_color is not None:
         bpy.context.preferences.themes[0].dopesheet_editor.space.header = dopesheet_color
