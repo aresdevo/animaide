@@ -21,7 +21,6 @@ Created by Ares Deveaux
 
 import bpy
 import os
-import mathutils
 
 # from utils.key import global_values
 from .. import utils, prefe
@@ -172,10 +171,7 @@ def magnet(context, obj, fcurve):
         else:
             factor = 0
 
-        # new_trans = obj.matrix @
-        # mathutils.
-
-        # k.co_ui.y = k.co_ui.y + (delta_y * factor)
+        k.co_ui.y = k.co_ui.y + (delta_y * factor)
 
     fcurve.update()
 
