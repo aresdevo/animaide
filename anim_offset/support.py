@@ -21,16 +21,20 @@ Created by Ares Deveaux
 
 import bpy
 import os
+import mathutils as mu
+import math
 
 # from utils.key import global_values
 from .. import utils, prefe
 
 # Anim_transform global variables
 
-user_preview_range = {}
-user_scene_range = {}
+# user_preview_range = {}
+# user_scene_range = {}
 global_values = {}
 last_op = None
+current_copy = [None]
+frozen_current = None
 
 # ---------- Main Tool ------------
 
@@ -41,10 +45,11 @@ def magnet_handlers(scene):
     global last_op
 
     context = bpy.context
+    # scene = context.scene
 
     external_op = context.active_operator
 
-    if context.scene.tool_settings.use_keyframe_insert_auto or \
+    if scene.tool_settings.use_keyframe_insert_auto or \
             (context.mode != "OBJECT" and context.mode != "POSE"):
 
         anim_offset = scene.animaide.anim_offset
@@ -56,14 +61,14 @@ def magnet_handlers(scene):
         utils.remove_message()
         return
 
-    animaide = context.scene.animaide
+    animaide = scene.animaide
     anim_offset = animaide.anim_offset
 
     preferences = context.preferences
     pref = preferences.addons[prefe.addon_name].preferences
 
-    if context.scene.animaide.anim_offset.mask_in_use:
-        cur_frame = context.scene.frame_current
+    if scene.animaide.anim_offset.mask_in_use:
+        cur_frame = scene.frame_current
         if cur_frame < scene.frame_start or cur_frame > scene.frame_end:
             if anim_offset.insert_outside_keys:
                 add_keys(context)
@@ -84,8 +89,10 @@ def magnet_handlers(scene):
 
     for obj in selected_objects:
         action = getattr(obj.animation_data, 'action', None)
+        fcurves = getattr(action, 'fcurves', list())
 
-        for fcurve in getattr(action, 'fcurves', list()):
+        for fcurve in fcurves:
+
             # ######## Not sure we need this ############
             # if obj.type == 'ARMATURE':
             #     split_data_path = fcurve.data_path.split(sep='"')
@@ -128,7 +135,7 @@ def add_keys(context):
             # else:
             # bpy.ops.anim.keyframe_insert_menu(type='Available')
 
-            keys = fcurve.keyframe_points
+            kfps = fcurve.keyframe_points
             cur_index = utils.key.on_current_frame(fcurve)
             delta_y = get_delta(context, obj, fcurve)
 
@@ -136,16 +143,18 @@ def add_keys(context):
                 cur_frame = context.scene.frame_current
                 y = fcurve.evaluate(cur_frame) + delta_y
                 # keys.insert(cur_frame, y)
-                utils.key.insert_key(keys, cur_frame, y)
+                utils.key.insert_key(kfps, cur_frame, y)
                 # utils.key.add_key(keys, x, y, select=False)
             else:
-                key = keys[cur_index]
-                key.co_ui.y += delta_y
+                kfp = kfps[cur_index]
+                kfp.co_ui.y += delta_y
 
 
 def magnet(context, obj, fcurve):
     """Modify all the keys in every fcurve of the current object proportionally to the change in transformation
     on the current frame by the user """
+
+    global current_copy, frozen_current
 
     scene = context.scene
 
@@ -158,30 +167,168 @@ def magnet(context, obj, fcurve):
     blends_action = bpy.data.actions.get('animaide')
     blends_curves = getattr(blends_action, 'fcurves', None)
 
-    delta_y = get_delta(context, obj, fcurve)
+    # delta = get_delta(context, obj, fcurve)
 
-    for k in fcurve.keyframe_points:
+    # frames = global_values[obj.name]['frames']
+    cur_frame = context.scene.frame_current
+    current_matrix = obj.matrix_local
+
+    if cur_frame != current_copy[0]:
+        frozen_current = current_matrix.to_4x4()
+        modify_global(obj)
+
+    current_copy = [cur_frame]
+
+    if current_matrix != frozen_current:
+        use_matrix = True
+    else:
+        use_matrix = False
+
+    # for frame in frames:
+    #     if frame > cur_frame:
+    #         frame_matrix = global_values[obj.name]["kfp_matrix"][frame]
+    #         matrix = obj.matrix_local @ frozen_current.inverted() @ frame_matrix
+
+    for kfp in fcurve.keyframe_points:
+
+        # if kfp.co.x > cur_frame:
+
+        if use_matrix:
+            frame_matrix = global_values[obj.name]["kfp_matrix"][kfp.co.x]
+            # matrix = current_matrix @ frozen_current.inverted() @ frame_matrix
+            matrix = None
+        else:
+            matrix = None
+
+        delta = get_delta(context, obj, fcurve, kfp.co.x, matrix)
+
+        print(f'delta: {delta}')
+
         if not context.scene.animaide.anim_offset.mask_in_use:
             factor = 1
-        elif scene.frame_start <= k.co.x <= scene.frame_end:
+        elif scene.frame_start <= kfp.co.x <= scene.frame_end:
             factor = 1
         elif blends_curves is not None and len(blends_curves) > 0:
             blends_curve = blends_curves[0]
-            factor = blends_curve.evaluate(k.co.x)
+            factor = blends_curve.evaluate(kfp.co.x)
         else:
             factor = 0
 
-        k.co_ui.y = k.co_ui.y + (delta_y * factor)
+        kfp.co_ui.y = kfp.co_ui.y + (delta * factor)
+        # print(f'kfp.co.y: {kfp.co.y}')
 
     fcurve.update()
 
     return
 
 
-def get_delta(context, obj, fcurve):
+def get_frame_vector(kind, frame, channels):
+    func = getattr(mu, kind)
+    values = []
+    if kind == "Vector" or kind == "Euler":
+        n = 3
+    elif kind == "Quaternion":
+        n = 4
+    else:
+        n = 0
+
+    for n in range(n):
+        # values.append(channels[n].keyframe_points[time].co.y)
+        values.append(channels[n].evaluate(frame))
+
+    return func(values)
+
+
+def get_frame_matrix(frame, channels):
+
+    posx = 0
+    posy = 0
+    posz = 0
+    rotx = 0
+    roty = 0
+    rotz = 0
+    rotw = 0
+    scax = 0
+    scay = 0
+    scaz = 0
+
+    for c in channels:
+        if c.data_path == 'location':
+            # vec = matrix.to_translation()[c.array_index]
+            if c.array_index == 0:
+                # posx = vec
+                posx = c.evaluate(frame)
+            elif c.array_index == 1:
+                # posy = vec
+                posy = c.evaluate(frame)
+            elif c.array_index == 2:
+                # posz = vec
+                posz = c.evaluate(frame)
+
+        if c.data_path == 'rotation_euler':
+            # vec = matrix.to_euler()[c.array_index]
+            if c.array_index == 0:
+                # rotx = vec
+                rotx = c.evaluate(frame)
+            elif c.array_index == 1:
+                # roty = vec
+                roty = c.evaluate(frame)
+            elif c.array_index == 2:
+                # rotz = vec
+                rotz = c.evaluate(frame)
+
+        if c.data_path == 'rotation_quaternion':
+            # vec = matrix.to_quaternion()[c.array_index]
+            if c.array_index == 0:
+                # rotw = vec
+                rotw = c.evaluate(frame)
+            elif c.array_index == 1:
+                # rotx = vec
+                rotx = c.evaluate(frame)
+            elif c.array_index == 2:
+                # roty = vec
+                roty = c.evaluate(frame)
+            elif c.array_index == 3:
+                # rotz = vec
+                rotz = c.evaluate(frame)
+
+        if c.data_path == 'scale':
+            # vec = matrix.to_scale()[c.array_index]
+            if c.array_index == 0:
+                # scax = vec
+                scax = c.evaluate(frame)
+            elif c.array_index == 1:
+                # scay = vec
+                scay = c.evaluate(frame)
+            elif c.array_index == 2:
+                # scaz = vec
+                scaz = c.evaluate(frame)
+
+    # create a location matrix
+    mat_loc = mu.Matrix.Translation((posx, posy, posz))
+
+    # create an identitiy matrix
+    mat_scax = mu.Matrix.Scale(scax, 4, (1, 0, 0))
+    mat_scay = mu.Matrix.Scale(scay, 4, (0, 1, 0))
+    mat_scaz = mu.Matrix.Scale(scaz, 4, (0, 0, 1))
+
+    # create a rotation matrix
+    mat_rotx = mu.Matrix.Rotation(math.radians(rotx), 4, 'X')
+    mat_roty = mu.Matrix.Rotation(math.radians(roty), 4, 'Y')
+    mat_rotz = mu.Matrix.Rotation(math.radians(rotz), 4, 'Z')
+
+    # combine transformations
+    mat_rot = mat_rotz @ mat_roty @ mat_rotx
+    mat_sca = mat_scax @ mat_scay @ mat_scaz
+    mat_out = mat_loc @ mat_rot @ mat_sca
+
+    return mat_out
+
+
+def get_delta_old(context, obj, fcurve):
     """Determine the transformation change by the user of the current object"""
 
-    cur_frame = bpy.context.scene.frame_current
+    cur_frame = context.scene.frame_current
     curve_value = fcurve.evaluate(cur_frame)
 
     try:
@@ -197,6 +344,77 @@ def get_delta(context, obj, fcurve):
         return target - curve_value
     else:
         return 0
+
+
+def get_delta(context, obj, fcurve, frame, matrix):
+    """Determine the transformation change by the user of the current object"""
+
+    index = fcurve.array_index
+    data_path = fcurve.data_path
+    print(f'data_path: {data_path}')
+
+    cur_frame = context.scene.frame_current
+
+    if matrix:
+        if data_path == 'location':
+            prop = matrix.to_translation()[index]
+            # new_vector = vecs[0]
+        elif data_path == 'rotation_euler':
+            prop = matrix.to_euler()[index]
+            # new_vector = vecs[1].to_euler()
+        elif data_path == 'rotation_quaternion':
+            prop = matrix.to_quaternion()[index]
+        else:
+            prop = matrix.to_scale()
+        # if frame < cur_frame:
+        #     return 0
+    else:
+        try:
+            prop = obj.path_resolve(data_path)
+        except:
+            prop = None
+
+    # print(f'vector: {vector}')
+
+    if prop:
+        curve_value = fcurve.evaluate(cur_frame)
+        try:
+            target = prop[index]
+        except TypeError:
+            target = prop
+        return target - curve_value
+    else:
+        return 0
+
+
+def get_globals(context):
+    global global_values
+    selected_objects = context.selected_objects
+    for obj in selected_objects:
+        action = getattr(obj.animation_data, 'action', None)
+        fcurves = getattr(action, 'fcurves', list())
+        channels = action.groups['Object Transforms'].channels
+        frames = utils.key.frame_summary(fcurves)
+
+        mat = {}
+        for fr in frames:
+            mat[fr] = get_frame_matrix(fr, channels).to_4x4()
+
+        data = {"kfp_matrix": mat, "frames": frames}
+        global_values[obj.name] = data
+    print(f'global_values: {global_values}')
+
+
+def modify_global(obj, start=None):
+    global global_values
+    action = getattr(obj.animation_data, 'action', None)
+    channels = action.groups['Object Transforms'].channels
+    frames = global_values[obj.name]['frames']
+
+    for fr in frames:
+        if start and fr > start:
+            continue
+        global_values[obj.name]['kfp_matrix'][fr] = get_frame_matrix(fr, channels).to_4x4()
 
 
 # ----------- Mask -----------

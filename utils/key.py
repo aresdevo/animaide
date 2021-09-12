@@ -77,6 +77,16 @@ def deselect_keys(fcurve):
         key.select_right_handle = False
 
 
+def frame_summary(fcurves):
+    # set(int(kfp.co.x) for fc in fcurves for kfp in fc.keyframe_points)
+    keys = []
+    for fc in fcurves:
+        for kfp in fc.keyframe_points:
+            if kfp.co.x not in keys:
+                keys.append(kfp.co.x)
+    return keys
+
+
 def some_selected_key(context, obj):
     fcurves = utils.curve.valid_anim(obj)
 

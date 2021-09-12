@@ -81,6 +81,7 @@ class ANIMAIDE_OT_activate_anim_offset(Operator):
     bl_idname = "anim.aide_activate_anim_offset"
     bl_label = "AnimOffset"
     message = "AnimOffset Active"
+    # matrix = None
 
     # bl_options = {'UNDO_GROUPED'}
 
@@ -90,13 +91,13 @@ class ANIMAIDE_OT_activate_anim_offset(Operator):
 
     def execute(self, context):
 
-        scene = context.scene
-        anim_offset = scene.animaide.anim_offset
-
-        anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
-        support.store_user_timeline_ranges(context)
-
-        scene.tool_settings.use_keyframe_insert_auto = False
+        # scene = context.scene
+        # anim_offset = scene.animaide.anim_offset
+        #
+        # anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
+        # support.store_user_timeline_ranges(context)
+        #
+        # scene.tool_settings.use_keyframe_insert_auto = False
 
         if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
@@ -107,17 +108,35 @@ class ANIMAIDE_OT_activate_anim_offset(Operator):
         #     'WINDOW',
         #     'POST_PIXEL')
 
-        utils.add_message(self.message)
+        # utils.add_message(self.message)
 
         # support.remove_mask(context)
 
-        context.area.tag_redraw()
+        # context.area.tag_redraw()
         # bpy.ops.wm.redraw_timer()
-        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        # bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
         # bpy.data.window_managers['WinMan'].windows.update()
         # bpy.data.window_managers['WinMan'].update_tag()
 
         return {'FINISHED'}
+
+    def invoke(self, context, event):
+        # global support.matrix
+        scene = context.scene
+        # support.matrix = context.object.matrix_local
+        # support.initial_matrix = support.matrix.to_4x4()
+        # print(context.object.matrix_local)
+        # print(support.matrix)
+        anim_offset = scene.animaide.anim_offset
+        anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
+        support.store_user_timeline_ranges(context)
+        scene.tool_settings.use_keyframe_insert_auto = False
+        utils.add_message(self.message)
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+
+        support.get_globals(context)
+
+        return self.execute(context)
 
 
 class ANIMAIDE_OT_deactivate_anim_offset(Operator):
