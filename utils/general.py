@@ -170,12 +170,13 @@ nla_color = None
 def add_message(message):
 
     global text_handle, dopesheet_color, graph_color, nla_color, pref_autosave
-    pref_autosave = bpy.context.preferences.use_preferences_save
-    dopesheet_color = bpy.context.preferences.themes[0].dopesheet_editor.space.header[:]
-    graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
-    nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
-    warning_color = (0.5, 0.3, 0.2, 1)
+    if text_handle is None:
+        pref_autosave = bpy.context.preferences.use_preferences_save
+        dopesheet_color = bpy.context.preferences.themes[0].dopesheet_editor.space.header[:]
+        graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
+        nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
 
+    warning_color = (0.5, 0.3, 0.2, 1)
     bpy.context.preferences.use_preferences_save = False
 
     def draw_text_callback(info):
@@ -189,18 +190,23 @@ def add_message(message):
         blf.color(font_id, 1, 1, 1, .5)
         blf.draw(font_id, info)
 
-    text_handle = bpy.types.SpaceView3D.draw_handler_add(
-        draw_text_callback, (message,),
-        'WINDOW', 'POST_PIXEL')
+    if text_handle is None:
+        text_handle = bpy.types.SpaceView3D.draw_handler_add(
+            draw_text_callback, (message,),
+            'WINDOW', 'POST_PIXEL')
 
 
 def remove_message():
-    bpy.context.preferences.use_preferences_save = pref_autosave
+    global text_handle
+
     bpy.types.SpaceView3D.draw_handler_remove(text_handle, 'WINDOW')
+    text_handle = None
+
+    if pref_autosave is not None:
+        bpy.context.preferences.use_preferences_save = pref_autosave
     if dopesheet_color is not None:
         bpy.context.preferences.themes[0].dopesheet_editor.space.header = dopesheet_color
     if graph_color is not None:
         bpy.context.preferences.themes[0].nla_editor.space.header = graph_color
     if nla_color is not None:
         bpy.context.preferences.themes[0].graph_editor.space.header = nla_color
-    print('message removed')

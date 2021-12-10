@@ -163,6 +163,7 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
     bl_idname = "anim.aide_add_anim_offset_mask"
     bl_label = "AnimOffset Mask"
     bl_options = {'UNDO_GROUPED'}
+    message = "AnimOffset Active"
 
     sticky: BoolProperty(default=False)
 
@@ -423,6 +424,8 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
             anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
             support.store_user_timeline_ranges(context)
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
+
+        utils.add_message(self.message)
 
         scene.tool_settings.use_keyframe_insert_auto = False
 
