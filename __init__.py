@@ -97,7 +97,7 @@ def register():
 
 def unregister():
 
-    utils.remove_message()
+    # utils.remove_message()
 
     preferences = bpy.context.preferences
 

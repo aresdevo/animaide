@@ -30,51 +30,67 @@ addon_name = __package__
 
 
 def add_key_manager_header():
+    global key_manager_pref
     for cls in key_manager.ui.header_classes:
         bpy.utils.register_class(cls)
     bpy.types.TIME_MT_editor_menus.append(key_manager.ui.draw_key_manager)
     bpy.types.DOPESHEET_MT_editor_menus.append(key_manager.ui.draw_key_manager)
     bpy.types.GRAPH_MT_editor_menus.append(key_manager.ui.draw_key_manager)
+    key_manager_pref = 'HEADERS'
 
 
 def remove_key_manager_header():
+    global key_manager_pref
     for cls in key_manager.ui.header_classes:
         bpy.utils.unregister_class(cls)
     bpy.types.TIME_MT_editor_menus.remove(key_manager.ui.draw_key_manager)
     bpy.types.DOPESHEET_MT_editor_menus.remove(key_manager.ui.draw_key_manager)
     bpy.types.GRAPH_MT_editor_menus.remove(key_manager.ui.draw_key_manager)
+    key_manager_pref = ''
 
 
 def add_key_manager_panel():
+    global key_manager_pref
     for cls in key_manager.ui.panel_classes:
         bpy.utils.register_class(cls)
+    key_manager_pref = 'PANEL'
 
 
 def remove_key_manager_panel():
+    global key_manager_pref
     for cls in key_manager.ui.panel_classes:
         bpy.utils.unregister_class(cls)
+    key_manager_pref = ''
 
 
 def add_anim_offset_panel():
+    global anim_offset_pref
     for cls in anim_offset.ui.panel_classes:
         bpy.utils.register_class(cls)
+    anim_offset_pref = 'PANEL'
 
 
 def remove_anim_offset_panel():
+    global anim_offset_pref
     for cls in anim_offset.ui.panel_classes:
         bpy.utils.unregister_class(cls)
+    anim_offset_pref = ''
 
 
 def add_anim_offset_header():
+    global anim_offset_pref
     bpy.types.TIME_MT_editor_menus.append(anim_offset.ui.draw_anim_offset)
     bpy.types.DOPESHEET_MT_editor_menus.append(anim_offset.ui.draw_anim_offset_mask)
     bpy.types.GRAPH_MT_editor_menus.append(anim_offset.ui.draw_anim_offset_mask)
+    anim_offset_pref = 'HEADERS'
 
 
 def remove_anim_offset_header():
+    global anim_offset_pref
     bpy.types.TIME_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset)
     bpy.types.GRAPH_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset_mask)
     bpy.types.DOPESHEET_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset_mask)
+    anim_offset_pref = ''
 
 
 class Preferences(AddonPreferences):
@@ -88,18 +104,15 @@ class Preferences(AddonPreferences):
 
         if self.key_manager_ui == 'HEADERS':
             remove_key_manager_panel()
-
-            remove_anim_offset_header()
+            if self.anim_offset_ui == 'HEADERS':
+                remove_anim_offset_header()
             add_key_manager_header()
             if self.anim_offset_ui == 'HEADERS':
                 add_anim_offset_header()
 
-            key_manager_pref = self.key_manager_ui
-
         elif self.key_manager_ui == 'PANEL':
             remove_key_manager_header()
             add_key_manager_panel()
-            key_manager_pref = self.key_manager_ui
 
     def anim_offset_update(self, context):
         global anim_offset_pref
@@ -109,15 +122,11 @@ class Preferences(AddonPreferences):
 
         if self.anim_offset_ui == 'HEADERS':
             remove_anim_offset_panel()
-
             add_anim_offset_header()
-
-            anim_offset_pref = self.anim_offset_ui
 
         elif self.anim_offset_ui == 'PANEL':
             remove_anim_offset_header()
             add_anim_offset_panel()
-            anim_offset_pref = self.anim_offset_ui
 
     def toggle_tool_markers(self, context):
         tool = context.scene.animaide.tool
