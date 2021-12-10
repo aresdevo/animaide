@@ -74,15 +74,7 @@
 > 
 >   ![Local Space](images/shortcut_troubleshoot.gif)
 >
-> 
-> - Because of the introduction of settings in the addon preference window, I've added a new (kind of ugly) "info panel":
 >
->   ![Info Panel](images/info.jpg)
-> 
->   The idea is that you don't miss it, but you can disable this view in the addon preferene window (that is the window 
-    where the addon appears when you install it):
-> 
->   ![Info Panel setting](images/info_panel_setting.jpg)
 
 > ## Installation
 >
