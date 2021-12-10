@@ -88,13 +88,9 @@
 >
 > First download the add-on by clicking one of this links:
 > 
-> For Blender 2.9 and up:
+> For Blender 2.93 and up:
 > 
-> <https://github.com/aresdevo/animaide/archive/master.zip>
-> 
-> Old version of the addon for Blender 2.83 (working on the update):
-> 
-> <https://github.com/aresdevo/animaide/archive/LTE.zip>
+> <https://github.com/aresdevo/animaide/archive/refs/heads/master.zip>
 >
 > Then in Blender, go to the "Add-ons" tab in the preference window. There click on the "Install" button and navigate to the
 > folder where you downloaded the addon. After you select the file and click "Install Add-on", AnimAide will be installed
