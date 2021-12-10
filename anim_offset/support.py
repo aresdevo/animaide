@@ -35,17 +35,82 @@ global_values = {}
 last_op = None
 current_copy = [None]
 frozen_current = None
+n = 0
 
 # ---------- Main Tool ------------
 
 
 def magnet_handlers(scene):
+
+    global current_copy, n, frozen_current
+    global last_op
+
+    context = bpy.context
+
+    external_op = context.active_operator
+
+
+
+    cur_frame = context.scene.frame_current
+
+    selected_objects = context.selected_objects
+
+    cube = scene.objects['Cube']
+    cube1 = scene.objects['Cube.001']
+    cube2 = scene.objects['Cube.002']
+
+    for obj in selected_objects:
+
+        if n == 0:
+            frozen_current = obj.matrix_local.to_4x4()
+        n = 1
+
+        action = getattr(obj.animation_data, 'action', None)
+        channels = action.groups['Object Transforms'].channels
+        fcurves = action.fcurves
+        frames = global_values[obj.name]['frames']
+
+        if cur_frame != current_copy[0] and current_copy[0] is not None:
+            frozen_current = obj.matrix_local.to_4x4()
+            for frame in frames:
+                # if frame >= current_copy[0]:
+                global_values[obj.name]['matrix_ini'][frame] = get_frame_matrix(frame, channels).to_4x4()
+
+        current_copy = [cur_frame]
+
+        for frame in frames:
+            cube.matrix_local = global_values[obj.name]['matrix_mod'][1]
+            cube1.matrix_local = global_values[obj.name]['matrix_mod'][72]
+            cube2.matrix_local = global_values[obj.name]['matrix_mod'][115]
+            # if frame > cur_frame:
+            frame_matrix = global_values[obj.name]["matrix_ini"][frame]
+            global_values[obj.name]['matrix_mod'][frame] = \
+                obj.matrix_local @ frozen_current.inverted() @ frame_matrix
+            # get_frame_delta(obj, fcurve, frame)
+
+        if external_op is last_op:
+            return
+        last_op = context.active_operator
+
+        for fcurve in fcurves:
+            cube.matrix_local = global_values[obj.name]['matrix_mod'][1]
+            cube1.matrix_local = global_values[obj.name]['matrix_mod'][72]
+            cube2.matrix_local = global_values[obj.name]['matrix_mod'][115]
+            delta = get_single_delta(context, obj, fcurve)
+            for kfp in fcurve.keyframe_points:
+                kfp.co_ui.y = get_frame_delta(obj, fcurve, kfp.co.x)
+                # kfp.co_ui.y = kfp.co_ui.y + delta
+            fcurve.update()
+
+
+def magnet_handlers_old(scene):
     """Function to be run by the anim_offset Handler"""
+
+    global current_copy, frozen_current, global_values, n
 
     global last_op
 
     context = bpy.context
-    # scene = context.scene
 
     external_op = context.active_operator
 
@@ -89,10 +154,36 @@ def magnet_handlers(scene):
 
     for obj in selected_objects:
         action = getattr(obj.animation_data, 'action', None)
-        fcurves = getattr(action, 'fcurves', list())
 
-        for fcurve in fcurves:
+        ###################
+        cur_frame = context.scene.frame_current
+        current_matrix = obj.matrix_local
 
+        # if cur_frame != current_copy[0]:
+        if n == 0:
+            frozen_current = obj.matrix_local.to_4x4()
+            # modify_global(obj)
+            n = 1
+
+        current_copy = [cur_frame]
+
+        # print(f'frozen_current: {frozen_current}')
+
+        modify_global(obj, atr='mod')
+
+        # if frozen_current and current_matrix != frozen_current:
+        #     use_matrix = True
+        #     modify_global(obj, atr='mod')
+        #     delta = 0
+        # else:
+        #     use_matrix = False
+        #     delta = get_single_delta(context, obj, fcurve)
+
+            # print(f'use_matrix: {use_matrix}')
+
+        ###################
+
+        for fcurve in getattr(action, 'fcurves', list()):
             # ######## Not sure we need this ############
             # if obj.type == 'ARMATURE':
             #     split_data_path = fcurve.data_path.split(sep='"')
@@ -137,7 +228,7 @@ def add_keys(context):
 
             kfps = fcurve.keyframe_points
             cur_index = utils.key.on_current_frame(fcurve)
-            delta_y = get_delta(context, obj, fcurve)
+            delta_y = get_single_delta(context, obj, fcurve)
 
             if not cur_index:
                 cur_frame = context.scene.frame_current
@@ -154,8 +245,6 @@ def magnet(context, obj, fcurve):
     """Modify all the keys in every fcurve of the current object proportionally to the change in transformation
     on the current frame by the user """
 
-    global current_copy, frozen_current
-
     scene = context.scene
 
     if fcurve.lock:
@@ -167,42 +256,12 @@ def magnet(context, obj, fcurve):
     blends_action = bpy.data.actions.get('animaide')
     blends_curves = getattr(blends_action, 'fcurves', None)
 
-    # delta = get_delta(context, obj, fcurve)
-
-    # frames = global_values[obj.name]['frames']
-    cur_frame = context.scene.frame_current
-    current_matrix = obj.matrix_local
-
-    if cur_frame != current_copy[0]:
-        frozen_current = current_matrix.to_4x4()
-        modify_global(obj)
-
-    current_copy = [cur_frame]
-
-    if current_matrix != frozen_current:
-        use_matrix = True
-    else:
-        use_matrix = False
-
-    # for frame in frames:
-    #     if frame > cur_frame:
-    #         frame_matrix = global_values[obj.name]["kfp_matrix"][frame]
-    #         matrix = obj.matrix_local @ frozen_current.inverted() @ frame_matrix
+    # delta_y = get_single_delta(context, obj, fcurve)
 
     for kfp in fcurve.keyframe_points:
-
-        # if kfp.co.x > cur_frame:
-
-        if use_matrix:
-            frame_matrix = global_values[obj.name]["kfp_matrix"][kfp.co.x]
-            # matrix = current_matrix @ frozen_current.inverted() @ frame_matrix
-            matrix = None
-        else:
-            matrix = None
-
-        delta = get_delta(context, obj, fcurve, kfp.co.x, matrix)
-
-        print(f'delta: {delta}')
+        # print(f'frame: {kfp.co.x}')
+        # if use_matrix:
+        delta = get_frame_delta(obj, fcurve, kfp.co.x)
 
         if not context.scene.animaide.anim_offset.mask_in_use:
             factor = 1
@@ -214,8 +273,9 @@ def magnet(context, obj, fcurve):
         else:
             factor = 0
 
-        kfp.co_ui.y = kfp.co_ui.y + (delta * factor)
-        # print(f'kfp.co.y: {kfp.co.y}')
+        # kfp.co_ui.y = kfp.co_ui.y + (delta * factor)
+        kfp.co_ui.y = delta * factor
+        # print(f'delta: {delta}')
 
     fcurve.update()
 
@@ -325,7 +385,7 @@ def get_frame_matrix(frame, channels):
     return mat_out
 
 
-def get_delta_old(context, obj, fcurve):
+def get_single_delta(context, obj, fcurve):
     """Determine the transformation change by the user of the current object"""
 
     cur_frame = context.scene.frame_current
@@ -346,45 +406,33 @@ def get_delta_old(context, obj, fcurve):
         return 0
 
 
-def get_delta(context, obj, fcurve, frame, matrix):
+def get_frame_delta(obj, fcurve, frame):
     """Determine the transformation change by the user of the current object"""
 
     index = fcurve.array_index
     data_path = fcurve.data_path
-    print(f'data_path: {data_path}')
 
-    cur_frame = context.scene.frame_current
+    matrix_mod = global_values[obj.name]['matrix_mod'][frame]
 
-    if matrix:
-        if data_path == 'location':
-            prop = matrix.to_translation()[index]
-            # new_vector = vecs[0]
-        elif data_path == 'rotation_euler':
-            prop = matrix.to_euler()[index]
-            # new_vector = vecs[1].to_euler()
-        elif data_path == 'rotation_quaternion':
-            prop = matrix.to_quaternion()[index]
-        else:
-            prop = matrix.to_scale()
-        # if frame < cur_frame:
-        #     return 0
+    if data_path == 'location':
+        mod = matrix_mod.to_translation()[index]
+    elif data_path == 'rotation_euler':
+        mod = matrix_mod.to_euler()[index]
+    elif data_path == 'rotation_quaternion':
+        mod = matrix_mod.to_quaternion()[index]
+    elif data_path == 'scale':
+        mod = matrix_mod.to_scale()[index]
     else:
-        try:
-            prop = obj.path_resolve(data_path)
-        except:
-            prop = None
+        mod = fcurve.evaluate(frame)
 
-    # print(f'vector: {vector}')
+    print(f'frame: {frame}, {data_path}[{index}] --> {mod}')
 
-    if prop:
-        curve_value = fcurve.evaluate(cur_frame)
-        try:
-            target = prop[index]
-        except TypeError:
-            target = prop
-        return target - curve_value
-    else:
-        return 0
+    curve_value = fcurve.evaluate(frame)
+    # try:
+    #     target = prop[index]
+    # except TypeError:
+    #     target = prop
+    return mod
 
 
 def get_globals(context):
@@ -396,25 +444,35 @@ def get_globals(context):
         channels = action.groups['Object Transforms'].channels
         frames = utils.key.frame_summary(fcurves)
 
-        mat = {}
+        ini = {}
+        mod = {}
         for fr in frames:
-            mat[fr] = get_frame_matrix(fr, channels).to_4x4()
+            ini[fr] = get_frame_matrix(fr, channels).to_4x4()
+            mod[fr] = get_frame_matrix(fr, channels).to_4x4()
 
-        data = {"kfp_matrix": mat, "frames": frames}
+        data = {"matrix_ini": ini, "matrix_mod": mod, "frames": frames}
         global_values[obj.name] = data
-    print(f'global_values: {global_values}')
+    # print(f'global_values: {global_values}')
 
 
-def modify_global(obj, start=None):
+def modify_global(obj, atr='ini', start=None):
     global global_values
     action = getattr(obj.animation_data, 'action', None)
     channels = action.groups['Object Transforms'].channels
     frames = global_values[obj.name]['frames']
+    # print(f'################# {global_values}')
 
     for fr in frames:
         if start and fr > start:
             continue
-        global_values[obj.name]['kfp_matrix'][fr] = get_frame_matrix(fr, channels).to_4x4()
+
+        if atr == 'ini':
+            global_values[obj.name]['matrix_ini'][fr] = get_frame_matrix(fr, channels).to_4x4()
+        else:
+            frame_matrix = global_values[obj.name]["matrix_ini"][fr]
+            global_values[obj.name]['matrix_mod'][fr] = obj.matrix_local @ frame_matrix
+                # obj.matrix_local @ frozen_current @ frame_matrix
+            # print(f'matrix: {global_values[obj.name]["matrix_mod"][fr]}')
 
 
 # ----------- Mask -----------
