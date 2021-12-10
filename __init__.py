@@ -64,7 +64,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.animaide : PointerProperty(type=AnimAideScene)
+    bpy.types.Scene.animaide = PointerProperty(type=AnimAideScene)
 
     preferences = bpy.context.preferences
     pref = preferences.addons[prefe.addon_name].preferences
