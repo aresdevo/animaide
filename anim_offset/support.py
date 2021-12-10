@@ -86,18 +86,8 @@ def magnet_handlers(scene):
         action = getattr(obj.animation_data, 'action', None)
 
         for fcurve in getattr(action, 'fcurves', list()):
-            # ######## Not sure we need this ############
-            # if obj.type == 'ARMATURE':
-            #     split_data_path = fcurve.data_path.split(sep='"')
-            #     bone_name = split_data_path[1]
-            #     bone = obj.data.bones.get(bone_name)
-            #
-            #     if bone is None or bone.hide:
-            #         return
-            #
-            #     if bone.select or bone.parent or bone.children:
-            #         magnet(context, obj, fcurve)
-            # else:
+            if fcurve.data_path.endswith("rotation_mode"):
+                continue   #added exception
             magnet(context, obj, fcurve)
 
     return
