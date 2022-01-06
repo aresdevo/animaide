@@ -49,22 +49,26 @@ class ANIMAIDE_PT:
 
         row = layout.row(align=True)
 
-        if mask_in_use:
-            row.operator("anim.aide_delete_anim_offset_mask", text='Deactivate Mask', depress=True, icon='SELECT_SUBTRACT')
-            sub = row.row(align=True)
-            sub.active = True
-            op = sub.operator("anim.aide_add_anim_offset_mask", text='', icon='GREASEPENCIL')
-            op.sticky = True
+        if context.area.type != 'VIEW_3D':
 
-        else:
-            op = row.operator("anim.aide_add_anim_offset_mask", text='Mask', icon='SELECT_SUBTRACT')
-            op.sticky = False
-            sub = row.row(align=True)
-            sub.active = False
+            if mask_in_use:
+                row.operator("anim.aide_delete_anim_offset_mask", text='Deactivate Mask', depress=True, icon='SELECT_SUBTRACT')
+                sub = row.row(align=True)
+                sub.active = True
+                op = sub.operator("anim.aide_add_anim_offset_mask", text='', icon='GREASEPENCIL')
+                op.sticky = True
+
+            else:
+                op = row.operator("anim.aide_add_anim_offset_mask", text='Mask', icon='SELECT_SUBTRACT')
+                op.sticky = False
+                sub = row.row(align=True)
+                sub.active = False
+
+            sub.operator('anim.aide_anim_offset_settings', text='', icon='PREFERENCES', emboss=True)
 
         # row = layout.row(align=False)
         # row.active = status
-        sub.operator('anim.aide_anim_offset_settings', text='', icon='PREFERENCES', emboss=True)
+        # sub.operator('anim.aide_anim_offset_settings', text='', icon='PREFERENCES', emboss=True)
         # sub.popover(panel="ANIMAIDE_PT_preferences", text="")
 
         # if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:

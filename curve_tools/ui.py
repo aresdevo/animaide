@@ -143,6 +143,7 @@ def steps(context, layout, tool, expand):
             row.prop(tool, 'selector_3d', text='')
         else:
             row.prop(tool, 'selector', text='')
+        row.prop(tool, 'overshoot', text='', toggle=1, invert_checkbox=False, icon='SNAP_INCREMENT')
 
 
 def tool_button(context, layout_type, tool_type=''):

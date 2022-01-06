@@ -19,9 +19,7 @@
 > ### New on this version:
 >
 > **In General:**
-> - Because there is a big change, there is an "info" panel with important information. It can be removed on the addon
-> preference window.
-> - Some settings were moved to the addon preferences. By been there your options will persist even after the Blender 
+> - Some settings were moved to the addon preferences. By being there your options will persist even after the Blender 
     session is over.
 > - A new group of tools called **KeyManager** has been added to its own panel.
 > - Some panels can now be moved to the animation views headers.
