@@ -29,7 +29,7 @@ bl_info = {
     "location": "Graph Editor - Dope Sheet - Timeline - 3D View - sidebar and menu bar",
     "warning": "This addon is still in development.",
     "category": "Animation",
-    "wiki_url": "https://github.com/aresdevo/animaide",
+    "doc_url": "https://github.com/aresdevo/animaide#readme",
     "tracker_url": "https://github.com/aresdevo/animaide/issues"
 }
 
