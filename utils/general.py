@@ -167,24 +167,37 @@ graph_color = None
 nla_color = None
 
 
+def set_bar_color(r, g, b, a):
+    global dopesheet_color, graph_color, nla_color, pref_autosave
+    # if text_handle is None:
+    pref_autosave = bpy.context.preferences.use_preferences_save
+    dopesheet_color = bpy.context.preferences.themes[0].dopesheet_editor.space.header[:]
+    graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
+    nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
+
+    bpy.context.preferences.use_preferences_save = False
+    bpy.context.preferences.themes[0].dopesheet_editor.space.header = (r, g, b, a)
+    bpy.context.preferences.themes[0].nla_editor.space.header = (r, g, b, a)
+    bpy.context.preferences.themes[0].graph_editor.space.header = (r, g, b, a)
+
+
+def reset_bar_color():
+    if pref_autosave is not None:
+        bpy.context.preferences.use_preferences_save = pref_autosave
+    if dopesheet_color is not None:
+        bpy.context.preferences.themes[0].dopesheet_editor.space.header = dopesheet_color
+    if graph_color is not None:
+        bpy.context.preferences.themes[0].nla_editor.space.header = graph_color
+    if nla_color is not None:
+        bpy.context.preferences.themes[0].graph_editor.space.header = nla_color
+
+
 def add_message(message):
 
-    global text_handle, dopesheet_color, graph_color, nla_color, pref_autosave
-    if text_handle is None:
-        pref_autosave = bpy.context.preferences.use_preferences_save
-        dopesheet_color = bpy.context.preferences.themes[0].dopesheet_editor.space.header[:]
-        graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
-        nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
-
-    warning_color = (0.5, 0.3, 0.2, 1)
-    bpy.context.preferences.use_preferences_save = False
+    global text_handle
 
     def draw_text_callback(info):
         font_id = 0
-        # draw some text
-        bpy.context.preferences.themes[0].dopesheet_editor.space.header = warning_color
-        bpy.context.preferences.themes[0].nla_editor.space.header = warning_color
-        bpy.context.preferences.themes[0].graph_editor.space.header = warning_color
         blf.position(font_id, 5, 80, 0)
         blf.size(font_id, 30, 72)
         blf.color(font_id, 1, 1, 1, .5)
@@ -201,12 +214,3 @@ def remove_message():
 
     bpy.types.SpaceView3D.draw_handler_remove(text_handle, 'WINDOW')
     text_handle = None
-
-    if pref_autosave is not None:
-        bpy.context.preferences.use_preferences_save = pref_autosave
-    if dopesheet_color is not None:
-        bpy.context.preferences.themes[0].dopesheet_editor.space.header = dopesheet_color
-    if graph_color is not None:
-        bpy.context.preferences.themes[0].nla_editor.space.header = graph_color
-    if nla_color is not None:
-        bpy.context.preferences.themes[0].graph_editor.space.header = nla_color
