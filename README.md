@@ -5,7 +5,7 @@
 *Tested on Blender 2.92 and up.*
 
 
-> **Warning: Not working well with NLA at the momment**
+> **Warning: Not working well with NLA at the moment**
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
 
@@ -30,7 +30,7 @@
 > - Menus and panels are now smarter. Tools are available just where they make sense. That simplifies the interface.
 > 
 > **CurveTools:**
-> - A new "Infinite" tool has been added
+> - A new "Infinite" tool has been added.
 > - The "Noise" has been renamed "Wave-Noise". It now adds a wave when sliding to the left.
 > - Tools are now grouped in the "expand" mode for ease of use.
 > - Overshoot option button is now available next to the curveTool.
@@ -60,7 +60,7 @@
 > "unselect" and "delete" them by type.
 >       - It also incorporates a Blender option that lets you select the key type that auto-key will use.
 >   - **Interpolation:**
->       - Lest you quickly assign interpolation types to key handles, just like Blender does, but with the added benefit of
+>       - Lets you quickly assign interpolation types to key handles, just like Blender does, but with the added benefit of
 > been able to assign it to every key in the selected object with the click of a button.
 >       - When dealing with "Bezier" curves, it lets you select the left or right handles of every selected key to 
           easily interact with a group of handles at once.
@@ -118,7 +118,7 @@
 > - **Timeline editors**
 > - **3D View**
 > 
->You can show the sidebar by using the "n" shortcut while in one of the mentioned editors or go to the "View" menu
+> You can show the sidebar by using the "n" shortcut while in one of the mentioned editors or go to the "View" menu
 > on those areas and open it there.
 
 > ### Menu:
@@ -177,7 +177,7 @@ At the moment, Animaide has Three main panels:
 >
 > That is the overshoot button that allows a bigger range of change.
 >
-> Bellow there is an array of small buttons that allows you to apply the tool in increments of 25%.
+> Below there is an array of small buttons that allows you to apply the tool in increments of 25%.
 > It will use the last selected or activated.
 >
 > ![steps](images/steps.gif)
@@ -203,8 +203,8 @@ At the moment, Animaide has Three main panels:
 
 > #### Note:
 >
-> Some **CurveTools** don't make much sence when used on the 3D-View, for that reason
-> Only the a few are available there:
+> Some **CurveTools** don't make much sense when used on the 3D-View, for that reason
+> Only there a few are available there:
 >
 > ![3D view CurveTools](images/3d_tools_expand.jpg)
 
@@ -238,7 +238,7 @@ At the moment, Animaide has Three main panels:
 >   ![sticky handles](images/sticky_handles.gif)
 >
 >   This used to be a bug but now that improved API tools took that away I thought to bring it back because can be
->   usefull at times. Basically, when active the key handles are left behind when the keyframe points are modified if
+>   useful at times. Basically, when active the key handles are left behind when the keyframe points are modified if
 >   the handle type is either "free" or "aligned".
 >   This is a simple use case for this tool:
 >
@@ -282,7 +282,7 @@ At the moment there are 15 different tools:
 >
 > it remembers how the curve was before engaging the tool.
 >
-> You can save additional frames as bookmark for latter use. You can find that option on a sub-panel called:
+> You can save additional frames as bookmark for later use. You can find that option on a sub-panel called:
 > **Frame Bookmarks**
 >
 > ![Blend Frame](images/frame_bookmark.gif)
@@ -414,7 +414,7 @@ At the moment there are 15 different tools:
 >>
 >>
 >>- **Shift:**
-    Keeps the masking mode alive. you can use it in combination with **"ctrl"** and **"alt"**.
+    Keeps the masking mode alive. You can use it in combination with **"ctrl"** and **"alt"**.
 >>
 >>
 >>- **Ctrl:**
@@ -428,7 +428,7 @@ At the moment there are 15 different tools:
 > 
 > ![Anim Offset Status Bar](images/anim_offset_status_bar.gif)
 >
-> When a mask has been created and the tools in on the header, a new pencil icon shows up in the Graph Editor.
+> When a mask has been created and the tools is on the header, a new pencil icon shows up in the Graph Editor.
 > This pencil activates a mask edit-mode that you can get out by using the "Escape" key, or your mouse
 > right click button.
 > 
@@ -440,7 +440,7 @@ At the moment there are 15 different tools:
 > 
 > ![Key outside margin](images/key_outside_margin.gif)
 > 
-> There is an option in the preferences called "autokey outside margins", if selected , any time
+> There is an option in the preferences called "autokey outside margins", if selected, any time
 > the cursor is outside the margins while manipulating the object it will create a key.
 
 > ![Fast calculation setting](images/fast_calculation_setting.jpg)
