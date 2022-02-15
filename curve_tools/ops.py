@@ -181,8 +181,6 @@ class ANIMAIDE_OT:
         if self.op_context == 'EXEC_DEFAULT':
             return self.execute(context)
 
-        tool.selector = self.tool_type
-
         tool.factor = 0.0
         tool.factor_overshoot = 0.0
         # self.slope = tool.slope
@@ -193,8 +191,10 @@ class ANIMAIDE_OT:
         tool.area = context.area.type
 
         if context.area.type == 'VIEW_3D':
+            tool.selector_3d = self.tool_type
             tool.unselected_fcurves = True
         else:
+            tool.selector = self.tool_type
             tool.unselected_fcurves = False
 
         # left_frame, right_frame = support.set_ref_marker(context)

@@ -57,10 +57,10 @@ def blend_button(layout, fac, text='', icon='NONE'):
     op.factor = fac
 
 
-def reference_frames(context, layout, expand):
-    tool = context.scene.animaide.tool
+def reference_frames(context, layout, selector):
+    # tool = context.scene.animaide.tool
 
-    if tool.selector == 'BLEND_FRAME':
+    if selector == 'BLEND_FRAME':
 
         row = layout.row(align=True)
         # row.label(text='Referece frames:')
@@ -245,12 +245,13 @@ class ANIMAIDE_PT_curve_tools:
 
         if context.area.type == 'GRAPH_EDITOR':
             layout.prop(tool, 'sticky_handles', text='Sticky handles')
-
-        if tool.selector == 'TIME_OFFSET':
-
-            layout.prop(clone, 'cycle', text='Cicle Options')
-
-        reference_frames(context, layout, expand)
+            if tool.selector == 'TIME_OFFSET':
+                layout.prop(clone, 'cycle', text='Cicle Options')
+            reference_frames(context, layout, tool.selector)
+        else:
+            if tool.selector_3d == 'TIME_OFFSET':
+                layout.prop(clone, 'cycle', text='Cicle Options')
+            reference_frames(context, layout, tool.selector_3d)
 
 
 class ANIMAIDE_PT_curve_tools_ge(Panel, ANIMAIDE_PT_curve_tools):

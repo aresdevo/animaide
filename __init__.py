@@ -24,7 +24,7 @@ bl_info = {
     "name": "AnimAide",
     "description": "Helpful tools to manipulate keys on f-curves",
     "author": "Ares Deveaux",
-    "version": (1, 0, 36),
+    "version": (1, 0, 37),
     "blender": (2, 92, 0),
     "location": "Graph Editor - Dope Sheet - Timeline - 3D View - sidebar and menu bar",
     "warning": "This addon is still in development.",
