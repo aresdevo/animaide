@@ -4,6 +4,9 @@
 
 *Tested on Blender 2.92 and up.*
 
+
+> **Warning: Not working well with NLA at the momment**
+
  ![Shortcut Troubleshoot](images/animaide.jpg)
 
  In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
