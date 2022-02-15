@@ -100,7 +100,6 @@ class ANIMAIDE_OT_activate_anim_offset(Operator):
 
         if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
-            utils.set_bar_color(0.5, 0.3, 0.2, 1)
             utils.add_message(self.message)
 
         # anim_offset_info = bpy.types.SpaceView3D.draw_handler_add(
@@ -136,7 +135,6 @@ class ANIMAIDE_OT_deactivate_anim_offset(Operator):
 
         if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
-            utils.reset_bar_color()
             utils.remove_message()
 
         scene = context.scene
@@ -424,7 +422,6 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
             anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
             support.store_user_timeline_ranges(context)
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
-            utils.set_bar_color(0.5, 0.3, 0.2, 1)
             utils.add_message(self.message)
 
         scene.tool_settings.use_keyframe_insert_auto = False

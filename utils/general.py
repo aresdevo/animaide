@@ -204,6 +204,7 @@ def add_message(message):
         blf.draw(font_id, info)
 
     if text_handle is None:
+        set_bar_color(0.5, 0.3, 0.2, 1)
         text_handle = bpy.types.SpaceView3D.draw_handler_add(
             draw_text_callback, (message,),
             'WINDOW', 'POST_PIXEL')
@@ -212,5 +213,6 @@ def add_message(message):
 def remove_message():
     global text_handle
 
+    reset_bar_color()
     bpy.types.SpaceView3D.draw_handler_remove(text_handle, 'WINDOW')
     text_handle = None
