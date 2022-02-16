@@ -2,10 +2,10 @@
 
 *CurveTools* - *AnimOffset* - *KeyManager*
 
-*Tested on Blender 2.92 and up.*
+###*-Tested with Blender 2.93 and up.*
 
-
-> **Seems to be working fine with NLA now**
+###*-Seems to be working fine with NLA now*
+###
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
 
