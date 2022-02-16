@@ -90,22 +90,23 @@ class ANIMAIDE_MT_operators(Menu):
     def draw(self, context):
         layout = self.layout
 
-        if context.area.type != 'DOPESHEET_EDITOR':
-            if context.area.type == 'GRAPH_EDITOR':
-                layout.menu('ANIMAIDE_MT_curve_tools_pie')
-
-            if context.area.type == 'VIEW_3D':
-                layout.menu('ANIMAIDE_MT_curve_tools', text='On Frame Curve Tools')
-            else:
-                layout.menu('ANIMAIDE_MT_curve_tools')
-                layout.menu('ANIMAIDE_MT_tweak')
-
+        if context.area.type == 'VIEW_3D':
+            layout.menu('ANIMAIDE_MT_curve_tools', text='On Frame Curve Tools')
             layout.separator()
+            layout.menu('ANIMAIDE_MT_anim_offset')
 
-        if context.area.type != 'VIEW_3D':
+        elif context.area.type == 'DOPESHEET_EDITOR':
             layout.operator('wm.call_menu_pie', text="Pie AnimOffset").name = 'ANIMAIDE_MT_pie_anim_offset'
-        layout.menu('ANIMAIDE_MT_anim_offset')
-        if context.area.type != 'VIEW_3D':
+            layout.menu('ANIMAIDE_MT_anim_offset')
+            layout.menu('ANIMAIDE_MT_anim_offset_mask')
+
+        elif context.area.type == 'GRAPH_EDITOR':
+            layout.menu('ANIMAIDE_MT_curve_tools_pie')
+            layout.menu('ANIMAIDE_MT_curve_tools')
+            layout.menu('ANIMAIDE_MT_tweak')
+            layout.separator()
+            layout.operator('wm.call_menu_pie', text="Pie AnimOffset").name = 'ANIMAIDE_MT_pie_anim_offset'
+            layout.menu('ANIMAIDE_MT_anim_offset')
             layout.menu('ANIMAIDE_MT_anim_offset_mask')
 
 

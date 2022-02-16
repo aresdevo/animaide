@@ -163,7 +163,7 @@ class Preferences(AddonPreferences):
         items=[('PANEL', 'Panel', 'Choose if you want "Anim Offset" on a panel', '', 1),
                ('HEADERS', 'Headers', 'Choose if you want "Anim Offset" tools on headers', '', 2)],
         name="Anim Offset",
-        default='PANEL',
+        default='HEADERS',
         update=anim_offset_update
     )
 

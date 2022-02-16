@@ -1,10 +1,14 @@
-# Animaide 1.0.3
+# Animaide 1.0.38
 
 *CurveTools* - *AnimOffset* - *KeyManager*
 
 **Tested with Blender 2.93 and up.**
 
 **Seems to be working fine with NLA now**
+
+> **Warning:** 
+> *AnimOffset is on the headers by default now, but that can be changed in the addon preferences*
+
 ###
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
@@ -20,8 +24,9 @@
 ##
 
 > ### New on this version:
->
+> 
 > **In General:**
+> - *Bug fixes*
 > - Some settings were moved to the addon preferences. By being there your options will persist even after the Blender 
     session is over.
 > - A new group of tools called **KeyManager** has been added to its own panel.

@@ -49,7 +49,7 @@ class ANIMAIDE_PT:
 
         row = layout.row(align=True)
 
-        if context.area.type != 'VIEW_3D':
+        if context.area.type != 'VIEW_3D' or context.area.type != 'NLA_EDITOR':
 
             if mask_in_use:
                 row.operator("anim.aide_delete_anim_offset_mask", text='Deactivate Mask', depress=True, icon='SELECT_SUBTRACT')
