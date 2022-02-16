@@ -161,6 +161,7 @@ def get_items(context, any_mode=False):
 
 
 text_handle = None
+bar_color = None
 pref_autosave = None
 dopesheet_color = None
 graph_color = None
@@ -168,12 +169,13 @@ nla_color = None
 
 
 def set_bar_color(r, g, b, a):
-    global dopesheet_color, graph_color, nla_color, pref_autosave
-    # if text_handle is None:
-    pref_autosave = bpy.context.preferences.use_preferences_save
-    dopesheet_color = bpy.context.preferences.themes[0].dopesheet_editor.space.header[:]
-    graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
-    nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
+    global bar_color, dopesheet_color, graph_color, nla_color, pref_autosave
+    if bar_color is None:
+        bar_color = True
+        pref_autosave = bpy.context.preferences.use_preferences_save
+        dopesheet_color = bpy.context.preferences.themes[0].dopesheet_editor.space.header[:]
+        graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
+        nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
 
     bpy.context.preferences.use_preferences_save = False
     bpy.context.preferences.themes[0].dopesheet_editor.space.header = (r, g, b, a)
@@ -204,7 +206,7 @@ def add_message(message):
         blf.draw(font_id, info)
 
     if text_handle is None:
-        set_bar_color(0.5, 0.3, 0.2, 1)
+        # set_bar_color(0.5, 0.3, 0.2, 1)
         text_handle = bpy.types.SpaceView3D.draw_handler_add(
             draw_text_callback, (message,),
             'WINDOW', 'POST_PIXEL')
@@ -214,5 +216,6 @@ def remove_message():
     global text_handle
 
     reset_bar_color()
-    bpy.types.SpaceView3D.draw_handler_remove(text_handle, 'WINDOW')
+    if text_handle:
+        bpy.types.SpaceView3D.draw_handler_remove(text_handle, 'WINDOW')
     text_handle = None

@@ -153,12 +153,12 @@ def change_frame(context, amount, direction='RIGHT'):
                     fcurve.update()
                     # context.scene.frame_current += amount
                     frames = amount
-                else:
-                    if direction == 'LEFT' and right_neighbor:
-                        right_neighbor.co.x = context.scene.frame_current
-                    elif direction == 'RIGHT' and left_neighbor:
-                        left_neighbor.co.x = context.scene.frame_current
-                    frames = 0
+                # else:
+                #     if direction == 'LEFT' and right_neighbor:
+                #         right_neighbor.co.x = context.scene.frame_current
+                #     elif direction == 'RIGHT' and left_neighbor:
+                #         left_neighbor.co.x = context.scene.frame_current
+                #     frames = 0
                     fcurve.update()
 
     context.scene.frame_current += frames
@@ -400,10 +400,14 @@ def delete_by_type(context, key_type):
                     continue
 
                 while key.type == key_type and key.select_control_point:
+                    print('fcurve.data_path: ', fcurve.data_path)
+                    print('fcurve.array_index: ', fcurve.array_index)
+                    print('key.co_ui.x: ', key.co_ui.x)
+                    print('fcurve.group.name: ', fcurve.group.name)
                     obj.keyframe_delete(fcurve.data_path,
-                                        fcurve.array_index,
-                                        key.co_ui.x,
-                                        fcurve.group.name)
+                                        index=fcurve.array_index,
+                                        frame=key.co_ui.x,
+                                        group=fcurve.group.name)
 
             fcurve.update()
 

@@ -5,7 +5,7 @@
 *Tested on Blender 2.92 and up.*
 
 
-> **Warning: Not working well with NLA at the moment**
+> **Seems to be working fine with NLA now**
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
 

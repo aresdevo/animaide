@@ -334,8 +334,11 @@ def valid_fcurve(context, obj, fcurve, check_ui=True):
             # return
 
         split_data_path = fcurve.data_path.split(sep='"')
-        bone_name = split_data_path[1]
-        bone = obj.data.bones.get(bone_name)
+        if len(split_data_path) > 1:
+            bone_name = split_data_path[1]
+            bone = obj.data.bones.get(bone_name)
+        else:
+            bone = None
 
         if not bone:
             return False

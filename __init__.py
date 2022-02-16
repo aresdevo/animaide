@@ -24,7 +24,7 @@ bl_info = {
     "name": "AnimAide",
     "description": "Helpful tools to manipulate keys on f-curves",
     "author": "Ares Deveaux",
-    "version": (1, 0, 37_1),
+    "version": (1, 0, 38),
     "blender": (2, 92, 0),
     "location": "Graph Editor - Dope Sheet - Timeline - 3D View - sidebar and menu bar",
     "warning": "This addon is still in development.",
@@ -36,6 +36,7 @@ bl_info = {
 import bpy
 import atexit
 from . import ui, curve_tools, anim_offset, key_manager, prefe, utils
+from bpy.app.handlers import persistent
 from bpy.props import BoolProperty, EnumProperty, PointerProperty, CollectionProperty, StringProperty
 from bpy.types import AddonPreferences, PropertyGroup, Operator
 
@@ -58,11 +59,20 @@ classes = \
     prefe.classes + \
     (AnimAideScene,)
 
+@persistent
+def load_post_handler(scene):
+    # if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
+    #     bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
+    utils.remove_message()
+    print('init')
+
 
 def register():
 
     for cls in classes:
         bpy.utils.register_class(cls)
+
+    bpy.app.handlers.load_post.append(load_post_handler)
 
     bpy.types.Scene.animaide = PointerProperty(type=AnimAideScene)
 
@@ -102,6 +112,8 @@ def unregister():
     preferences = bpy.context.preferences
 
     pref = preferences.addons[prefe.addon_name].preferences
+
+    bpy.app.handlers.load_post.remove(load_post_handler)
 
     # bpy.types.TIME_MT_editor_menus.remove(curve_tools.ui.draw_bookmarks)
 

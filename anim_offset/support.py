@@ -151,6 +151,7 @@ def magnet(context, obj, fcurve):
     delta_y = get_delta(context, obj, fcurve)
 
     for k in fcurve.keyframe_points:
+
         if not context.scene.animaide.anim_offset.mask_in_use:
             factor = 1
         elif scene.frame_start <= k.co.x <= scene.frame_end:
@@ -172,7 +173,9 @@ def get_delta(context, obj, fcurve):
     """Determine the transformation change by the user of the current object"""
 
     cur_frame = bpy.context.scene.frame_current
-    curve_value = fcurve.evaluate(cur_frame)
+    nla_frame = int(context.object.animation_data.nla_tweak_strip_time_to_scene(cur_frame))
+    nla_dif = nla_frame - cur_frame
+    curve_value = fcurve.evaluate(cur_frame-nla_dif)
 
     try:
         prop = obj.path_resolve(fcurve.data_path)
