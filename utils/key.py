@@ -94,6 +94,18 @@ def some_selected_key(context, obj):
     return False
 
 
+def some_selected_keys_in_objects(context, objects):
+    selected = False
+    for obj in objects:
+        if not utils.curve.valid_obj(context, obj):
+            continue
+        if some_selected_key(context, obj):
+            print('some selected Bone: ', some_selected_key(context, obj))
+            return True
+    print('some selected Bone: ', False)
+    return False
+
+
 def add_key(keys, x, y, select=False, index=-1):
     keys.add(1)
     if index == -1:
@@ -143,7 +155,8 @@ def first_and_last_selected(fcurve, keyframes):
         index = on_current_frame(fcurve)
         if index is None:
             return
-        keyframes = [index]
+        else:
+            keyframes = [index]
 
     first_index = keyframes[0]
     first_key = every_key[first_index]
@@ -153,6 +166,82 @@ def first_and_last_selected(fcurve, keyframes):
     last_key = every_key[last_index]
 
     return first_key, last_key
+
+
+def selected_bounding_box(context, objects, keys_selected=True):
+
+    most_left = None
+    most_right = None
+    left_limit = None
+    right_limit = None
+    lonely_cursor = True
+
+    for obj in objects:
+        if not utils.curve.valid_obj(context, obj):
+            continue
+
+        fcurves = obj.animation_data.action.fcurves
+
+        for fcurve in fcurves:
+            if not utils.curve.valid_fcurve(context, obj, fcurve):
+                continue
+            if keys_selected:
+                selected_keys_i = utils.key.get_selected_index(fcurve)
+                if selected_keys_i:
+                    first, last = first_and_last_selected(fcurve, selected_keys_i)
+                    left_neighbor, right_neighbor = get_selected_neigbors(fcurve, selected_keys_i)
+                    first_frame = first.co.x
+                    last_frame = last.co.x
+                    left_neighbor_frame = left_neighbor.co.x
+                    right_neighbor_frame = right_neighbor.co.x
+                else:
+                    first_frame = most_left
+                    last_frame = most_right
+                    left_neighbor_frame = left_limit
+                    right_neighbor_frame = right_limit
+            else:
+                key_i = utils.key.on_current_frame(fcurve)
+                if key_i:
+                    lonely_cursor = False
+                    first_frame = fcurve.keyframe_points[key_i].co.x
+                    last_frame = fcurve.keyframe_points[key_i].co.x
+                    left_neighbor, right_neighbor = get_index_neighbors(fcurve, key_i)
+                    left_neighbor_frame = left_neighbor.co.x
+                    right_neighbor_frame = right_neighbor.co.x
+                else:
+                    first_frame = bpy.context.scene.frame_current
+                    last_frame = bpy.context.scene.frame_current
+                    left_neighbor, right_neighbor = get_frame_neighbors(fcurve)
+                    left_neighbor_frame = left_neighbor.co.x
+                    right_neighbor_frame = right_neighbor.co.x
+
+            if most_left is None:
+                most_left = first_frame
+            elif first_frame < most_left:
+                most_left = first_frame
+
+            if most_right is None:
+                most_right = last_frame
+            elif last_frame > most_right:
+                most_right = last_frame
+
+            if left_limit is None:
+                left_limit = left_neighbor_frame
+            elif left_neighbor_frame > left_limit:
+                left_limit = left_neighbor_frame
+
+            if right_limit is None:
+                right_limit = right_neighbor_frame
+            elif right_neighbor_frame < right_limit:
+                right_limit = right_neighbor_frame
+
+    print('left limit: ', left_limit)
+    print('most left: ', most_left)
+    print('most right: ', most_right)
+    print('right limit: ', right_limit)
+    print('lonely cursor: ', lonely_cursor)
+
+    return most_left, most_right, left_limit, right_limit, lonely_cursor
 
 
 def on_current_frame(fcurve):

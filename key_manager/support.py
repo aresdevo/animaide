@@ -95,10 +95,10 @@ def add_key_type(context, fcurve, key_type):
 def change_frame(context, amount, direction='RIGHT'):
     """move keys horizontally"""
 
-    def can_move(l_neighbor, r_neighbor, l_key, r_key):
-        if l_neighbor is not None and l_key.co.x + amount <= l_neighbor.co.x:
+    def can_move(l_limit, r_limit, most_l, most_r):
+        if l_limit is not None and most_l + amount <= l_limit:
             return False
-        elif r_neighbor is not None and r_key.co.x + amount >= r_neighbor.co.x:
+        elif r_limit is not None and most_r + amount >= r_limit:
             return False
         else:
             return True
@@ -115,11 +115,19 @@ def change_frame(context, amount, direction='RIGHT'):
 
     frames = amount
 
+    some_selected_key = utils.key.some_selected_keys_in_objects(context, objects)
+
+    bounding_box = utils.key.selected_bounding_box(context, objects, some_selected_key)
+
+    most_left = bounding_box[0]
+    most_right = bounding_box[1]
+    left_limit = bounding_box[2]
+    right_limit = bounding_box[3]
+    lonely_cursor = bounding_box[4]
+
     for obj in objects:
         if not utils.curve.valid_obj(context, obj):
             continue
-
-        some_selected_key = utils.key.some_selected_key(context, obj)
 
         fcurves = obj.animation_data.action.fcurves
 
@@ -130,9 +138,7 @@ def change_frame(context, amount, direction='RIGHT'):
             selected_keys = utils.key.get_selected_index(fcurve)
 
             if selected_keys:
-                left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, selected_keys)
-                left_key, right_key = utils.key.first_and_last_selected(fcurve, selected_keys)
-                if not can_move(left_neighbor, right_neighbor, left_key, right_key):
+                if not can_move(left_limit, right_limit, most_left, most_right):
                     return
                 for index in selected_keys:
                     if not index:
@@ -143,33 +149,49 @@ def change_frame(context, amount, direction='RIGHT'):
                 frames = 0
 
             elif not some_selected_key:
-                left_neighbor, right_neighbor = utils.key.get_frame_neighbors(fcurve)
-                current_index = utils.key.on_current_frame(fcurve)
-                if current_index:
-                    key = fcurve.keyframe_points[current_index]
-                    if not can_move(left_neighbor, right_neighbor, key, key):
+                index = utils.key.on_current_frame(fcurve)
+                if index:
+                    if not can_move(left_limit, right_limit, most_left, most_right):
                         return
+                    key = fcurve.keyframe_points[index]
                     key.co.x += amount
-                    fcurve.update()
-                    # context.scene.frame_current += amount
                     frames = amount
-                # else:
-                #     if direction == 'LEFT' and right_neighbor:
-                #         right_neighbor.co.x = context.scene.frame_current
-                #     elif direction == 'RIGHT' and left_neighbor:
-                #         left_neighbor.co.x = context.scene.frame_current
-                #     frames = 0
                     fcurve.update()
 
-    context.scene.frame_current += frames
+    if lonely_cursor and not some_selected_key:
+        if direction == 'LEFT' and left_limit:
+            context.scene.frame_current = left_limit
+        elif direction == 'RIGHT' and right_limit:
+            context.scene.frame_current = right_limit
+    else:
+        context.scene.frame_current += frames
 
 
 def insert_frames(context, amount):
     """insert frames between keys"""
 
+    def can_move(meta, margen):
+        if meta is not None and margen + amount <= meta:
+            return False
+        else:
+            return True
+
     objects = context.selected_objects
 
+    if not objects:
+        return
+
     current_frame = context.scene.frame_current
+
+    some_selected_key = utils.key.some_selected_keys_in_objects(context, objects)
+
+    bounding_box = utils.key.selected_bounding_box(context, objects, some_selected_key)
+
+    most_left = bounding_box[0]
+    most_right = bounding_box[1]
+    left_limit = bounding_box[2]
+    right_limit = bounding_box[3]
+    lonely_cursor = bounding_box[4]
 
     def displace_keys(anchor_frame):
         for key in fcurve.keyframe_points:
@@ -181,9 +203,6 @@ def insert_frames(context, amount):
 
             key.co_ui.x += amount
 
-    if not objects:
-        return
-
     for obj in objects:
         if not utils.curve.valid_obj(context, obj):
             continue
@@ -199,10 +218,15 @@ def insert_frames(context, amount):
             selected_keys = utils.key.get_selected_index(fcurve)
 
             if selected_keys:
+                if not can_move(most_right, right_limit):
+                    return
                 for selected_i in selected_keys:
                     selected_k = fcurve.keyframe_points[selected_i]
                     displace_keys(selected_k.co_ui.x)
+                    # displace_keys(most_left)
             elif not some_selected_key:
+                if not can_move(current_frame, right_limit):
+                    return
                 displace_keys(current_frame)
 
             fcurve.update()
