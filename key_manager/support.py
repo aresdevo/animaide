@@ -96,9 +96,9 @@ def change_frame(context, amount, direction='RIGHT'):
     """move keys horizontally"""
 
     def can_move(l_limit, r_limit, most_l, most_r):
-        if l_limit is not None and most_l + amount <= l_limit:
+        if l_limit and most_l != l_limit and most_l + amount <= l_limit:
             return False
-        elif r_limit is not None and most_r + amount >= r_limit:
+        elif r_limit and most_r != r_limit and most_r + amount >= r_limit:
             return False
         else:
             return True
@@ -125,6 +125,8 @@ def change_frame(context, amount, direction='RIGHT'):
     right_limit = bounding_box[3]
     lonely_cursor = bounding_box[4]
 
+    mid = most_left + ((most_right - most_left)/2)
+
     for obj in objects:
         if not utils.curve.valid_obj(context, obj):
             continue
@@ -141,8 +143,6 @@ def change_frame(context, amount, direction='RIGHT'):
                 if not can_move(left_limit, right_limit, most_left, most_right):
                     return
                 for index in selected_keys:
-                    if not index:
-                        continue
                     key = fcurve.keyframe_points[index]
                     key.co.x += amount
                     fcurve.update()
@@ -150,7 +150,7 @@ def change_frame(context, amount, direction='RIGHT'):
 
             elif not some_selected_key:
                 index = utils.key.on_current_frame(fcurve)
-                if index:
+                if index is not None:
                     if not can_move(left_limit, right_limit, most_left, most_right):
                         return
                     key = fcurve.keyframe_points[index]
@@ -163,6 +163,8 @@ def change_frame(context, amount, direction='RIGHT'):
             context.scene.frame_current = left_limit
         elif direction == 'RIGHT' and right_limit:
             context.scene.frame_current = right_limit
+    elif some_selected_key:
+        context.scene.frame_current = mid + amount
     else:
         context.scene.frame_current += frames
 
@@ -171,7 +173,7 @@ def insert_frames(context, amount):
     """insert frames between keys"""
 
     def can_move(meta, margen):
-        if meta is not None and margen + amount <= meta:
+        if meta and meta != margen and margen + amount <= meta:
             return False
         else:
             return True

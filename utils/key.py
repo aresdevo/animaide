@@ -95,14 +95,11 @@ def some_selected_key(context, obj):
 
 
 def some_selected_keys_in_objects(context, objects):
-    selected = False
     for obj in objects:
         if not utils.curve.valid_obj(context, obj):
             continue
         if some_selected_key(context, obj):
-            print('some selected Bone: ', some_selected_key(context, obj))
             return True
-    print('some selected Bone: ', False)
     return False
 
 
@@ -234,12 +231,6 @@ def selected_bounding_box(context, objects, keys_selected=True):
                 right_limit = right_neighbor_frame
             elif right_neighbor_frame < right_limit:
                 right_limit = right_neighbor_frame
-
-    print('left limit: ', left_limit)
-    print('most left: ', most_left)
-    print('most right: ', most_right)
-    print('right limit: ', right_limit)
-    print('lonely cursor: ', lonely_cursor)
 
     return most_left, most_right, left_limit, right_limit, lonely_cursor
 
