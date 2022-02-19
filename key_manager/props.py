@@ -32,7 +32,7 @@ handle_type_t = [('FREE', 'Free', 'Each handle can be manipulated independently'
                  ('VECTOR', 'Vector', 'Each handle points to the adjacent key', 'HANDLE_VECTOR', 3),
                  ('AUTO', 'Auto', 'Automatically adjust both handles to conform the the curve', 'HANDLE_AUTO', 4),
                  ('AUTO_CLAMPED', 'Auto Clamped',
-                  'Automatically adjust both handles to conform the the curve but'
+                  'Automatically adjust both handles to conform the curve but'
                   ' flattens it as it gets to picks and valleys',
                   'HANDLE_AUTOCLAMPED', 5)]
 
