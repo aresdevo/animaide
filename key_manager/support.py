@@ -572,7 +572,7 @@ def set_value(key, str):
 
 
 def copy_value(keyframes, reference_key):
-    """Copy value of 'referece_key' to 'keyframes'"""
+    """Copy value of 'reference_key' to 'keyframes'"""
 
     for index, key in keyframes:
         key.co_ui.y = reference_key.co.y
