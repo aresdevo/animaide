@@ -186,7 +186,7 @@ class AnimAideTool(PropertyGroup):
 
     sticky_handles: BoolProperty(default=False,
                                  name='Sticky Handles',
-                                 description='If On key points will be modified independetly\n' \
+                                 description='If On key points will be modified independently\n' \
                                  'from its handles if the interpolation is "Free"\n' \
                                  'or "Aligned"')
 
