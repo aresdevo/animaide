@@ -154,7 +154,7 @@ class Preferences(AddonPreferences):
     key_manager_ui: EnumProperty(
         items=[('PANEL', 'Panel', 'Choose if you want "Key Manager" on a panel', '', 1),
                ('HEADERS', 'Headers', 'Choose if you want "Key Manager" tools on headers', '', 2)],
-        name="Kay Manager",
+        name="Key Manager",
         default='PANEL',
         update=key_manager_update
     )
