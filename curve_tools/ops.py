@@ -1025,7 +1025,7 @@ class ANIMAIDE_OT_push_bookmark(Operator):
 
 
 class ANIMAIDE_OT_get_ref_frame(Operator):
-    """Sets a refernce frame that will be use by the BLEND FRAME\n""" \
+    """Sets a reference frame that will be use by the BLEND FRAME\n""" \
     """tool. The one at the left sets the left reference, and the\n""" \
     """one on the right sets the right reference"""
 
