@@ -654,14 +654,22 @@ class ANIMAIDE_OT_smooth(Operator, ANIMAIDE_OT):
             factor = utils.clamp(self.factor, self.min_value, self.max_value)
             for index in self.selected_keys:
                 k = self.fcurve.keyframe_points[index]
-                if 'sy' not in self.original_values[index]:
-                    continue
-                smooth_y = self.original_values[index]['sy']
-                if smooth_y == 'book end':
+                book_end = self.original_values[index]['book_end']
+
+                # if 'sy' not in self.original_values[index]:
+                #     continue
+                # if not book_end:
+                #     continue
+
+                if book_end:
                     delta = 0
                 else:
-                    delta = self.original_values[index]['y'] - smooth_y
-                k.co_ui.y = self.original_values[index]['y'] - delta * factor
+                    # delta = smooth_y - self.original_values[index]['y']
+                    prek = self.original_values[index-1]['y']
+                    curk = self.original_values[index]['y']
+                    postk = self.original_values[index+1]['y']
+                    delta = (((prek + postk)/2) - curk)/1.8
+                k.co_ui.y = self.original_values[index]['y'] + delta * factor
         # else:
         #     self.report({'INFO'}, 'Some selected keys needed for this tool')
 

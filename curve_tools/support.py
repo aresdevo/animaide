@@ -179,8 +179,9 @@ def get_globals(context):
             under_cursor = []
             values = {}
             every_key = []
-            left_neighbor = None
-            right_neighbor = None
+            # left_neighbor = None
+            # right_neighbor = None
+            last_index = 0
 
             keys = fcurve.keyframe_points
 
@@ -208,25 +209,15 @@ def get_globals(context):
 
                     # key = fcurve.keyframe_points[key_index]
 
+                    values[key_index]['book_end'] = False
+                    curve_items['last_key'] = co
+                    last_index = key_index
+
                     if key_index - 1 not in keyframes:
-                        values[key_index]['sy'] = 'book end'
-                        prevkey_value = key.co_ui.y
-                        co = {'x': key.co_ui.x, 'y': key.co_ui.y}
+                        values[key_index]['book_end'] = True
                         curve_items['first_key'] = co
-                    else:
-                        prevkey_value = fcurve.keyframe_points[key_index - 1].co_ui.y
 
-                    if key_index + 1 not in keyframes:
-                        values[key_index]['sy'] = 'book end'
-                        nextkey_value = key.co_ui.y
-                        co = {'x': key.co_ui.x, 'y': key.co_ui.y}
-                        curve_items['last_key'] = co
-                    else:
-                        nextkey_value = fcurve.keyframe_points[key_index + 1].co_ui.y
-
-                    # smooth = (prevkey_value + key.co_ui.y + nextkey_value) / 3
-                    smooth = (prevkey_value + nextkey_value) / 2
-                    values[key_index]['sy'] = smooth
+            values[last_index]['book_end'] = True
 
             if keyframes:
                 # left_neighbor, right_neighbor = utils.key.get_selected_neigbors(fcurve, keyframes)
