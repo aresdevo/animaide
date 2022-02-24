@@ -12,7 +12,7 @@
 ###
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
- ![Shortcut Troubleshoot](blob/gh-pages/images/animaide.jpg)
+ ![Shortcut Troubleshoot](https://github.com/aresdevo/animaide/blob/gh-pages/images/animaide.jpg)
 
  In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
  with the vertices on a geometry. That is where **AnimAide** comes in.
