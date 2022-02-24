@@ -11,7 +11,6 @@
 
 ###
 
- ![Shortcut Troubleshoot](images/animaide.jpg)
  ![Shortcut Troubleshoot](https://github.com/aresdevo/animaide/blob/gh-pages/images/animaide.jpg)
 
  In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
@@ -79,7 +78,7 @@
 >   If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel to
 >   delete any previous shortcut that might be conflicting.
 > 
->   ![Local Space](images/shortcut_troubleshoot.gif)
+>   ![Local Space](https://github.com/aresdevo/animaide/blob/gh-pages/images/shortcut_troubleshoot.gif)
 >
 >
 
@@ -95,23 +94,23 @@
 > folder where you downloaded the addon. After you select the file and click "Install Add-on", AnimAide will be installed
 > under the animation category:
 > 
-> ![Installing 2](images/installing2.gif)
+> ![Installing 2](https://github.com/aresdevo/animaide/blob/gh-pages/images/installing2.gif)
 >
 > Make sure the addon check-mark is active:
 > 
-> ![Installing 3](images/installing3.jpg)
+> ![Installing 3](https://github.com/aresdevo/animaide/blob/gh-pages/images/installing3.jpg)
 >
 >> ### New:
 >>
 >> You can add most the panels to the headers now by selecting the new options on the addon
 >> preferences:
 >>
->> ![preferences](images/preferences.jpg)
+>> ![preferences](https://github.com/aresdevo/animaide/blob/gh-pages/images/preferences.jpg)
 >>
 >> As you can see, you can also find others settings there that used to be
 >> in the main Blender interface:
 >>
->> ![settingns in preferences](images/preferences_preferences.jpg)
+>> ![settingns in preferences](https://github.com/aresdevo/animaide/blob/gh-pages/images/preferences_preferences.jpg)
 
 > ### Where to find the tools
 >
@@ -135,13 +134,13 @@
 > 
 > GraphEditor menu:
 > 
-> ![Graph Editor menu](images/ge_menu.gif)
+> ![Graph Editor menu](https://github.com/aresdevo/animaide/blob/gh-pages/images/ge_menu.gif)
 >
 > #### You can add your own shortcuts:
 > To do so find the tools on the "AnimAide" menu and right-click on one of them. You will then get an option to
 > add a shortcut to it:
 > 
-> ![Shortcut](images/shortcut.jpg)
+> ![Shortcut](https://github.com/aresdevo/animaide/blob/gh-pages/images/shortcut.jpg)
 
 At the moment, Animaide has Three main panels:  
 - **curveTools**
@@ -151,7 +150,7 @@ At the moment, Animaide has Three main panels:
 > ## curveTools
 > ###
 >
-> ![Shortcut Troubleshoot](images/local_space.gif)
+> ![Shortcut Troubleshoot](https://github.com/aresdevo/animaide/blob/gh-pages/images/local_space.gif)
 >
 > These panel gives you helpful tools to simultaneously manipulate keys across
 > multiple f-curves from either animated objects or animated bones in an armature.
@@ -163,7 +162,7 @@ At the moment, Animaide has Three main panels:
 
 > ### How the interface works:
 >
-> ![Buttons](images/big_button.jpg)
+> ![Buttons](https://github.com/aresdevo/animaide/blob/gh-pages/images/big_button.jpg)
 >
 > **CurveTools** shows as buttons in the interface. After selecting some keys on one or more f-curves,
 > activate a tool by clicking the main big button with its name on it. The main button affects the
@@ -171,61 +170,61 @@ At the moment, Animaide has Three main panels:
 >
 > As you apply the tool information will also show in the status bar:
 >
-> ![Curve Tools Status Bar](images/curve_tools_status_bar.gif)
+> ![Curve Tools Status Bar](https://github.com/aresdevo/animaide/blob/gh-pages/images/curve_tools_status_bar.gif)
 
 > To select other tools as the active one, there is a pop-up menu next to the main button:
 >
-> ![ge tool list](images/ge_tool_list.gif)
+> ![ge tool list](https://github.com/aresdevo/animaide/blob/gh-pages/images/ge_tool_list.gif)
 >
 > There is a new button next to the pop-up menu:
 >
-> ![overshoot](images/overshoot.gif)
+> ![overshoot](https://github.com/aresdevo/animaide/blob/gh-pages/images/overshoot.gif)
 >
 > That is the overshoot button that allows a bigger range of change.
 >
 > Below there is an array of small buttons that allows you to apply the tool in increments of 25%.
 > It will use the last selected or activated.
 >
-> ![steps](images/steps.gif)
+> ![steps](https://github.com/aresdevo/animaide/blob/gh-pages/images/steps.gif)
 
 > ### It has two modes:
 > - **Compact:**
 >
->   ![big button](images/big_button.jpg)
+>   ![big button](https://github.com/aresdevo/animaide/blob/gh-pages/images/big_button.jpg)
 >
 >   You will only see one tool at a time. The right button with a wave icon is a pop-up menu where you
 >   can select all the other tools.
 >
 > - **Expanded:**
 >
->   ![Expanded Mode](images/ge_expand.gif)
+>   ![Expanded Mode](https://github.com/aresdevo/animaide/blob/gh-pages/images/ge_expand.gif)
 >
 >   Expand the tools view by clicking the arrow to the left. You then are able to work with all the tools
 >   at once. The pop-up menu moves to the bottom.
 >
 > Any option needed by the active tools will be found at the bottom.
 >
-> ![Overshoot](images/expanded_settings.jpg)
+> ![Overshoot](https://github.com/aresdevo/animaide/blob/gh-pages/images/expanded_settings.jpg)
 
 > #### Note:
 >
 > Some **CurveTools** don't make much sense when used on the 3D-View, for that reason
 > Only there a few are available there:
 >
-> ![3D view CurveTools](images/3d_tools_expand.jpg)
+> ![3D view CurveTools](https://github.com/aresdevo/animaide/blob/gh-pages/images/3d_tools_expand.jpg)
 
 > ### Curve Tools Settings:
 >
 > Can now be found in the addon preferences:
 >
-> ![use markers](images/use_markers_setting.jpg)
+> ![use markers](https://github.com/aresdevo/animaide/blob/gh-pages/images/use_markers_setting.jpg)
 >
 > - **Activate on release:**
     When this option is selected tools will behave similar to previous version
     in the sense that they will become active as soon as you select them. If you unselect it, tools will become
     active only after you left-click and drag.
 >
->   ![Installing 2](images/not_on_mouse_release.gif)
+>   ![Installing 2](https://github.com/aresdevo/animaide/blob/gh-pages/images/not_on_mouse_release.gif)
 >
 > - **Use Markers:**
     When selected markers will be added whenever a reference frame is created.
@@ -236,24 +235,24 @@ At the moment, Animaide has Three main panels:
 >
 >   Experiment combination of tools to achieve desire effects:
 >
->   ![combining tools](images/combining_tools.gif)
+>   ![combining tools](https://github.com/aresdevo/animaide/blob/gh-pages/images/combining_tools.gif)
 >
 > 
 > - **Sticky Handles:**
 >
->   ![sticky handles](images/sticky_handles.gif)
+>   ![sticky handles](https://github.com/aresdevo/animaide/blob/gh-pages/images/sticky_handles.gif)
 >
 >   This used to be a bug but now that improved API tools took that away I thought to bring it back because can be
 >   useful at times. Basically, when active the key handles are left behind when the keyframe points are modified if
 >   the handle type is either "free" or "aligned".
 >   This is a simple use case for this tool:
 >
->   ![sticky handles use case](images/sticky_handles_use_case.gif)
+>   ![sticky handles use case](https://github.com/aresdevo/animaide/blob/gh-pages/images/sticky_handles_use_case.gif)
 >
 > 
 > - **Tweak tools:**
 >
->   ![Tweak Menu](images/tweak_menu.jpg)
+>   ![Tweak Menu](https://github.com/aresdevo/animaide/blob/gh-pages/images/tweak_menu.jpg)
 >
 >   Create a shortcut for the **Tweak** tools if you like to work jumping from key to key adjusting the pose
 >   on each frame.
@@ -261,7 +260,7 @@ At the moment, Animaide has Three main panels:
 >
 > - **Auto Key:**
 >
->   ![tools with auto key](images/tools_with_autokey.gif)
+>   ![tools with auto key](https://github.com/aresdevo/animaide/blob/gh-pages/images/tools_with_autokey.gif)
 >
 >   When no key is selected and "auto key" is on most **curveTools** will add a key where the cursor is.
 
@@ -271,7 +270,7 @@ At the moment there are 15 different tools:
 >
 > This is similar to "Ease", but it remembers how the curve was before engaging the tool.
 >
-> ![Blend Ease](images/blend_ease.gif)
+> ![Blend Ease](https://github.com/aresdevo/animaide/blob/gh-pages/images/blend_ease.gif)
 
 > ### Blend Frame
 >
@@ -279,23 +278,23 @@ At the moment there are 15 different tools:
 > There are two buttons (Left and Right) that store the corresponding left and right reference frames. You can set
 > reference frames by clicking those buttons.
 >
-> ![Reference Frames](images/blend_frame.gif)
+> ![Reference Frames](https://github.com/aresdevo/animaide/blob/gh-pages/images/blend_frame.gif)
 >
 > By default, the option "Use markers" is active. With it, markers are position where the reference frames are.
 > The markers are linked to the reference frames, so if you move the markers you also modify the reference frames.
 >
-> ![Marker Linked](images/marker_linked.gif)
+> ![Marker Linked](https://github.com/aresdevo/animaide/blob/gh-pages/images/marker_linked.gif)
 >
 > it remembers how the curve was before engaging the tool.
 >
 > You can save additional frames as bookmark for later use. You can find that option on a sub-panel called:
 > **Frame Bookmarks**
 >
-> ![Blend Frame](images/frame_bookmark.gif)
+> ![Blend Frame](https://github.com/aresdevo/animaide/blob/gh-pages/images/frame_bookmark.gif)
 
 > ### Blend Infinite
 >
-> ![Blend Frame](images/blend_infinite.gif)
+> ![Blend Frame](https://github.com/aresdevo/animaide/blob/gh-pages/images/blend_infinite.gif)
 > 
 > Lets you position the keys based on the slope created by the two neighboring keys to the left or the right.
 
@@ -304,86 +303,86 @@ At the moment there are 15 different tools:
 > Progressively makes the values of the selected keys match either of the neighboring keys. it remembers how the curve was
 > before engaging the tool.
 >
-> ![Blend Neighbor](images/blend_neighbor.gif)
+> ![Blend Neighbor](https://github.com/aresdevo/animaide/blob/gh-pages/images/blend_neighbor.gif)
 
 > ### Blend Offset
 >
 > Moves the selected keys as a block until it reaches either neighboring key
 >
-> ![Blend Offset](images/blend_offset.gif)
+> ![Blend Offset](https://github.com/aresdevo/animaide/blob/gh-pages/images/blend_offset.gif)
 
 > ### Ease
 >
 > With this one, you arch the f_curve with either an ease-in or an ease-out. It does not
 > remember how the curve was before activating the tool
 >
-> ![Ease](images/ease.gif)
+> ![Ease](https://github.com/aresdevo/animaide/blob/gh-pages/images/ease.gif)
 
 > ### Ease To Ease
 >
 > This f-curve manipulator tool transition smoothly from one end to the next with ease-in and ease-out.
 > It does not remember how the curve was before activating the tool.
 >
-> ![Ease To Ease](images/ease_to_ease.gif)
+> ![Ease To Ease](https://github.com/aresdevo/animaide/blob/gh-pages/images/ease_to_ease.gif)
 
 > ### Scale Average
 >
 > Scale the values of the selected keys using the average of all the values as the anchor.
 >
-> ![Scale Average](images/scale_average.gif)
+> ![Scale Average](https://github.com/aresdevo/animaide/blob/gh-pages/images/scale_average.gif)
 
 > ### Scale Left
 >
 > Scale the values of the selected keys using the left neighboring key as the anchor.
 >
-> ![Scale Left](images/scale_left.gif)
+> ![Scale Left](https://github.com/aresdevo/animaide/blob/gh-pages/images/scale_left.gif)
 
 > ### Scale Right
 >
 > Scale the values of the selected keys using the right neighboring key as the anchor.
 >
-> ![Scale Right](images/scale_right.gif)
+> ![Scale Right](https://github.com/aresdevo/animaide/blob/gh-pages/images/scale_right.gif)
 
 > ### Smooth
 >
 > It will try to average the values of the keys to smooth out the f-curve. You might have to run the slider more than once to get a smoother result.
 >
-> ![Smooth](images/smooth.gif)
+> ![Smooth](https://github.com/aresdevo/animaide/blob/gh-pages/images/smooth.gif)
 
 > ### Push-Pull
 >
 > Exaggerates the values (push) or decreases the intensity of the animation (pull)
 >
-> ![Push Pull](images/Push_pull.gif)
+> ![Push Pull](https://github.com/aresdevo/animaide/blob/gh-pages/images/Push_pull.gif)
 
 > ### Time Offset
 >
 > The effect is similar to sliding the keys in time, but with this option, the keys stay in the same frame. It works better when there are a lot of keys.
 >
-> ![Time Offset](images/time_offset.gif)
+> ![Time Offset](https://github.com/aresdevo/animaide/blob/gh-pages/images/time_offset.gif)
 
 > ### Tween
 >
 > A simple linear transition between the neighboring keys
 >
-> ![Tween](images/tween.gif)
+> ![Tween](https://github.com/aresdevo/animaide/blob/gh-pages/images/tween.gif)
 
 > ### Wave-Noise
 >
 > It adds random values to the selected keys when moving to the right and a wave pattern when moving to the left.
 >
-> ![Noise](images/wave-noise.gif)
+> ![Noise](https://github.com/aresdevo/animaide/blob/gh-pages/images/wave-noise.gif)
 
 > There are two pie menus with all the tools in them. You can find them in the Animaide menu.
 > Assigning a shortcut to the pie menu would be advised.
 >
-> ![Pie Menu A](images/curve_tools_pie_a.jpg)
-> ![Pie Menu A](images/curve_tools_pie_b.jpg)
+> ![Pie Menu A](https://github.com/aresdevo/animaide/blob/gh-pages/images/curve_tools_pie_a.jpg)
+> ![Pie Menu A](https://github.com/aresdevo/animaide/blob/gh-pages/images/curve_tools_pie_b.jpg)
 
 > ## animOffset
 > ###
 > 
-> ![AnimOffset](images/anim_offset_basic.gif)
+> ![AnimOffset](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_basic.gif)
 >
 > With this tool you can modify any animated object, and the change will propagate to the animation range. It can be
 > filter by a mask. You can find the panel in all the animation editors, but the mask option just in the GraphEditor.
@@ -393,24 +392,24 @@ At the moment there are 15 different tools:
 > 
 > Anim Offset panel:
 > 
-> ![AnimOffset panel](images/anim_offset_panel.gif)
+> ![AnimOffset panel](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_panel.gif)
 > 
 >> #### New:
 >> 
 >> It is on a panel by default but can be put on the animation views headers by going to the addon preferences window:
 >>
->> ![AnimOffset preferences](images/anim_offset_header_setting.jpg)
+>> ![AnimOffset preferences](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_header_setting.jpg)
 >>
 >> This is how the header looks like:
 >>
->> ![AnimOffset header](images/anim_offset_header.jpg)
+>> ![AnimOffset header](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_header.jpg)
 >>
 >> It has more or less icons depending on the panel or if a mask has been created.
 >
 
 > ### AnimOffset Mask
 >
-> ![Mask Creation](images/anim_offset_mask.gif)
+> ![Mask Creation](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_mask.gif)
 >
 > While creating or modifying the mask you can use modifier
 > keys to activate different options:
@@ -432,50 +431,50 @@ At the moment there are 15 different tools:
 >
 > The status bar shows important information, including what the modifier keys do.
 > 
-> ![Anim Offset Status Bar](images/anim_offset_status_bar.gif)
+> ![Anim Offset Status Bar](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_status_bar.gif)
 >
 > When a mask has been created and the tools is on the header, a new pencil icon shows up in the Graph Editor.
 > This pencil activates a mask edit-mode that you can get out by using the "Escape" key, or your mouse
 > right click button.
 > 
-> ![AnimOffset header in use](images/anim_offset_header_in_use.jpg)
+> ![AnimOffset header in use](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_header_in_use.jpg)
 
 > AnimOffset only works if the current frame is inside
 > the margins. For this reason, when the mask is created or
 > modified, the cursor will be position in the middle of the mask. 
 > 
-> ![Key outside margin](images/key_outside_margin.gif)
+> ![Key outside margin](https://github.com/aresdevo/animaide/blob/gh-pages/images/key_outside_margin.gif)
 > 
 > There is an option in the preferences called "autokey outside margins", if selected, any time
 > the cursor is outside the margins while manipulating the object it will create a key.
 
-> ![Fast calculation setting](images/fast_calculation_setting.jpg)
+> ![Fast calculation setting](https://github.com/aresdevo/animaide/blob/gh-pages/images/fast_calculation_setting.jpg)
 > 
 > Selecting "Fast offset calculation" option in the addon preferences updates the f-curves only after the transformation
 > is over:
 > 
-> ![Fast calculation](images/fast_calculation.gif)
+> ![Fast calculation](https://github.com/aresdevo/animaide/blob/gh-pages/images/fast_calculation.gif)
 
 > In the mask options you can adjust the slope of the mask blend influence:
 > 
-> ![Mask Blend Settings](images/anim_offset_mask_slope.gif)
+> ![Mask Blend Settings](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_mask_slope.gif)
 
 >> #### New
 >>
 >> Now **AnimOffst** works seamlessly with Blender's auto key:
 >>
->> ![Anim Offset vs auto key](images/anim_offset_vs_auto_key.gif)
+>> ![Anim Offset vs auto key](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_vs_auto_key.gif)
 >> 
 > There is a new pie menu with all the **AnimOffset** commands:
 > 
-> ![Anim Offset pie menu](images/anim_offset_pie.jpg)
+> ![Anim Offset pie menu](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_pie.jpg)
 > 
 > You can find it on the **Animaide** menu in the Graph Editor.
 
 > ## KeyManager:
 > ###
 > 
-> ![Key Manager](images/key_manager_panel.jpg)
+> ![Key Manager](https://github.com/aresdevo/animaide/blob/gh-pages/images/key_manager_panel.jpg)
 > 
 > This toolbox mostly aims to speedup some tasks you already can do by adding extra options to some Blender Tools.
 >
@@ -488,14 +487,14 @@ At the moment there are 15 different tools:
 > 
 > **Move:**
 > 
-> ![Move Keys](images/move_keys.gif)
+> ![Move Keys](https://github.com/aresdevo/animaide/blob/gh-pages/images/move_keys.gif)
 > 
 > Move keys in time by a specified amount. If some keys are selected just those will be affected. 
 > If non are selected the key under the cursor will be affected.
 > 
 > **Insert:** 
 > 
-> ![Move Keys](images/insert_keys.gif)
+> ![Move Keys](https://github.com/aresdevo/animaide/blob/gh-pages/images/insert_keys.gif)
 > 
 > Insert frames between keys by a specified amount. If some keys are selected, frames will be inserted 
 > betwee those. If non is selected frames will be inserted where the cursor is.
@@ -503,7 +502,7 @@ At the moment there are 15 different tools:
 
 > ### Type
 > 
-> ![Key Type](images/key_type.gif)
+> ![Key Type](https://github.com/aresdevo/animaide/blob/gh-pages/images/key_type.gif)
 > 
 > Uses the colored Blender key types, and lets you "assign", "select",
 "unselect" and "delete" them by type.
@@ -512,12 +511,12 @@ At the moment there are 15 different tools:
 
 > ### Interpolation
 > 
-> ![Key interpolation](images/key_interpolation.gif)
+> ![Key interpolation](https://github.com/aresdevo/animaide/blob/gh-pages/images/key_interpolation.gif)
 > 
 > Lest you quickly assign interpolation types to key handles, just like Blender does, but with the added benefit of
 > been able to assign it to every key in the selected object with the click of a button.
 > 
-> ![Handle type and selection](images/handle_type_and_selection.gif)
+> ![Handle type and selection](https://github.com/aresdevo/animaide/blob/gh-pages/images/handle_type_and_selection.gif)
 > 
 > When dealing with "Bezier" curves, it lets you the left or right handles of every selected key to easily interact
 > with a group of handles at once.
@@ -526,18 +525,18 @@ At the moment there are 15 different tools:
 > 
 > This panel can be moved to the animation views headers to make them more accessible.
 > 
-> ![Key Manager header setting](images/key_manager_header_setting.jpg)
+> ![Key Manager header setting](https://github.com/aresdevo/animaide/blob/gh-pages/images/key_manager_header_setting.jpg)
 >
 > When in the header the panel is devided in two:
 > - One that has all the options for keyframes:
 > 
->   ![Key Manager header keys](images/key_manager_header_a.jpg)
+>   ![Key Manager header keys](https://github.com/aresdevo/animaide/blob/gh-pages/images/key_manager_header_a.jpg)
 > 
 >   You can find it on the Graph Editor, Dopesheet and Timeline headers.
 > 
 > - And another one that has all the options for the handles:
 > 
->   ![Key Manager header handles](images/key_manager_header_b.jpg)
+>   ![Key Manager header handles](https://github.com/aresdevo/animaide/blob/gh-pages/images/key_manager_header_b.jpg)
 > 
 >    You can find this one only on the Graph editor header
 > 
