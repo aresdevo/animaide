@@ -25,6 +25,17 @@ import blf
 # from curve_tools.support import get_items
 
 
+def set_animaide_action():
+    """Creates an "action" called 'animaide'"""
+
+    action = bpy.data.actions.get('animaide')
+
+    if action is None:
+        return bpy.data.actions.new('animaide')
+    else:
+        return bpy.data.actions.get('animaide')
+
+
 def gradual(key_y, target_y, delta=1.0, factor=0.15):
     """Gradualy transition the value of key_y to target_y"""
     step = abs(key_y - target_y) * (delta * factor)

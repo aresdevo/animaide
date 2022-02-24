@@ -230,11 +230,15 @@ class ANIMAIDE_PT_curve_tools:
             tool_button(context, col, 'scale_left')
             tool_button(context, col, 'scale_right')
             col.separator()
-            if context.area.type != 'VIEW_3D':
-                tool_button(context, col, 'smooth')
+            tool_button(context, col, 'shear_left')
+            tool_button(context, col, 'shear_right')
+            col.separator()
             tool_button(context, col, 'push_pull')
             tool_button(context, col, 'time_offset')
             tool_button(context, col, 'tween')
+            col.separator()
+            if context.area.type != 'VIEW_3D':
+                tool_button(context, col, 'smooth')
             if context.area.type != 'VIEW_3D':
                 tool_button(context, col, 'wave_noise')
 

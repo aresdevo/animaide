@@ -20,6 +20,7 @@ Created by Ares Deveaux
 '''
 
 import math
+import bpy
 
 # from utils.key import global_values, on_current_frame, get_selected_neigbors, \
 #     get_frame_neighbors
@@ -43,6 +44,65 @@ def add_noise(fcurve, strength=0.4, scale=1, phase=0):
     # fcurve.convert_to_samples(0, 100)
     # fcurve.convert_to_keyframes(0, 100)
     # fcurve.modifiers.remove(noise)
+
+
+def add_shear_curve():
+    """Add a curve with 4 control pints to an action called 'animaide' that would act as a mask for anim_offset"""
+    action = utils.set_animaide_action()
+    fcurves = getattr(action, 'fcurves', None)
+    if len(fcurves) == 0:
+        return utils.curve.new('Shear', 2, key_interp='VECTOR')
+    else:
+        return action.fcurves[0]
+
+
+def set_shear_values(left, right):
+    """Modify the position of the fcurve 4 control points that is been used as mask to anim_offset """
+
+    # scene = context.scene
+    action = bpy.data.actions.get('animaide')
+    curves = getattr(action, 'fcurves', None)
+
+    if curves is not None:
+        curve = curves[0]
+        keys = curve.keyframe_points
+
+        # left_blend = scene.frame_preview_start
+        # left_margin = scene.frame_start
+        # right_margin = scene.frame_end
+        # right_blend = scene.frame_preview_end
+
+        keys[0].co.x = left
+        keys[0].co.y = 0
+        keys[1].co.x = right
+        keys[1].co.y = 0
+        # keys[2].co.x = right_margin
+        # keys[2].co.y = 1
+        # keys[3].co.x = right_blend
+        # keys[3].co.y = 0
+        curve.update()
+
+
+def shear(self, direction):
+    if direction == 'left':
+        direction = 1
+    else:
+        direction = 0
+    shear_action = utils.set_animaide_action()
+    shear_curves = getattr(shear_action, 'fcurves', None)
+    shear_curve = add_shear_curve()
+    local_y = self.right_neighbor['y'] - self.left_neighbor['y']
+    set_shear_values(self.left_neighbor['x'], self.right_neighbor['x'])
+
+    factor = utils.clamp(self.factor, self.min_value, self.max_value)
+    shear_curve.keyframe_points[direction].co_ui.y = local_y
+    shear_curve.update()
+
+    for index in self.selected_keys:
+        k = self.fcurve.keyframe_points[index]
+        k.co_ui.y = self.original_values[index]['y'] + shear_curve.evaluate(k.co.x) * factor
+
+    shear_curves.remove(shear_curve)
 
 
 def set_min_max_values(self, context):

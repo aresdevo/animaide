@@ -93,46 +93,6 @@ def magnet_handlers(scene):
     return
 
 
-def add_keys(context):
-    selected_objects = context.selected_objects
-
-    for obj in selected_objects:
-        action = getattr(obj.animation_data, 'action', None)
-
-        for fcurve in getattr(action, 'fcurves', list()):
-            scene = context.scene
-            anim_offset = scene.animaide.anim_offset
-
-            if fcurve.lock:
-                return
-
-            if getattr(fcurve.group, 'name', None) == 'animaide':
-                return  # we don't want to select keys on reference fcurves
-
-            # if context.scene.animaide.anim_offset.mask_in_use:
-            #     cur_frame = context.scene.frame_current
-            #     if cur_frame < scene.frame_start or cur_frame > scene.frame_end:
-            # if anim_offset.insert_outside_keys:
-            # if context.area.type == 'GRAPH_EDITOR':
-            #     bpy.ops.graph.keyframe_insert(type='ALL')
-            # else:
-            # bpy.ops.anim.keyframe_insert_menu(type='Available')
-
-            keys = fcurve.keyframe_points
-            cur_index = utils.key.on_current_frame(fcurve)
-            delta_y = get_delta(context, obj, fcurve)
-
-            if not cur_index:
-                cur_frame = context.scene.frame_current
-                y = fcurve.evaluate(cur_frame) + delta_y
-                # keys.insert(cur_frame, y)
-                utils.key.insert_key(keys, cur_frame, y)
-                # utils.key.add_key(keys, x, y, select=False)
-            else:
-                key = keys[cur_index]
-                key.co_ui.y += delta_y
-
-
 def magnet(context, obj, fcurve):
     """Modify all the keys in every fcurve of the current object proportionally to the change in transformation
     on the current frame by the user """
@@ -195,48 +155,14 @@ def get_delta(context, obj, fcurve):
 # ----------- Mask -----------
 
 
-def set_animaide_action():
-    """Creates an "action" called 'animaide'"""
-
-    blends_action = bpy.data.actions.get('animaide')
-
-    if blends_action is None:
-        return bpy.data.actions.new('animaide')
-
-    return
-
-
-def add_animaide_fcurve(action_group, color=(1, 1, 1)):
-    """Adds and fcuve in the 'animaide' action"""
-
-    blends_action = bpy.data.actions.get('animaide')
-
-    if blends_action is None:
-        return
-
-    if len(blends_action.fcurves) == 0:
-        blends_curve = blends_action.fcurves.new(data_path='animaide', index=0, action_group=action_group)
-        blends_curve.color_mode = 'CUSTOM'
-        blends_curve.color = color
-    else:
-        blends_curve = blends_action.fcurves[0]
-
-    return blends_curve
-
-
 def add_blends():
     """Add a curve with 4 control pints to an action called 'animaide' that would act as a mask for anim_offset"""
-
-    set_animaide_action()
-    blends_curve = add_animaide_fcurve(action_group='Magnet')
-    keys = blends_curve.keyframe_points
-    if len(keys) == 0:
-        keys.add(4)
-
-    blends_curve.lock = True
-    blends_curve.select = True
-    blends_curve.update() # check if I need to add irmita's key function
-    return blends_curve
+    action = utils.set_animaide_action()
+    fcurves = getattr(action, 'fcurves', None)
+    if len(fcurves) == 0:
+        return utils.curve.new('Magnet', 4)
+    else:
+        return action.fcurves[0]
 
 
 def remove_mask(context):
@@ -302,6 +228,33 @@ def mask_interpolation(keys, context):
     keys[1].easing = 'EASE_IN_OUT'
     keys[2].interpolation = interp
     keys[2].easing = oposite
+
+
+def add_keys(context):
+    selected_objects = context.selected_objects
+
+    for obj in selected_objects:
+        action = getattr(obj.animation_data, 'action', None)
+
+        for fcurve in getattr(action, 'fcurves', list()):
+
+            if fcurve.lock:
+                return
+
+            if getattr(fcurve.group, 'name', None) == 'animaide':
+                return  # we don't want to select keys on reference fcurves
+
+            keys = fcurve.keyframe_points
+            cur_index = utils.key.on_current_frame(fcurve)
+            delta_y = get_delta(context, obj, fcurve)
+
+            if not cur_index:
+                cur_frame = context.scene.frame_current
+                y = fcurve.evaluate(cur_frame) + delta_y
+                utils.key.insert_key(keys, cur_frame, y)
+            else:
+                key = keys[cur_index]
+                key.co_ui.y += delta_y
 
 
 # -------- For mask interface -------

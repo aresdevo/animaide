@@ -37,6 +37,32 @@ def add_curve3d(context, name, key_amount=0):
     return obj
 
 
+def new(action_group_name, keys_to_add, key_interp='AUTO_CLAMPED', color=(1, 1, 1)):
+    """Adds and fcuve in the 'animaide' action"""
+
+    action = utils.set_animaide_action()
+
+    blends_curve = action.fcurves.new(data_path=group_name, index=0, action_group=action_group_name)
+    blends_curve.color_mode = 'CUSTOM'
+    blends_curve.color = color
+
+    keys = blends_curve.keyframe_points
+    keys.add(keys_to_add)
+
+    for k in keys:
+        k.handle_left_type = key_interp
+        k.handle_right_type = key_interp
+
+    bpy.ops.transform.translate(value=(0, 0, 0))
+
+    blends_curve.lock = True
+    blends_curve.select = True
+    blends_curve.update() # check if I need to add irmita's key function
+    # utils.key.update_keyframe_points(context)
+
+    return blends_curve
+
+
 def create_path(context, fcurves):
     curve_obj = add_curve3d(context, "animaide_path")
     curve_obj.data.dimensions = '3D'

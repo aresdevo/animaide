@@ -40,12 +40,15 @@ menu_items = [('BLEND_EASE', 'Blend Ease', 'From current to C shape', '', 1),
               ('SCALE_LEFT', 'Scale Left', 'Scale anchor to left neighbor', '', 9),
               ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 10),
 
-              ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 11),
-              ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 12),
+              ('SHEAR_LEFT', 'Shear Left', 'Overshoots key values', '', 11),
+              ('SHEAR_RIGHT', 'Shear Right', 'Overshoots key values', '', 12),
 
-              ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 13),
-              ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 14),
-              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 15)]
+              ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 13),
+              ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 14),
+              ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 15),
+
+              ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 16),
+              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 17)]
 
 
 menu_items_3d = [('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 1),

@@ -716,6 +716,76 @@ class ANIMAIDE_OT_time_offset(Operator, ANIMAIDE_OT):
         return support.to_execute(self, context, self.tool, context)
 
 
+class ANIMAIDE_OT_shear_right(Operator, ANIMAIDE_OT):
+    """Shift the value in time of selected or current keys """
+
+    bl_idname = "anim.aide_shear_right"
+    bl_label = "Shear Right"
+
+    tool_type = 'SHEAR_RIGHT'
+
+    def tool(self, context):
+
+        if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            support.shear(self, 'right')
+
+            # shear_action = utils.set_animaide_action()
+            # shear_curve = support.add_shear_curve()
+            # shear_curves = getattr(shear_action, 'fcurves', None)
+            # local_y = self.right_neighbor['y'] - self.left_neighbor['y']
+            # support.set_shear_values(self.left_neighbor['x'], self.right_neighbor['x'])
+            #
+            # factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            # shear_curve.keyframe_points[1].co_ui.y = local_y * factor
+            #
+            # for index in self.selected_keys:
+            #     k = self.fcurve.keyframe_points[index]
+            #     k.co_ui.y = self.original_values[index]['y'] + shear_curve.evaluate(k.co.x)
+            #
+            # shear_curves.remove(shear_curve)
+
+    def execute(self, context):
+        return support.to_execute(self, context, self.tool, context)
+
+
+class ANIMAIDE_OT_shear_left(Operator, ANIMAIDE_OT):
+    """Shift the value in time of selected or current keys """
+
+    bl_idname = "anim.aide_shear_left"
+    bl_label = "Shear Left"
+
+    tool_type = 'SHEAR_LEFT'
+
+    def tool(self, context):
+
+        if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            support.shear(self, 'left')
+
+            # shear_action = utils.set_animaide_action()
+            # shear_curve = support.add_shear_curve()
+            # shear_curves = getattr(shear_action, 'fcurves', None)
+            # local_y = self.right_neighbor['y'] - self.left_neighbor['y']
+            # support.set_shear_values(self.left_neighbor['x'], self.right_neighbor['x'])
+            #
+            # factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            # shear_curve.keyframe_points[0].co_ui.y = local_y * factor
+            #
+            # for index in self.selected_keys:
+            #     k = self.fcurve.keyframe_points[index]
+            #     k.co_ui.y = self.original_values[index]['y'] + shear_curve.evaluate(k.co.x)
+            #
+            # shear_curves.remove(shear_curve)
+
+    def execute(self, context):
+        return support.to_execute(self, context, self.tool, context)
+
+
 class ANIMAIDE_OT_wave_noise(Operator, ANIMAIDE_OT):
     """Set random values to the selected or current key \n""" \
     """or set them in a wave pattern."""
@@ -1127,6 +1197,8 @@ classes = (
     ANIMAIDE_OT_smooth,
     ANIMAIDE_OT_wave_noise,
     ANIMAIDE_OT_time_offset,
+    ANIMAIDE_OT_shear_left,
+    ANIMAIDE_OT_shear_right,
     ANIMAIDE_OT_tween,
     ANIMAIDE_OT_blend_infinite,
 )
