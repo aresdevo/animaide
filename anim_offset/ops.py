@@ -307,7 +307,7 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
                 # ----------- center cursor ----------
                 start = scene.frame_start
                 end = scene.frame_end
-                scene.frame_current = (end + start)/2
+                scene.frame_current = int((end + start)/2)
 
                 self.leftmouse = False
                 self.created = True
