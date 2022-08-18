@@ -31,37 +31,39 @@ menu_items = [('BLEND_EASE', 'Blend Ease', 'From current to C shape', '', 1),
               ('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 2),
               ('BLEND_INFINITE', 'Blend Infinite', 'Adds or adjust keys to conform to the adjacent slope', '', 3),
               ('BLEND_NEIGHBOR', 'Blend Neighbor', 'From current to neighbors', '', 4),
-              ('BLEND_OFFSET', 'Blend Offset', 'Offset key values to neighbors', '', 5),
+              ('BLEND_DEFAULT', 'Blend Default', 'From default value', '', 5),
+              ('BLEND_OFFSET', 'Blend Offset', 'Offset key values to neighbors', '', 6),
 
-              ('EASE', 'Ease', 'C shape transition', '', 6),
-              ('EASE_TO_EASE', 'Ease To Ease', 'S shape transition', '', 7),
+              ('EASE', 'Ease', 'C shape transition', '', 7),
+              ('EASE_TO_EASE', 'Ease To Ease', 'S shape transition', '', 8),
 
-              ('SCALE_AVERAGE', 'Scale Average', 'Scale to average value', '', 8),
-              ('SCALE_LEFT', 'Scale Left', 'Scale anchor to left neighbor', '', 9),
-              ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 10),
+              ('SCALE_AVERAGE', 'Scale Average', 'Scale to average value', '', 9),
+              ('SCALE_LEFT', 'Scale Left', 'Scale anchor to left neighbor', '', 10),
+              ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 11),
 
-              ('SHEAR_LEFT', 'Shear Left', 'Overshoots key values', '', 11),
-              ('SHEAR_RIGHT', 'Shear Right', 'Overshoots key values', '', 12),
+              ('SHEAR_LEFT', 'Shear Left', 'Overshoots key values', '', 12),
+              ('SHEAR_RIGHT', 'Shear Right', 'Overshoots key values', '', 13),
 
-              ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 13),
-              ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 14),
-              ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 15),
+              ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 14),
+              ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 15),
+              ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 16),
 
-              ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 16),
-              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 17)]
+              ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 17),
+              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 18)]
 
 
 menu_items_3d = [('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 1),
                  ('BLEND_INFINITE', 'Blend Infinite', 'Adds or adjust keys to conform to the adjacent slope', '', 2),
                  ('BLEND_NEIGHBOR', 'Blend Neighbor', 'From current to neighbors', '', 3),
+                 ('BLEND_DEFAULT', 'Blend Default', 'From default value', '', 4),
 
-                 ('SCALE_LEFT', 'Scale Left', 'Scale anchor to left neighbor', '', 4),
-                 ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 5),
+                 ('SCALE_LEFT', 'Scale Left', 'Scale anchor to left neighbor', '', 5),
+                 ('SCALE_RIGHT', 'Scale Right', 'Scale anchor to right neighbor', '', 6),
 
-                 ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 6),
+                 ('PUSH_PULL', 'Push Pull', 'Overshoots key values', '', 7),
 
-                 ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 7),
-                 ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 8)]
+                 ('TIME_OFFSET', 'Time Offset', 'Slide fcurve in time without afecting keys frame value', '', 8),
+                 ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 9)]
 
 
 def update_clone_move(self, context):
