@@ -219,6 +219,7 @@ class ANIMAIDE_PT_curve_tools:
             tool_button(context, col, 'blend_frame')
             tool_button(context, col, 'blend_infinite')
             tool_button(context, col, 'blend_neighbor')
+            tool_button(context, col, 'blend_default')
             if context.area.type != 'VIEW_3D':
                 tool_button(context, col, 'blend_offset')
                 col.separator()
@@ -349,6 +350,7 @@ class ANIMAIDE_MT_curve_tools(Menu):
         layout.operator('anim.aide_blend_frame')
         layout.operator('anim.aide_blend_infinite')
         layout.operator('anim.aide_blend_neighbor')
+        layout.operator('anim.aide_blend_default')
         if context.area.type != 'VIEW_3D':
             layout.operator('anim.aide_blend_offset')
 
@@ -432,6 +434,7 @@ class ANIMAIDE_MT_pie_curve_tools_b(Menu):
         pie.operator("anim.aide_smooth")
         pie.operator("anim.aide_blend_offset")
         pie.operator("anim.aide_time_offset")
+        pie.operator("anim.aide_blend_default")
         pie.operator('anim.aide_blend_infinite')
 
 
