@@ -422,28 +422,29 @@ class ANIMAIDE_OT_blend_default(Operator, ANIMAIDE_OT):
                 context.window.workspace.status_text_set(self.display_info)
             tool = context.scene.animaide.tool
             factor = utils.clamp(self.factor, self.min_value, self.max_value)
-            factor_zero_one = (factor+1)/(2)
             for index in self.selected_keys:
                 default = None
                 id =  self.fcurve.id_data
                 datap = self.fcurve.data_path
                 obj = next(o for o in bpy.data.objects if o.animation_data and o.animation_data.action is id)
 
-                print("OBJECT: "+ str(obj))
                 if obj.type == "ARMATURE" and bpy.context.mode == "POSE":
+
+                    # Bones have weird data_paths so we need to parse them to get bone and property name
                     names = datap.split('"')[1::2]
-                    data_path_no_names = ''.join(datap.split('"')[0::2])
+                    no_name = ''.join(datap.split('"')[0::2])
+                    bone_data = no_name.replace('][', '].[').split('.')
 
-                    data_chunks = data_path_no_names.replace('][', '].[').split('.')
-                    for id, chunk in enumerate(data_chunks):
-                        if chunk.find('[]') > 0:
-                            data_chunks[id] = chunk.replace('[]', '["' + names.pop(0) + '"]')
+                    for id, i in enumerate(bone_data):
+                        if i.find('[]') > 0:
+                            bone_data[id] = i.replace('[]', '["' + names.pop(0) + '"]')
+                    boneName = bone_data[1].split('"')[1::2]          
 
-                    boneName = data_chunks[1].split('"')[1::2]
-
-                    print(str(data_chunks))              
-
-                    default = obj.pose.bones[boneName[0]].bl_rna.properties[data_chunks[2]]
+                    if boneName:
+                        default = obj.pose.bones[boneName[0]].bl_rna.properties[bone_data[2]]
+                    else: # Most likely a custom property
+                        default = self.original_values[index]['y'] # Unsupported data, don't affect it
+                        #TODO: Find a way to read/reset a custom property value to use in this
                 else:
                     if obj.get(datap) == None and obj.type != "ARMATURE":
                         default = obj.bl_rna.properties[datap]
@@ -454,10 +455,9 @@ class ANIMAIDE_OT_blend_default(Operator, ANIMAIDE_OT):
                     else:
                         default = default.default
                 else:
-                    default = self.original_values[index]['y'] # Unsupported object, dont affect it
+                    default = self.original_values[index]['y'] # Unsupported object, don't affect it
 
                 k = self.fcurve.keyframe_points[index]
-                print(factor)
                 new_value = (default*factor)+(self.original_values[index]['y']*(1-factor))
                 if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
                     k.co.y = new_value
