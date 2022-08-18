@@ -408,7 +408,7 @@ class ANIMAIDE_OT_blend_neighbor(Operator, ANIMAIDE_OT):
         return support.to_execute(self, context, self.tool, context)
 
 class ANIMAIDE_OT_blend_default(Operator, ANIMAIDE_OT):
-    """Blend selected or current keys to the value of the default value"""
+    """Blend selected or current keys to the default value"""
 
     bl_idname = "anim.aide_blend_default"
     bl_label = "Blend Default"
