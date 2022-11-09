@@ -53,7 +53,7 @@ def new(action_group_name, keys_to_add, key_interp='AUTO_CLAMPED', color=(1, 1, 
         k.handle_left_type = key_interp
         k.handle_right_type = key_interp
 
-    bpy.ops.transform.translate(value=(0, 0, 0))
+    # bpy.ops.transform.translate(value=(0, 0, 0))
 
     blends_curve.lock = True
     blends_curve.select = True
