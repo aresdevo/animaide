@@ -160,13 +160,13 @@ def change_frame(context, amount, direction='RIGHT'):
 
     if lonely_cursor and not some_selected_key:
         if direction == 'LEFT' and left_limit:
-            context.scene.frame_current = left_limit
+            context.scene.frame_current = int(left_limit)
         elif direction == 'RIGHT' and right_limit:
-            context.scene.frame_current = right_limit
+            context.scene.frame_current = int(right_limit)
     elif some_selected_key:
-        context.scene.frame_current = mid + amount
+        context.scene.frame_current = int(mid + amount)
     else:
-        context.scene.frame_current += frames
+        context.scene.frame_current += int(frames)
 
 
 def insert_frames(context, amount):

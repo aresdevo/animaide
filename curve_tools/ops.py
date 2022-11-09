@@ -407,13 +407,80 @@ class ANIMAIDE_OT_blend_neighbor(Operator, ANIMAIDE_OT):
     def execute(self, context):
         return support.to_execute(self, context, self.tool, context)
 
+class ANIMAIDE_OT_blend_default(Operator, ANIMAIDE_OT):
+    """Blend selected or current keys to the default value"""
+
+    bl_idname = "anim.aide_blend_default"
+    bl_label = "Blend Default"
+
+    tool_type = 'BLEND_DEFAULT'
+
+    def tool(self, context):
+
+        if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
+            for index in self.selected_keys:
+                default = None
+                id =  self.fcurve.id_data
+                datap = self.fcurve.data_path
+                obj = next(o for o in bpy.data.objects if o.animation_data and o.animation_data.action is id)
+
+                if obj.type == "ARMATURE" and bpy.context.mode == "POSE":
+
+                    # Bones have weird data_paths so we need to parse them to get bone and property name
+                    names = datap.split('"')[1::2]
+                    no_name = ''.join(datap.split('"')[0::2])
+                    bone_data = no_name.replace('][', '].[').split('.')
+
+                    for id, i in enumerate(bone_data):
+                        if i.find('[]') > 0:
+                            bone_data[id] = i.replace('[]', '["' + names.pop(0) + '"]')
+                    boneName = bone_data[1].split('"')[1::2]          
+
+                    if boneName:
+                        default = obj.pose.bones[boneName[0]].bl_rna.properties[bone_data[2]]
+                    else: # Most likely a custom property
+                        default = self.original_values[index]['y'] # Unsupported data, don't affect it
+                        #TODO: Find a way to read/reset a custom property value to use in this
+                else:
+                    if obj.get(datap) == None and obj.type != "ARMATURE":
+                        default = obj.bl_rna.properties[datap]
+
+                if default:
+                    if default.default_array:
+                        default = default.default_array[self.fcurve.array_index]
+                    else:
+                        default = default.default
+                else:
+                    default = self.original_values[index]['y'] # Unsupported object, don't affect it
+
+                k = self.fcurve.keyframe_points[index]
+                new_value = (default*factor)+(self.original_values[index]['y']*(1-factor))
+                if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
+                    k.co.y = new_value
+                else:
+                    k.co_ui.y = new_value
+
+        elif context.scene.tool_settings.use_keyframe_insert_auto:
+            context.window.workspace.status_text_set(self.display_info)
+            self.add_key(context, self.fcurve)
+        # else:
+        #     self.report({'INFO'}, self.warning)
+        return
+
+    def execute(self, context):
+        return support.to_execute(self, context, self.tool, context)
+
 
 class ANIMAIDE_OT_blend_infinite(Operator, ANIMAIDE_OT):
     """Blend selected or current keys to the slant of neighboring\n""" \
     """left or right keys."""
 
     bl_idname = "anim.aide_blend_infinite"
-    bl_label = "Blend infinite"
+    bl_label = "Blend Infinite"
 
     tool_type = 'BLEND_INFINITE'
 
@@ -1189,6 +1256,7 @@ classes = (
     ANIMAIDE_OT_blend_ease,
     ANIMAIDE_OT_blend_neighbor,
     ANIMAIDE_OT_blend_frame,
+    ANIMAIDE_OT_blend_default,
     ANIMAIDE_OT_blend_offset,
     ANIMAIDE_OT_push_pull,
     ANIMAIDE_OT_scale_average,
