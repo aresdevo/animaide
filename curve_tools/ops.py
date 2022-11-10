@@ -441,7 +441,8 @@ class ANIMAIDE_OT_blend_default(Operator, ANIMAIDE_OT):
                     boneName = bone_data[1].split('"')[1::2]          
 
                     if boneName:
-                        default = obj.pose.bones[boneName[0]].bl_rna.properties[bone_data[2]]
+                        if bone_data[2] != "[]":
+                            default = obj.pose.bones[boneName[0]].bl_rna.properties[bone_data[2]]
                     else: # Most likely a custom property
                         default = self.original_values[index]['y'] # Unsupported data, don't affect it
                         #TODO: Find a way to read/reset a custom property value to use in this
