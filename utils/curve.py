@@ -137,6 +137,26 @@ def get_selected(fcurves):
     return selected
 
 
+def get_all_fcurves(obj):
+    trans_action = obj.animation_data.action
+    trans_fcurves = getattr(trans_action, 'fcurves', None)
+    if trans_fcurves:
+        trans_fcurves = trans_fcurves.items()
+    else:
+        trans_fcurves = []
+
+    if obj.type != 'ARMATURE':
+        shapes_action = obj.data.shape_keys.animation_data.action
+        shapes_fcurves = getattr(shapes_action, 'fcurves', None)
+        if shapes_fcurves:
+            shapes_fcurves = shapes_fcurves.items()
+        else:
+            shapes_fcurves = []
+        return trans_fcurves + shapes_fcurves
+    else:
+        return trans_fcurves
+
+
 def remove_helpers(objects):
     """Remove the all the helper curves that have been added to an object action"""
 
@@ -203,7 +223,7 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
 
     index = len(fcurves)
     every_key = global_fcurve['every_key']
-    original_values = global_fcurve['original_values']
+    original_keys = global_fcurve['original_keys']
 
     dup = fcurves.new(data_path=new_data_path, index=index, action_group=group_name)
     dup.keyframe_points.add(len(every_key))
@@ -220,9 +240,8 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
     i = 0
 
     for index in every_key:
-        original_key = original_values[index]
-        dup.keyframe_points[i].co.x = original_key['x']
-        dup.keyframe_points[i].co.y = original_key['y']
+        dup.keyframe_points[i].co.x = original_keys[index]['x']
+        dup.keyframe_points[i].co.y = original_keys[index]['y']
 
         i += 1
 
@@ -297,6 +316,7 @@ def move_clone(objects):
 
 
 def valid_anim(obj):
+
     anim = obj.animation_data
     action = getattr(anim, 'action', None)
     fcurves = getattr(action, 'fcurves', None)
@@ -319,10 +339,16 @@ def valid_obj(context, obj, check_ui=True):
     return True
 
 
-def valid_fcurve(context, obj, fcurve, check_ui=True):
+def valid_fcurve(context, obj, fcurve, action_type='transfrom_action', check_ui=True):
+
+    if not fcurve:
+        return False
 
     try:
-        prop = obj.path_resolve(fcurve.data_path)
+        if action_type == 'transfrom_action':
+            prop = obj.path_resolve(fcurve.data_path)
+        else:
+            prop = fcurve.data_path
     except:
         prop = None
 
@@ -381,7 +407,7 @@ def valid_fcurve(context, obj, fcurve, check_ui=True):
                 if only_selected and not bone.select:
                     return False
 
-    if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
-        return False  # we don't want to select keys on reference fcurves
+    # if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
+    #     return False  # we don't want to select keys on reference fcurves
 
     return True

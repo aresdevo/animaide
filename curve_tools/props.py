@@ -89,7 +89,7 @@ def update_overshoot(self, context):
 def update_selector(self, context):
     # change values when selector property is changed
 
-    support.get_globals(context)
+    # support.get_globals(context)
     # self.overshoot = False
     self.show_factor = False
 

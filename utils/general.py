@@ -36,6 +36,26 @@ def set_animaide_action():
         return bpy.data.actions.get('animaide')
 
 
+def get_all_actions(obj):
+
+    trans_action = getattr(obj.animation_data, 'action', None)
+
+    transform = {'type': 'transform_action',
+                 'action': trans_action}
+
+    sk = getattr(obj.data, 'shape_keys', None)
+    sk_animation_data = getattr(sk, 'animation_data', None)
+    sk_action = getattr(sk_animation_data, 'action', None)
+
+    shape_keys = {'type': 'shape_keys',
+                  'action': sk_action}
+
+    if transform or shape_keys:
+        return [transform, shape_keys]
+    else:
+        return
+
+
 def gradual(key_y, target_y, delta=1.0, factor=0.15):
     """Gradualy transition the value of key_y to target_y"""
     step = abs(key_y - target_y) * (delta * factor)
