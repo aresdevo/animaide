@@ -9,7 +9,7 @@
 > **Warning:** 
 > *AnimOffset is on the headers by default now, but that can be changed in the addon preferences*
 
-###
+
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
 
