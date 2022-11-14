@@ -24,7 +24,7 @@ bl_info = {
     "name": "AnimAide",
     "description": "Helpful tools to manipulate keys on f-curves",
     "author": "Ares Deveaux",
-    "version": (1, 0, 39),
+    "version": (1, 0, 38),
     "blender": (2, 93, 0),
     "location": "Graph Editor - Dope Sheet - Timeline - 3D View - sidebar and menu bar",
     "warning": "This addon is still in development.",
@@ -35,7 +35,7 @@ bl_info = {
 
 import bpy
 import atexit
-from . import ui, curve_tools, anim_offset, key_manager, curve_sculptor, prefe, utils
+from . import ui, curve_tools, anim_offset, key_manager, prefe, utils
 from bpy.app.handlers import persistent
 from bpy.props import BoolProperty, EnumProperty, PointerProperty, CollectionProperty, StringProperty
 from bpy.types import AddonPreferences, PropertyGroup, Operator
@@ -49,9 +49,7 @@ class AnimAideScene(PropertyGroup):
     tool: PointerProperty(type=curve_tools.props.AnimAideTool)
     anim_offset: PointerProperty(type=anim_offset.props.AnimAideOffset)
     key_tweak: PointerProperty(type=key_manager.props.KeyTweak)
-    # sculptor: PointerProperty(type=curve_sculptor.props.AnimAideSculptor)
 
-# curve_sculptor.classes + \
 classes = \
     anim_offset.classes + \
     curve_tools.classes + \

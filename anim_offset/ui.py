@@ -21,7 +21,6 @@ Created by Ares Deveaux
 
 import bpy
 from . import support
-# from .utils import key
 from bpy.types import Panel, Menu
 
 

@@ -199,7 +199,7 @@ graph_color = None
 nla_color = None
 
 
-def set_bar_color(r, g, b, a):
+def set_bar_color():
     global bar_color, dopesheet_color, graph_color, nla_color, pref_autosave
     if bar_color is None:
         bar_color = True
@@ -208,10 +208,12 @@ def set_bar_color(r, g, b, a):
         graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
         nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
 
+    h = bpy.context.preferences.themes[0].user_interface.wcol_regular.inner_sel
+    highlight = (h[0]+0.05, h[1]+0.05, h[2]+0.05, h[3])
     bpy.context.preferences.use_preferences_save = False
-    bpy.context.preferences.themes[0].dopesheet_editor.space.header = (r, g, b, a)
-    bpy.context.preferences.themes[0].nla_editor.space.header = (r, g, b, a)
-    bpy.context.preferences.themes[0].graph_editor.space.header = (r, g, b, a)
+    bpy.context.preferences.themes[0].dopesheet_editor.space.header = highlight
+    bpy.context.preferences.themes[0].nla_editor.space.header = highlight
+    bpy.context.preferences.themes[0].graph_editor.space.header = highlight
 
 
 def reset_bar_color():

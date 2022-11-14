@@ -100,7 +100,7 @@ class ANIMAIDE_OT_activate_anim_offset(Operator):
 
         if support.magnet_handlers not in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
-            utils.set_bar_color(0.5, 0.3, 0.2, 1)
+            utils.set_bar_color()
             utils.add_message(self.message)
 
         # anim_offset_info = bpy.types.SpaceView3D.draw_handler_add(
