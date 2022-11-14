@@ -19,16 +19,15 @@
 
 ## Installation
 
-> ### IMPORTANT
-> - It is a good practice to remove the previous version of the addon (if you have one) before installing the new one.
-> 
-> 
-> - If you are coming from the previous version, you might have some issues with the shortcuts.
->   If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel to
->   delete any previous shortcut that might be conflicting.
-> 
->   ![Local Space](images/shortcut_troubleshoot.gif)
->
+**IMPORTANT**
+- It is a good practice to remove the previous version of the addon (if you have one) before installing the new one.
+
+- If you are coming from the previous version, you might have some issues with the shortcuts.
+   If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel to
+   delete any previous shortcut that might be conflicting.
+ 
+   ![Local Space](images/shortcut_troubleshoot.gif)
+
 
 
 Download the latest release.
@@ -42,17 +41,17 @@ Make sure the addon check-mark is active:
  
 ![Installing 3](images/installing3.jpg)
 
-> ### Settings:
->
-> You can add most the panels to the headers now by selecting the new options on the addon
-> preferences:
->
-> ![preferences](images/preferences.jpg)
->
-> As you can see, you can also find others settings there that used to be
-> in the main Blender interface:
->
-> ![settingns in preferences](images/preferences_preferences.jpg)
+### Settings:
+
+You can add most the panels to the headers now by selecting the new options on the addon
+preferences:
+
+![preferences](images/preferences.jpg)
+
+As you can see, you can also find others settings there that used to be
+in the main Blender interface:
+
+![settingns in preferences](images/preferences_preferences.jpg)
 
 ### Where to find the tools
 
@@ -60,15 +59,15 @@ It is available in some form in all animation editors plus the 3D View.
 
 You can find AnimAide the sidebar in:
 
-- **Graph editor**
-- **DopeSheet**
-- **Timeline editors**
-- **3D View**
+- *Graph editor*
+- *DopeSheet*
+- *Timeline editors*
+- *3D View*
 
 You can show the sidebar by using the "n" shortcut while in one of the mentioned editors or go to the "View" menu
 on those areas and open it there.
 
-### Menu:
+**Menu:**
 
 All the tools are also available in the **Animaide** menu under the GraphEditor, DopeSheet, and 3DView editors.
 Each menu is a bit different according to what can be used on each view. The one that has
@@ -78,16 +77,17 @@ GraphEditor menu:
  
 ![Graph Editor menu](images/ge_menu.gif)
 
-#### You can add your own shortcuts:
+**You can add your own shortcuts:**
+
 To do so find the tools on the "AnimAide" menu and right-click on one of them. You will then get an option to
 add a shortcut to it:
  
 ![Shortcut](images/shortcut.jpg)
 
 At the moment, Animaide has Three main panels:  
-- **curveTools**
-- **animOffset**
-- **key_manager** -- (**New**)
+- *curveTools*
+- *animOffset*
+- *key_manager*
 
 ## curveTools
 
@@ -101,7 +101,7 @@ unselected keys as reference. When activated from the 3DView it will act on all 
 the selected object or bone, but when it is used in the GraphEditor it will act on the selected keys of the selected 
 channels.
 
-### How the interface works:
+**How the interface works:**
 
 ![Buttons](images/big_button.jpg)
 
@@ -128,7 +128,7 @@ It will use the last selected or activated.
 
 ![steps](images/steps.gif)
 
-### It has two modes:
+**It has two modes:**
 - **Compact:**
 
 ![big button](images/big_button.jpg)
@@ -147,14 +147,14 @@ Any option needed by the active tools will be found at the bottom.
 
 ![Overshoot](images/expanded_settings.jpg)
 
-> #### Note:
->
-> Some **CurveTools** don't make much sense when used on the 3D-View, for that reason
-> Only there a few are available there:
->
-> ![3D view CurveTools](images/3d_tools_expand.jpg)
+**Note:**
 
-### Curve Tools Settings:
+Some **CurveTools** don't make much sense when used on the 3D-View, for that reason
+Only there a few are available there:
+
+![3D view CurveTools](images/3d_tools_expand.jpg)
+
+**Curve Tools Settings:**
 
 Can now be found in the addon preferences:
 
@@ -207,13 +207,15 @@ Can now be found in the addon preferences:
 
 At the moment there are 18 different tools:
 
-### Blend Ease
+### Individual Tools:
+
+**Blend Ease**
 
 This is similar to "Ease", but it remembers how the curve was before engaging the tool.
 
 ![Blend Ease](images/blend_ease.gif)
 
-### Blend Frame
+**Blend Frame**
 
 Allows you to use specific frames in the animation as reference to match values on the selected keys.
 There are two buttons (Left and Right) that store the corresponding left and right reference frames. You can set
@@ -229,86 +231,86 @@ The markers are linked to the reference frames, so if you move the markers you a
 it remembers how the curve was before engaging the tool.
 
 You can save additional frames as bookmark for later use. You can find that option on a sub-panel called:
-**Frame Bookmarks**
+*Frame Bookmarks*
 
 ![Blend Frame](images/frame_bookmark.gif)
 
-### Blend Infinite
+**Blend Infinite**
 
 ![Blend Frame](images/blend_infinite.gif)
 
 Lets you position the keys based on the slope created by the two neighboring keys to the left or the right.
 
-### Blend Neighbor
+**Blend Neighbor**
 
 Progressively makes the values of the selected keys match either of the neighboring keys. it remembers how the curve was
 before engaging the tool.
 
 ![Blend Neighbor](images/blend_neighbor.gif)
 
-### Blend Offset
+**Blend Offset**
 
 Moves the selected keys as a block until it reaches either neighboring key
 
 ![Blend Offset](images/blend_offset.gif)
 
-### Ease
+**Ease**
 
 With this one, you arch the f_curve with either an ease-in or an ease-out. It does not
 remember how the curve was before activating the tool
 
 ![Ease](images/ease.gif)
 
-### Ease To Ease
+**Ease To Ease**
 
 This f-curve manipulator tool transition smoothly from one end to the next with ease-in and ease-out.
 It does not remember how the curve was before activating the tool.
 
 ![Ease To Ease](images/ease_to_ease.gif)
 
-### Scale Average
+**Scale Average**
 
 Scale the values of the selected keys using the average of all the values as the anchor.
 
 ![Scale Average](images/scale_average.gif)
 
-### Scale Left
+**Scale Left**
 
 Scale the values of the selected keys using the left neighboring key as the anchor.
 
 ![Scale Left](images/scale_left.gif)
 
-### Scale Right
+**Scale Right**
 
 Scale the values of the selected keys using the right neighboring key as the anchor.
 
 ![Scale Right](images/scale_right.gif)
 
-### Smooth
+**Smooth**
 
 It will try to average the values of the keys to smooth out the f-curve. You might have to run the slider more than once to get a smoother result.
 
 ![Smooth](images/smooth.gif)
 
-### Push-Pull
+**Push-Pull**
 
 Exaggerates the values (push) or decreases the intensity of the animation (pull)
 
 ![Push Pull](images/Push_pull.gif)
 
-### Time Offset
+**Time Offset**
 
 The effect is similar to sliding the keys in time, but with this option, the keys stay in the same frame. It works better when there are a lot of keys.
 
 ![Time Offset](images/time_offset.gif)
 
-### Tween
+**Tween**
 
 A simple linear transition between the neighboring keys
 
 ![Tween](images/tween.gif)
 
-### Wave-Noise
+**Wave-Noise**
 
 It adds random values to the selected keys when moving to the right and a wave pattern when moving to the left.
 
@@ -344,23 +346,23 @@ Anim Offset panel:
 >
 > It has more or less icons depending on the panel or if a mask has been created.
 
-### AnimOffset Mask
+**AnimOffset Mask**
 
 ![Mask Creation](images/anim_offset_mask.gif)
 
 While creating or modifying the mask you can use modifier
 keys to activate different options:
 
-- **Without modifier:**
+- *Without modifier:*
     Creates the mask range, or moves the margins if the mask is already created.
 
-- **Shift:**
+- *Shift:*
     Keeps the masking mode alive. You can use it in combination with **"ctrl"** and **"alt"**.
 
-- **Ctrl:**
+- *Ctrl:*
     Soften the margins by adding blend transition to each margin. By holding it down keeps the blend manipulation alive.
 
-- **Alt:**
+- *Alt:*
     Let you move the entire range at once. By holding it down keeps the range manipulation alive.
 
 The status bar shows important information, including what the modifier keys do.
@@ -393,15 +395,15 @@ In the mask options you can adjust the slope of the mask blend influence:
  
 ![Mask Blend Settings](images/anim_offset_mask_slope.gif)
 
-**AnimOffst** works seamlessly with Blender's auto key:
+*AnimOffset* works seamlessly with Blender's auto key:
 
 ![Anim Offset vs auto key](images/anim_offset_vs_auto_key.gif)
  
-There is a new pie menu with all the **AnimOffset** commands:
+There is a new pie menu with all the *AnimOffset* commands:
  
 ![Anim Offset pie menu](images/anim_offset_pie.jpg)
 
-You can find it on the **Animaide** menu in the Graph Editor.
+You can find it on the *Animaide* menu in the Graph Editor.
 
 ## KeyManager:
 
@@ -410,27 +412,27 @@ You can find it on the **Animaide** menu in the Graph Editor.
 This toolbox mostly aims to speedup some tasks you already can do by adding extra options to some Blender Tools.
 
 It has three main sections:
-- **Move-Insert**
-- **Type**
-- **Interpolation**
+- *Move-Insert*
+- *Type*
+- *Interpolation*
 
-### Move-Insert
+**Move-Insert**
  
-**Move:**
+*Move:*
  
 ![Move Keys](images/move_keys.gif)
 
 Move keys in time by a specified amount. If some keys are selected just those will be affected. 
 If non are selected the key under the cursor will be affected.
 
-**Insert:** 
+*Insert:*
  
 ![Move Keys](images/insert_keys.gif)
 
 Insert frames between keys by a specified amount. If some keys are selected, frames will be inserted 
 betwee those. If non is selected frames will be inserted where the cursor is. 
 
-### Type
+**Type**
  
 ![Key Type](images/key_type.gif)
  
@@ -439,7 +441,7 @@ Uses the colored Blender key types, and lets you "assign", "select",
  
 It also incorporates a Blender option that lets you select the key type the auto-key will use.
 
-### Interpolation
+**Interpolation**
  
 ![Key interpolation](images/key_interpolation.gif)
 
@@ -451,7 +453,7 @@ been able to assign it to every key in the selected object with the click of a b
 When dealing with "Bezier" curves, it lets you the left or right handles of every selected key to easily interact
 with a group of handles at once.
 
-### Header Option:
+**Header Option:**
 
 This panel can be moved to the animation views headers to make them more accessible.
  
@@ -470,4 +472,4 @@ You can find it on the Graph Editor, Dopesheet and Timeline headers.
 
 You can find this one only on the Graph editor header
 
-### Enjoy the addon :)
+**Enjoy the addon :)**
