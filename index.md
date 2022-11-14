@@ -19,17 +19,16 @@
 
 ## Installation
 
-**IMPORTANT**
-- It is a good practice to remove the previous version of the addon (if you have one) before installing the new one.
-
-- If you are coming from the previous version, you might have some issues with the shortcuts.
-   If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel to
-   delete any previous shortcut that might be conflicting.
- 
-   ![Local Space](images/shortcut_troubleshoot.gif)
-
-
-
+>
+> **Important**
+> - It is a good practice to remove the previous version of the addon (if you have one) before installing the new one.
+>
+> - If you are coming from the previous version, you might have some issues with the shortcuts.
+>   If that is the case you should go to "keymaps" in the preference window and there go to the "animation" sub-panel to
+>   delete any previous shortcut that might be conflicting.
+> 
+>   ![Local Space](images/shortcut_troubleshoot.gif)
+>
 Download the latest release.
 Then in Blender, go to the "Add-ons" tab in the preference window. There click on the "Install" button and navigate to the
 folder where you downloaded the addon. After you select the file and click "Install Add-on", AnimAide will be installed
@@ -41,7 +40,7 @@ Make sure the addon check-mark is active:
  
 ![Installing 3](images/installing3.jpg)
 
-### Settings:
+### Settings
 
 You can add most the panels to the headers now by selecting the new options on the addon
 preferences:
@@ -53,7 +52,7 @@ in the main Blender interface:
 
 ![settingns in preferences](images/preferences_preferences.jpg)
 
-### Where to find the tools
+### Where to find AnimAide
 
 It is available in some form in all animation editors plus the 3D View.
 
@@ -89,7 +88,7 @@ At the moment, Animaide has Three main panels:
 - *animOffset*
 - *key_manager*
 
-## curveTools
+## CurveTools
 
 ![Shortcut Troubleshoot](images/local_space.gif)
 
@@ -117,16 +116,16 @@ To select other tools as the active one, there is a pop-up menu next to the main
 
 ![ge tool list](images/ge_tool_list.gif)
 
-There is a new button next to the pop-up menu:
+That is the overshoot button that allows a bigger range of change.
 
 ![overshoot](images/overshoot.gif)
-
-That is the overshoot button that allows a bigger range of change.
 
 Below there is an array of small buttons that allows you to apply the tool in increments of 25%.
 It will use the last selected or activated.
 
 ![steps](images/steps.gif)
+
+### CurveTools General info
 
 **It has two modes:**
 - **Compact:**
@@ -170,44 +169,41 @@ Can now be found in the addon preferences:
 - **Use Markers:**
     When selected markers will be added whenever a reference frame is created.
 
-> #### TIPS:
->
-> - **Combine Tools:**
->
->   Experiment combination of tools to achieve desire effects:
->
->   ![combining tools](images/combining_tools.gif)
->
-> 
-> - **Sticky Handles:**
->
->   ![sticky handles](images/sticky_handles.gif)
->
->   This used to be a bug but now that improved API tools took that away I thought to bring it back because can be
->   useful at times. Basically, when active the key handles are left behind when the keyframe points are modified if
->   the handle type is either "free" or "aligned".
->   This is a simple use case for this tool:
->
->   ![sticky handles use case](images/sticky_handles_use_case.gif)
->
-> 
-> - **Tweak tools:**
->
->   ![Tweak Menu](images/tweak_menu.jpg)
->
->   Create a shortcut for the **Tweak** tools if you like to work jumping from key to key adjusting the pose
->   on each frame.
-> 
->
-> - **Auto Key:**
->
->   ![tools with auto key](images/tools_with_autokey.gif)
->
->   When no key is selected and "auto key" is on most **curveTools** will add a key where the cursor is.
+### CurveTools Tips:
+
+- **Combine Tools:**
+
+Experiment combination of tools to achieve desire effects:
+
+![combining tools](images/combining_tools.gif)
+
+- **Sticky Handles:**
+
+![sticky handles](images/sticky_handles.gif)
+
+This used to be a bug but now that improved API tools took that away I thought to bring it back because can be
+useful at times. Basically, when active the key handles are left behind when the keyframe points are modified if
+the handle type is either "free" or "aligned".
+This is a simple use case for this tool:
+
+![sticky handles use case](images/sticky_handles_use_case.gif)
+
+- **Tweak tools:**
+
+![Tweak Menu](images/tweak_menu.jpg)
+
+Create a shortcut for the **Tweak** tools if you like to work jumping from key to key adjusting the pose
+on each frame.
+
+- **Auto Key:**
+
+![tools with auto key](images/tools_with_autokey.gif)
+
+When no key is selected and "auto key" is on most **curveTools** will add a key where the cursor is.
 
 At the moment there are 18 different tools:
 
-### Individual Tools:
+### CurveTool List
 
 **Blend Ease**
 
@@ -322,7 +318,7 @@ Assigning a shortcut to the pie menu would be advised.
 ![Pie Menu A](images/curve_tools_pie_a.jpg)
 ![Pie Menu A](images/curve_tools_pie_b.jpg)
 
-## animOffset
+## AnimOffset
  
 ![AnimOffset](images/anim_offset_basic.gif)
 
@@ -336,17 +332,17 @@ Anim Offset panel:
  
 ![AnimOffset panel](images/anim_offset_panel.gif)
   
-> It is on the animation views headers by default but can be put on the panel by going to the addon preferences window:
->
-> ![AnimOffset preferences](images/anim_offset_header_setting.jpg)
->
-> This is how the header looks like:
->
-> ![AnimOffset header](images/anim_offset_header.jpg)
->
-> It has more or less icons depending on the panel or if a mask has been created.
+It is on the animation views headers by default but can be put on the panel by going to the addon preferences window:
 
-**AnimOffset Mask**
+![AnimOffset preferences](images/anim_offset_header_setting.jpg)
+
+This is how the header looks like:
+
+![AnimOffset header](images/anim_offset_header.jpg)
+
+It has more or less icons depending on the panel or if a mask has been created.
+
+## AnimOffset Mask
 
 ![Mask Creation](images/anim_offset_mask.gif)
 
@@ -416,7 +412,7 @@ It has three main sections:
 - *Type*
 - *Interpolation*
 
-**Move-Insert**
+## Move-Insert
  
 *Move:*
  
@@ -432,7 +428,7 @@ If non are selected the key under the cursor will be affected.
 Insert frames between keys by a specified amount. If some keys are selected, frames will be inserted 
 betwee those. If non is selected frames will be inserted where the cursor is. 
 
-**Type**
+## Type
  
 ![Key Type](images/key_type.gif)
  
@@ -441,7 +437,7 @@ Uses the colored Blender key types, and lets you "assign", "select",
  
 It also incorporates a Blender option that lets you select the key type the auto-key will use.
 
-**Interpolation**
+## Interpolation
  
 ![Key interpolation](images/key_interpolation.gif)
 
