@@ -1,21 +1,19 @@
-# Animaide 1.0.38
+# Animaide Manual
 
-*CurveTools* - *AnimOffset* - *KeyManager*
+In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
+with the vertices on a geometry. That is where **AnimAide** comes in.
 
-**Tested with Blender 2.93 and up.**
+There are some Blender options to manipulate keys, but **AnimAide** open the door to new possibilities. Not only has a
+wider range of tools but when working with a group of f-curves each one will have their local space.
 
-![Shortcut Troubleshoot](images/animaide.jpg)
+This kind of tools is standard in the game and film industry.
 
+![animaie_panel](images/animaide.jpg)
+
+> ![anim_offset_header](images/anim_offset_header.jpg)
+> 
 > **Note:** 
 > *AnimOffset is on the headers by default now, but that can be changed in the addon preferences*
-
- In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
- with the vertices on a geometry. That is where **AnimAide** comes in.
-
- There are some Blender options to manipulate keys, but **AnimAide** open the door to new possibilities. Not only has a
- wider range of tools but when working with a group of f-curves each one will have their local space.
-
- This kind of tools is standard in the game and film industry.
 
 ## Installation
 
