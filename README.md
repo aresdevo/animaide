@@ -1,4 +1,4 @@
-# Animaide 1.0.38
+# Animaide
 *--Tested with Blender 2.93 and up--*
 
 In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
@@ -41,7 +41,7 @@ This toolbox mostly aims to speedup some tasks you already can do by adding extr
 ![Handle type and selection](https://aresdevo.github.io/animaide/images/handle_type_and_selection.gif)
 
   
-### Release notes:
+### 1.0.38 Release notes:
 
 **In General:**
 - Some settings were moved to the addon preferences. By being there your options will persist even after the Blender 
