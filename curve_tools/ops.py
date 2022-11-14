@@ -424,23 +424,18 @@ class ANIMAIDE_OT_blend_default(Operator, ANIMAIDE_OT):
             tool = context.scene.animaide.tool
             factor = utils.clamp(self.factor, self.min_value, self.max_value)
             for index in self.selected_keys:
-                default = None
+                default = obj = None
                 id = self.fcurve.id_data
                 datap = self.fcurve.data_path
-                print('id: ', id)
-                # obj = next(o for o in bpy.data.objects if o.animation_data and o.animation_data.action is id)
-
-                # this previous loop was giving error after merging the fix for shape keys,
-                # I deconstructed it as follows just to make it work, but doesn't affects shape keys
-
-                obj = None
-                for o in bpy.data.objects:
+                for o in bpy.context.selected_objects:
                     if o.animation_data and o.animation_data.action is id:
                         obj = o
+                    elif hasattr(o.data, "shape_keys"):
+                        if o.data.shape_keys.animation_data:
+                            obj = o
+                            
                 if obj is not None:
                     if obj.type == "ARMATURE" and bpy.context.mode == "POSE":
-
-                        # Bones have weird data_paths so we need to parse them to get bone and property name
                         names = datap.split('"')[1::2]
                         no_name = ''.join(datap.split('"')[0::2])
                         bone_data = no_name.replace('][', '].[').split('.')
@@ -457,18 +452,21 @@ class ANIMAIDE_OT_blend_default(Operator, ANIMAIDE_OT):
                             default = self.original_values[index]['y'] # Unsupported data, don't affect it
                             #TODO: Find a way to read/reset a custom property value to use in this
                     else:
-                        if obj.get(datap) == None and obj.type != "ARMATURE":
+                        if str(datap).startswith("key_blocks["): # Is a shape key
+                            default = 0 # Every shape key should have a default of 0
+                        elif obj.get(datap) == None and obj.type != "ARMATURE":
                             default = obj.bl_rna.properties[datap]
 
-                if default:
-                    if default.default_array:
-                        default = default.default_array[self.fcurve.array_index]
+                if default != None:
+                    if str(default).isdigit():
+                        default = default
                     else:
-                        default = default.default
+                        if default.default_array:
+                            default = default.default_array[self.fcurve.array_index]
+                        else:
+                            default = default.default
                 else:
                     default = self.original_keys[index]['y'] # Unsupported object, don't affect it
-
-                    # "original_values" was renamed to "original_keys" in the "to_execute" function
 
                 k = self.fcurve.keyframe_points[index]
                 new_value = (default*factor)+(self.original_keys[index]['y']*(1-factor))
