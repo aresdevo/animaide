@@ -1,3 +1,5 @@
 remote_theme: pages-themes/leap-day@v0.2.0
-title: AnimAide Manual
-show_downloads: "true"
+show_downloads: true
+github:
+  zip: https://github.com/aresdevo/animaide/archive/refs/tags/v1_0_38_38.zip
+  tar: https://github.com/aresdevo/animaide/archive/refs/tags/v1_0_38_38.tar.gz
