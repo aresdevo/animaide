@@ -1,5 +1,5 @@
 # Animaide
-*--Tested with Blender 2.93 and up--*
+- *To get more information please refer to the [Manual](https://aresdevo.github.io/animaide/)*
 
 In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
 with the vertices on a geometry. That is where **AnimAide** comes in.
@@ -9,9 +9,7 @@ wider range of tools but when working with a group of f-curves each one will hav
 
 This kind of tools is standard in the game and film industry.
 
-To access the [Manual](https://aresdevo.github.io/animaide/) and get more information please go to this link: https://aresdevo.github.io/animaide/
-
-**It has three main panels:**
+**Animaide has three main panels:**
 
 ### curveTools
 
@@ -44,6 +42,7 @@ This toolbox mostly aims to speedup some tasks you already can do by adding extr
 ### 1.0.38 Release notes:
 
 **In General:**
+- *Compatible with Blender 2.93 and up*
 - Some settings were moved to the addon preferences. By being there your options will persist even after the Blender 
 session is over.
 - A new group of tools called **KeyManager** has been added to its own panel.
