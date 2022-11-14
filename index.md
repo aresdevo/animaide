@@ -1,4 +1,4 @@
-#Animaide 1.0.38
+# Animaide 1.0.38
 
 *CurveTools* - *AnimOffset* - *KeyManager*
 
