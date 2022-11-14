@@ -169,7 +169,7 @@ Can now be found in the addon preferences:
 - **Use Markers:**
     When selected markers will be added whenever a reference frame is created.
 
-### CurveTools Tips:
+### CurveTools Tips
 
 - **Combine Tools:**
 
@@ -401,7 +401,7 @@ There is a new pie menu with all the *AnimOffset* commands:
 
 You can find it on the *Animaide* menu in the Graph Editor.
 
-## KeyManager:
+## KeyManager
 
 ![Key Manager](images/key_manager_panel.jpg)
 
@@ -412,7 +412,7 @@ It has three main sections:
 - *Type*
 - *Interpolation*
 
-## Move-Insert
+**Move-Insert**
  
 *Move:*
  
@@ -428,7 +428,7 @@ If non are selected the key under the cursor will be affected.
 Insert frames between keys by a specified amount. If some keys are selected, frames will be inserted 
 betwee those. If non is selected frames will be inserted where the cursor is. 
 
-## Type
+**Type**
  
 ![Key Type](images/key_type.gif)
  
@@ -437,7 +437,7 @@ Uses the colored Blender key types, and lets you "assign", "select",
  
 It also incorporates a Blender option that lets you select the key type the auto-key will use.
 
-## Interpolation
+**Interpolation**
  
 ![Key interpolation](images/key_interpolation.gif)
 
