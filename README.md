@@ -27,7 +27,7 @@ With this tool you can modify any animated object, and the change will propagate
 filter by a mask. You can find the panel in all the animation editors, but the mask option just in the GraphEditor.
 
 ![AnimOffset](https://aresdevo.github.io/animaide/images/anim_offset_basic.gif)
-![AnimOffsetMask](https://aresdevo.github.io/animaide/images/anim_offset_mask.gif)
+![AnimOffsetMask](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_mask.gif)
 
 ### KeyManager:
 
