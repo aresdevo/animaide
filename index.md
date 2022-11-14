@@ -9,7 +9,6 @@
 > **Warning:** 
 > *AnimOffset is on the headers by default now, but that can be changed in the addon preferences*
 
-###
 
  ![Shortcut Troubleshoot](images/animaide.jpg)
 
@@ -21,7 +20,6 @@
 
  This kind of tools is standard in the game and film industry.
 
-##
 
 > ### New on this version:
 > 
@@ -148,7 +146,6 @@ At the moment, Animaide has Three main panels:
 - **key_manager** -- (**New**)
 
 > ## curveTools
-> ###
 >
 > ![Shortcut Troubleshoot](images/local_space.gif)
 >
@@ -380,7 +377,6 @@ At the moment there are 15 different tools:
 > ![Pie Menu A](images/curve_tools_pie_b.jpg)
 
 > ## animOffset
-> ###
 > 
 > ![AnimOffset](images/anim_offset_basic.gif)
 >
@@ -472,7 +468,6 @@ At the moment there are 15 different tools:
 > You can find it on the **Animaide** menu in the Graph Editor.
 
 > ## KeyManager:
-> ###
 > 
 > ![Key Manager](images/key_manager_panel.jpg)
 > 
