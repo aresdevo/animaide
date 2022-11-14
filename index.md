@@ -29,6 +29,7 @@
 > 
 >   ![Local Space](images/shortcut_troubleshoot.gif)
 >
+
 Download the latest release.
 Then in Blender, go to the "Add-ons" tab in the preference window. There click on the "Install" button and navigate to the
 folder where you downloaded the addon. After you select the file and click "Install Add-on", AnimAide will be installed
