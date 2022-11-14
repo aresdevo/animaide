@@ -1,4 +1,5 @@
 # Animaide 1.0.38
+*--Tested with Blender 2.93 and up--*
 
 In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
 with the vertices on a geometry. That is where **AnimAide** comes in.
@@ -8,57 +9,42 @@ wider range of tools but when working with a group of f-curves each one will hav
 
 This kind of tools is standard in the game and film industry.
 
-![Shortcut Troubleshoot](https://github.com/aresdevo/animaide/blob/gh-pages/images/animaide.jpg)
+To access the [Manual](https://aresdevo.github.io/animaide/) and get more information please go to this link: https://aresdevo.github.io/animaide/
 
-> **Note:** 
-> *AnimOffset is on the headers by default now, but that can be changed in the addon preferences*
-> ![AnimOffset header](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_header.jpg)
+**It has three main panels:**
 
-**Tested with Blender 2.93 and up.**
-
-At the moment, Animaide has Three main panels:
-
-## curveTools
-
-![Shortcut Troubleshoot](https://github.com/aresdevo/animaide/blob/gh-pages/images/local_space.gif)
+### curveTools
 
 These panel gives you helpful tools to simultaneously manipulate keys across
 multiple f-curves from either animated objects or animated bones in an armature.
 
-## animOffset
+![local_space](https://aresdevo.github.io/animaide/images/local_space.gif)
+![combining_tools](https://aresdevo.github.io/animaide/images/combining_tools.gif)
 
-![AnimOffset](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_basic.gif)
+
+
+### animOffset
 
 With this tool you can modify any animated object, and the change will propagate to the animation range. It can be
 filter by a mask. You can find the panel in all the animation editors, but the mask option just in the GraphEditor.
 
-![AnimOffset panel](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_panel.gif)
+![AnimOffset](https://aresdevo.github.io/animaide/images/anim_offset_basic.gif)
+![anim_offset_mask](https://aresdevo.github.io/animaide/images/anim_offset_mask.gif)
 
-The mask has the option of adding a blending border that fades the effect of the tool. The interpolation can be adjusted
-in the preferences with the interpolation options.
 
-![Mask Creation](https://github.com/aresdevo/animaide/blob/gh-pages/images/anim_offset_mask.gif)
-
-## KeyManager:
-
-![Key Manager](https://github.com/aresdevo/animaide/blob/gh-pages/images/key_manager_panel.jpg)
+### KeyManager:
 
 This toolbox mostly aims to speedup some tasks you already can do by adding extra options to some Blender Tools.
 
-It has three main sections:
-- **Move-Insert**
-  ![Move Keys](https://github.com/aresdevo/animaide/blob/gh-pages/images/move_keys.gif)
-  ![Move Keys](https://github.com/aresdevo/animaide/blob/gh-pages/images/insert_keys.gif)
-- **Type**
-  ![Key Type](https://github.com/aresdevo/animaide/blob/gh-pages/images/key_type.gif)
-- **Interpolation**
-  ![Handle type and selection](https://github.com/aresdevo/animaide/blob/gh-pages/images/handle_type_and_selection.gif)
+![Move Keys](https://aresdevo.github.io/animaide/images/move_keys.gif)
+![insert Keys](https://aresdevo.github.io/animaide/images/insert_keys.gif)
+![Key Type](https://aresdevo.github.io/animaide/images/key_type.gif)
+![Handle type and selection](https://aresdevo.github.io/animaide/images/handle_type_and_selection.gif)
 
   
-### New on this version:
+### Release notes:
 
 **In General:**
-- *Bug fixes*
 - Some settings were moved to the addon preferences. By being there your options will persist even after the Blender 
 session is over.
 - A new group of tools called **KeyManager** has been added to its own panel.
@@ -67,6 +53,8 @@ session is over.
 - Menus and panels are now smarter. Tools are available just where they make sense. That simplifies the interface.
  
 **CurveTools:**
+- Now Blend Shape fcruves can also be manipulated with this tools.
+- A new "Default" tool has been added.
 - A new "Infinite" tool has been added.
 - The "Noise" has been renamed "Wave-Noise". It now adds a wave when sliding to the left.
 - Tools are now grouped in the "expand" mode for ease of use.
@@ -103,5 +91,6 @@ new edit button is persistent
 - When dealing with "Bezier" curves, it lets you select the left or right handles of every selected key to 
   easily interact with a group of handles at once.
 
-
 ### Enjoy the addon :)
+
+![animaide](https://aresdevo.github.io/animaide/images/animaide.jpg)
