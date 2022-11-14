@@ -1,1 +1,3 @@
-theme: jekyll-theme-architect
+remote_theme: pages-themes/leap-day@v0.2.0
+title: AnimAide Manual
+show_downloads: "true"
