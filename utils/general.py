@@ -208,8 +208,9 @@ def set_bar_color():
         graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
         nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
 
-    h = bpy.context.preferences.themes[0].user_interface.wcol_regular.inner_sel
-    highlight = (h[0]+0.05, h[1]+0.05, h[2]+0.05, h[3])
+    # h = bpy.context.preferences.themes[0].user_interface.wcol_regular.inner_sel
+    h = bpy.context.preferences.themes[0].graph_editor.preview_range
+    highlight = (h[0]*.9, h[1]*.9, h[2]*.9, 1)
     bpy.context.preferences.use_preferences_save = False
     bpy.context.preferences.themes[0].dopesheet_editor.space.header = highlight
     bpy.context.preferences.themes[0].nla_editor.space.header = highlight

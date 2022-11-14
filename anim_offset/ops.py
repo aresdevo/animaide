@@ -423,7 +423,7 @@ class ANIMAIDE_OT_add_anim_offset_mask(Operator):
             anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
             support.store_user_timeline_ranges(context)
             bpy.app.handlers.depsgraph_update_post.append(support.magnet_handlers)
-            utils.set_bar_color(0.5, 0.3, 0.2, 1)
+            utils.set_bar_color()
             utils.add_message(self.message)
 
         scene.tool_settings.use_keyframe_insert_auto = False
