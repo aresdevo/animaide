@@ -208,7 +208,6 @@ def set_bar_color():
         graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
         nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
 
-    # h = bpy.context.preferences.themes[0].user_interface.wcol_regular.inner_sel
     h = bpy.context.preferences.themes[0].graph_editor.preview_range
     highlight = (h[0]*.9, h[1]*.9, h[2]*.9, 1)
     bpy.context.preferences.use_preferences_save = False
