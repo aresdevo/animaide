@@ -1,4 +1,6 @@
-> ## Development no longer active
+I'm working with Blender developers to bring this tools to core Blender.
+
+>## Development no longer active
 >
 > I started this project as a learning experience. I'm an animator wanting to learn how to code, 
 > and while fun it takes a lot of time.
