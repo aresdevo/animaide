@@ -1,5 +1,4 @@
-### News:
-I'm in touch with Blender developers to bring this tools to core Blender.
+----- I'm in touch with Blender developers to bring this tools to core Blender ------
 
 >## Development no longer active
 >
