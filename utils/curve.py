@@ -356,7 +356,7 @@ def valid_fcurve(context, obj, fcurve, action_type='transfrom_action', check_ui=
         return False
 
     if check_ui and context.area.type == 'GRAPH_EDITOR':
-        if context.space_data.use_only_selected_curves_handles and not fcurve.select:
+        if context.space_data.uuse_only_selected_keyframe_handles and not fcurve.select:
             return False
 
         # if context.area.type != 'VIEW_3D':
