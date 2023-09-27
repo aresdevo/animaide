@@ -69,7 +69,8 @@ def set_type(context, key_type):
                     else:
                         add_key_type(context, fcurve, key_type)
 
-                fcurve.update()
+                fcurve.keyframe_points.sort()
+                fcurve.keyframe_points.handles_recalc()
 
 
 def add_key_type(context, fcurve, key_type):
@@ -89,7 +90,8 @@ def add_key_type(context, fcurve, key_type):
     key.interpolation = interp
     key.type = key_type
 
-    fcurve.update()
+    fcurve.keyframe_points.sort()
+    fcurve.keyframe_points.handles_recalc()
 
 
 def change_frame(context, amount, direction='RIGHT'):
@@ -145,7 +147,8 @@ def change_frame(context, amount, direction='RIGHT'):
                 for index in selected_keys:
                     key = fcurve.keyframe_points[index]
                     key.co.x += amount
-                    fcurve.update()
+                    fcurve.keyframe_points.sort()
+                    fcurve.keyframe_points.handles_recalc()
                 frames = 0
 
             elif not some_selected_key:
@@ -156,7 +159,8 @@ def change_frame(context, amount, direction='RIGHT'):
                     key = fcurve.keyframe_points[index]
                     key.co.x += amount
                     frames = amount
-                    fcurve.update()
+                    fcurve.keyframe_points.sort()
+                    fcurve.keyframe_points.handles_recalc()
 
     if lonely_cursor and not some_selected_key:
         if direction == 'LEFT' and left_limit:
@@ -231,7 +235,8 @@ def insert_frames(context, amount):
                     return
                 displace_keys(current_frame)
 
-            fcurve.update()
+            fcurve.keyframe_points.sort()
+            fcurve.keyframe_points.handles_recalc()
 
 
 def set_handles_type(context, act_on='SELECTION', handle_type='NONE', check_ui=True):
@@ -283,7 +288,8 @@ def set_handles_type(context, act_on='SELECTION', handle_type='NONE', check_ui=T
                 handle_type_asignment(last_key, **kwargs)
                 handle_type_asignment(first_key, **kwargs)
 
-            fcurve.update()
+            fcurve.keyframe_points.sort()
+            fcurve.keyframe_points.handles_recalc()
 
 
 def select_key_parts(context,  left=False, right=False, point=False):
@@ -369,7 +375,8 @@ def set_handles_interp(context, act_on='SELECTION', interp='NONE', easing='NONE'
                 for index, key in fcurve.keyframe_points.items():
                     assign_interp(key, interp, easing, strength)
 
-            fcurve.update()
+            fcurve.keyframe_points.sort()
+            fcurve.keyframe_points.handles_recalc()
 
 
 def handle_buttons(context, key, left, point, right):
@@ -435,7 +442,8 @@ def delete_by_type(context, key_type):
                                         frame=key.co_ui.x,
                                         group=fcurve.group.name)
 
-            fcurve.update()
+            fcurve.keyframe_points.sort()
+            fcurve.keyframe_points.handles_recalc()
 
             # utils.key.select_by_type(fcurve, kind)
         # if context.area.type == 'GRAPH_EDITOR':

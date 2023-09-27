@@ -63,6 +63,8 @@ def set_shear_values(left, right):
     # scene = context.scene
     action = bpy.data.actions.get('animaide')
     curves = getattr(action, 'fcurves', None)
+    print('set_shear_values')
+    print(len(curves[0].keyframe_points))
 
     if curves is not None:
         curve = curves[0]
@@ -81,7 +83,8 @@ def set_shear_values(left, right):
         # keys[2].co.y = 1
         # keys[3].co.x = right_blend
         # keys[3].co.y = 0
-        curve.update()
+        curve.keyframe_points.sort()
+        curve.keyframe_points.handles_recalc()
 
 
 def shear(self, direction):
@@ -97,7 +100,8 @@ def shear(self, direction):
 
     factor = utils.clamp(self.factor, self.min_value, self.max_value)
     shear_curve.keyframe_points[direction].co_ui.y = local_y
-    shear_curve.update()
+    shear_curve.keyframe_points.sort()
+    shear_curve.keyframe_points.handles_recalc()
 
     for index in self.selected_keys:
         k = self.fcurve.keyframe_points[index]
@@ -169,7 +173,8 @@ def to_execute(self, context, function, *args):
 
                     function(*args)
 
-                    self.fcurve.update()
+                    self.fcurve.keyframe_points.sort()
+                    self.fcurve.keyframe_points.handles_recalc()
 
     return {'FINISHED'}
 
@@ -214,7 +219,8 @@ def reset_original():
                     k.handle_left.y = handles.get('l')
                     k.handle_right.y = handles.get('r')
 
-                fcurve.update()
+                fcurve.keyframe_points.sort()
+                fcurve.keyframe_points.handles_recalc()
 
     return
 

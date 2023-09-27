@@ -124,7 +124,8 @@ def magnet(context, obj, fcurve):
 
         k.co_ui.y = k.co_ui.y + (delta_y * factor)
 
-    fcurve.update()
+    fcurve.keyframe_points.sort()
+    fcurve.keyframe_points.handles_recalc()
 
     return
 
@@ -157,11 +158,14 @@ def get_delta(context, obj, fcurve):
 
 def add_blends():
     """Add a curve with 4 control pints to an action called 'animaide' that would act as a mask for anim_offset"""
+    print('add_blends running')
     action = utils.set_animaide_action()
     fcurves = getattr(action, 'fcurves', None)
     if len(fcurves) == 0:
+        print('adding magnet 4')
         return utils.curve.new('Magnet', 4)
     else:
+        print('NOT adding magnet 4')
         return action.fcurves[0]
 
 
@@ -189,12 +193,19 @@ def set_blend_values(context):
 
     if blends_curves is not None:
         blend_curve = blends_curves[0]
+        print(blend_curve)
         keys = blend_curve.keyframe_points
+        print(keys)
+        print(len(keys))
 
         left_blend = scene.frame_preview_start
+        print(left_blend)
         left_margin = scene.frame_start
+        print(left_margin)
         right_margin = scene.frame_end
+        print(right_margin)
         right_blend = scene.frame_preview_end
+        print(right_blend)
 
         keys[0].co.x = left_blend
         keys[0].co.y = 0
