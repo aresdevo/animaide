@@ -63,8 +63,6 @@ def set_shear_values(left, right):
     # scene = context.scene
     action = bpy.data.actions.get('animaide')
     curves = getattr(action, 'fcurves', None)
-    print('set_shear_values')
-    print(len(curves[0].keyframe_points))
 
     if curves is not None:
         curve = curves[0]
