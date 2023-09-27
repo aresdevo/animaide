@@ -39,7 +39,6 @@ def add_curve3d(context, name, key_amount=0):
 
 def new(action_group_name, keys_to_add, key_interp='AUTO_CLAMPED', color=(1, 1, 1)):
     """Adds and fcuve in the 'animaide' action"""
-    print('new')
 
     action = utils.set_animaide_action()
 
@@ -48,10 +47,7 @@ def new(action_group_name, keys_to_add, key_interp='AUTO_CLAMPED', color=(1, 1, 
     blends_curve.color = color
 
     keys = blends_curve.keyframe_points
-    for i in range(keys_to_add):
-        print('adding key')
-        keys.add(1)
-    print(len(keys))
+    keys.add(keys_to_add)
 
     for k in keys:
         k.handle_left_type = key_interp
