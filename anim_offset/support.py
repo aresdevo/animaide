@@ -124,7 +124,8 @@ def magnet(context, obj, fcurve):
 
         k.co_ui.y = k.co_ui.y + (delta_y * factor)
 
-    fcurve.update()
+    fcurve.keyframe_points.sort()
+    fcurve.keyframe_points.handles_recalc()
 
     return
 

@@ -234,7 +234,7 @@ def add_message(message):
     def draw_text_callback(info):
         font_id = 0
         blf.position(font_id, 5, 80, 0)
-        blf.size(font_id, 30, 72)
+        blf.size(font_id, 30)
         blf.color(font_id, 1, 1, 1, .5)
         blf.draw(font_id, info)
 

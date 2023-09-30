@@ -57,7 +57,8 @@ def new(action_group_name, keys_to_add, key_interp='AUTO_CLAMPED', color=(1, 1, 
 
     blends_curve.lock = True
     blends_curve.select = True
-    blends_curve.update() # check if I need to add irmita's key function
+    blends_curve.keyframe_points.sort()
+    blends_curve.keyframe_points.handles_recalc()
     # utils.key.update_keyframe_points(context)
 
     return blends_curve
@@ -213,7 +214,9 @@ def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=Fals
 
     add_cycle(dup, before=before, after=after)
 
-    dup.update()
+    dup.keyframe_points.sort()
+    dup.keyframe_points.handles_recalc()
+    
 
     return dup
 
@@ -247,7 +250,8 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
 
     add_cycle(dup, before=before, after=after)
 
-    dup.update()
+    dup.keyframe_points.sort()
+    dup.keyframe_points.handles_recalc()
 
     return dup
 
@@ -267,7 +271,8 @@ def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=Fa
 
             duplicate(fcurve, selected_keys=selected_keys, before=cycle_before, after=cycle_after)
 
-            fcurve.update()
+            fcurve.keyframe_points.sort()
+            fcurve.keyframe_points.handles_recalc()
 
 
 def remove_clone(objects):
@@ -308,11 +313,13 @@ def move_clone(objects):
             for key in clone.keyframe_points:
                 key.co.x = key.co.x + (amount * move_factor)
 
-            clone.update()
+            clone.keyframe_points.sort()
+            clone.keyframe_points.handles_recalc()
 
             utils.key.attach_selection_to_fcurve(fcurve, clone, is_gradual=False)
 
-            fcurve.update()
+            fcurve.keyframe_points.sort()
+            fcurve.keyframe_points.handles_recalc()
 
 
 def valid_anim(obj):
