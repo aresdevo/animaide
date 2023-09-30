@@ -386,12 +386,12 @@ def update_keyframe_points(context):
     if area != 'GRAPH_EDITOR':
         context.area.type = 'GRAPH_EDITOR'
 
-    snap = context.space_data.auto_snap
-    context.space_data.auto_snap = 'NONE'
+    snap = context.scene.tool_settings.use_snap_anim
+    context.scene.tool_settings.use_snap_anim = False
 
     bpy.ops.transform.transform()
 
-    context.space_data.auto_snap = snap
+    context.scene.tool_settings.use_snap_anim = snap
     if area != 'GRAPH_EDITOR':
         context.area.type = area
 
