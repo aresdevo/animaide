@@ -148,7 +148,10 @@ def get_delta(context, obj, fcurve):
             target = prop[fcurve.array_index]
         except TypeError:
             target = prop
-        return target - curve_value
+        try:
+            return target - curve_value
+        except TypeError:
+            return 0
     else:
         return 0
 
