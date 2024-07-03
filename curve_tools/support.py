@@ -257,6 +257,10 @@ def get_globals(context):
 
             global_curve_data = {}
 
+            # Allows selection in dope sheet to work in graph editor
+            for fcurve_index, fcurve in fcurves.items():
+                fcurve.select = True
+
             for fcurve_index, fcurve in fcurves.items():
                 if not utils.curve.valid_fcurve(context, obj, fcurve, action_type=action_type):
                     continue
