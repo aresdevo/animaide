@@ -465,7 +465,7 @@ def draw_bookmarks(self, context):
 
 classes = (
     ANIMAIDE_PT_curve_tools_ge,
-    # ANIMAIDE_PT_curve_tools_de,
+    ANIMAIDE_PT_curve_tools_de,
     ANIMAIDE_PT_curve_tools_3d,
     ANIMAIDE_UL_frame_bookmarks,
     ANIMAIDE_PT_frame_bookmarks_ge,
