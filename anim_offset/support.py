@@ -124,7 +124,8 @@ def magnet(context, obj, fcurve):
 
         k.co_ui.y = k.co_ui.y + (delta_y * factor)
 
-    fcurve.update()
+    fcurve.keyframe_points.sort()
+    fcurve.keyframe_points.handles_recalc()
 
     return
 
@@ -147,7 +148,10 @@ def get_delta(context, obj, fcurve):
             target = prop[fcurve.array_index]
         except TypeError:
             target = prop
-        return target - curve_value
+        try:
+            return target - curve_value
+        except TypeError:
+            return 0
     else:
         return 0
 

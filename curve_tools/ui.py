@@ -322,16 +322,10 @@ class ANIMAIDE_PT_frame_bookmarks_3d(Panel, ANIMAIDE_PT_frame_bookmarks):
     bl_parent_id = 'ANIMAIDE_PT_curve_tools_3d'
 
 
-# class ANIMAIDE_PT_frame_bookmarks_de(Panel, ANIMAIDE_PT_frame_bookmarks):
-#     bl_idname = 'ANIMAIDE_PT_frame_bookmarks_de'
-#     bl_space_type = 'DOPESHEET_EDITOR'
-#     # bl_parent_id = 'ANIMAIDE_PT_curve_tools_de'
-
-
-# class ANIMAIDE_PT_frame_bookmarks_3d(Panel, ANIMAIDE_PT_frame_bookmarks):
-#     bl_idname = 'ANIMAIDE_PT_frame_bookmarks_3d'
-#     bl_space_type = 'VIEW_3D'
-#     bl_parent_id = 'ANIMAIDE_PT_curve_tools_3d'
+class ANIMAIDE_PT_frame_bookmarks_de(Panel, ANIMAIDE_PT_frame_bookmarks):
+    bl_idname = 'ANIMAIDE_PT_frame_bookmarks_de'
+    bl_space_type = 'DOPESHEET_EDITOR'
+    bl_parent_id = 'ANIMAIDE_PT_curve_tools_de'
 
 
 class ANIMAIDE_MT_curve_tools(Menu):
@@ -465,11 +459,11 @@ def draw_bookmarks(self, context):
 
 classes = (
     ANIMAIDE_PT_curve_tools_ge,
-    # ANIMAIDE_PT_curve_tools_de,
+    ANIMAIDE_PT_curve_tools_de,
     ANIMAIDE_PT_curve_tools_3d,
     ANIMAIDE_UL_frame_bookmarks,
     ANIMAIDE_PT_frame_bookmarks_ge,
-    # ANIMAIDE_PT_frame_bookmarks_de,
+    ANIMAIDE_PT_frame_bookmarks_de,
     ANIMAIDE_PT_frame_bookmarks_3d,
     ANIMAIDE_MT_pie_curve_tools_a,
     ANIMAIDE_MT_pie_curve_tools_b,
