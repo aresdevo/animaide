@@ -20,6 +20,7 @@ Created by Ares Deveaux
 '''
 
 import math
+import random
 import bpy
 
 # from utils.key import global_values, on_current_frame, get_selected_neigbors, \
@@ -49,12 +50,13 @@ def add_noise(fcurve, strength=0.4, scale=1, phase=0):
 def add_shear_curve():
     """Add a curve with 4 control pints to an action called 'animaide' that would act as a mask for anim_offset"""
     action = utils.set_animaide_action()
-    fcurves = getattr(action, 'fcurves', None)
+    fcurves = utils.curve.get_fcurves_for_action(action)
+    fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
     # fcurves = utils.curve.get_all_fcurves(obj)
-    if len(fcurves) == 0:
+    if len(fcurves_list) == 0:
         return utils.curve.new('Shear', 2, key_interp='VECTOR')
     else:
-        return fcurves[0]
+        return fcurves_list[0]
 
 
 def set_shear_values(left, right):
@@ -62,10 +64,11 @@ def set_shear_values(left, right):
 
     # scene = context.scene
     action = bpy.data.actions.get('animaide')
-    curves = getattr(action, 'fcurves', None)
+    curves = utils.curve.get_fcurves_for_action(action)
+    curves_list = utils.curve.get_fcurves_list(curves) if curves else []
 
-    if curves is not None:
-        curve = curves[0]
+    if curves_list:
+        curve = curves_list[0]
         keys = curve.keyframe_points
 
         # left_blend = scene.frame_preview_start
@@ -91,7 +94,8 @@ def shear(self, direction):
     else:
         direction = 0
     shear_action = utils.set_animaide_action()
-    shear_curves = getattr(shear_action, 'fcurves', None)
+    shear_curves = utils.curve.get_fcurves_for_action(shear_action)
+    shear_curves_list = utils.curve.get_fcurves_list(shear_curves) if shear_curves else []
     shear_curve = add_shear_curve()
     local_y = self.right_neighbor['y'] - self.left_neighbor['y']
     set_shear_values(self.left_neighbor['x'], self.right_neighbor['x'])
@@ -105,7 +109,8 @@ def shear(self, direction):
         k = self.fcurve.keyframe_points[index]
         k.co_ui.y = self.original_keys[index]['y'] + shear_curve.evaluate(k.co.x) * factor
 
-    shear_curves.remove(shear_curve)
+    if shear_curves_list:
+        shear_curves_list[0].remove(shear_curve)
 
 
 def set_min_max_values(self, context):
@@ -141,10 +146,15 @@ def to_execute(self, context, function, *args):
             if not action:
                 continue
 
-            self.fcurves = action.fcurves
+            self.fcurves = utils.curve.get_fcurves_for_action(action)
+            fcurves_list = utils.curve.get_fcurves_list(self.fcurves) if self.fcurves else []
 
             for fcurve_i in global_fcurves:
-                    self.fcurve = self.fcurves[fcurve_i]
+                    # Access by index - need to handle Blender 5.0 compatibility
+                    if fcurve_i < len(fcurves_list):
+                        self.fcurve = fcurves_list[fcurve_i]
+                    else:
+                        continue
 
                     self.global_fcurve = global_fcurves[fcurve_i]
 
@@ -194,8 +204,14 @@ def reset_original():
             if not action:
                 continue
 
+            fcurves = utils.curve.get_fcurves_for_action(action)
+            fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
+
             for fcurve_i in global_fcurves:
-                fcurve = action.fcurves[fcurve_i]
+                if fcurve_i < len(fcurves_list):
+                    fcurve = fcurves_list[fcurve_i]
+                else:
+                    continue
 
                 global_fcurve = global_fcurves[fcurve_i]
 
@@ -221,6 +237,48 @@ def reset_original():
                 fcurve.keyframe_points.handles_recalc()
 
     return
+
+
+# Function to determine if an fcurve is locked
+def is_fcurve_locked(obj, fcurve):
+    if fcurve.lock or fcurve.mute:
+        return True
+    if not obj:
+        return False
+    print(fcurve.data_path)
+
+    # Check if the fcurve is related to a pose bone
+    if fcurve.data_path.startswith("pose.bones"):
+        bone_name = fcurve.data_path.split('"')[1]  # Extract the bone name
+        bone = obj.pose.bones.get(bone_name)
+
+        # Determine the specific property (location, rotation, scale)
+        if "location" in fcurve.data_path:
+            return bone.lock_location[fcurve.array_index]
+        elif "rotation_quaternion" in fcurve.data_path:
+            if fcurve.array_index == 0:
+                return bone.lock_rotation_w  # Quaternion W component
+            else:
+                return bone.lock_rotation[fcurve.array_index - 1]  # Quaternion X, Y, Z components
+        elif "rotation_euler" in fcurve.data_path:
+            return bone.lock_rotation[fcurve.array_index]  # Euler X, Y, Z components
+        elif "scale" in fcurve.data_path:
+            return bone.lock_scale[fcurve.array_index]
+    else:
+        # For object level properties
+        if fcurve.data_path.startswith("location"):
+            return obj.lock_location[fcurve.array_index]
+        elif "rotation_quaternion" in fcurve.data_path:
+            if fcurve.array_index == 0:
+                return obj.lock_rotation_w  # Quaternion W component
+            else:
+                return obj.lock_rotation[fcurve.array_index - 1]  # Quaternion X, Y, Z components
+        elif "rotation_euler" in fcurve.data_path:
+            return obj.lock_rotation[fcurve.array_index]  # Euler X, Y, Z components
+        elif fcurve.data_path.startswith("scale"):
+            return obj.lock_scale[fcurve.array_index]
+    
+    return False
 
 
 def get_globals(context):
@@ -250,18 +308,27 @@ def get_globals(context):
                 continue
 
             action_type = action_data['type']
-            fcurves = action.fcurves
+            fcurves = utils.curve.get_fcurves_for_action(action)
+            fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-            if not fcurves:
+            if not fcurves_list:
                 continue
 
             global_curve_data = {}
 
             # Allows selection in dope sheet to work in graph editor
-            for fcurve_index, fcurve in fcurves.items():
-                fcurve.select = True
+            for fcurve_index, fcurve in enumerate(fcurves_list):
+                locked = is_fcurve_locked(obj, fcurve)
+                if not locked:
+                    fcurve.select = True
+                else:
+                    fcurve.select = False
+                    for keyframe in fcurve.keyframe_points:
+                        keyframe.select_control_point = False
+                        keyframe.select_left_handle = False
+                        keyframe.select_right_handle = False
 
-            for fcurve_index, fcurve in fcurves.items():
+            for fcurve_index, fcurve in enumerate(fcurves_list):
                 if not utils.curve.valid_fcurve(context, obj, fcurve, action_type=action_type):
                     continue
 
@@ -465,5 +532,3 @@ def linear_y(key, left_neighbor, right_neighbor):
     adjacent = key.co_ui.x - left_neighbor['x']
     oposite = tangent * adjacent
     return left_neighbor['y'] + oposite
-
-
