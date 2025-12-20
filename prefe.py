@@ -33,7 +33,8 @@ def add_key_manager_header():
     global key_manager_pref
     for cls in key_manager.ui.header_classes:
         bpy.utils.register_class(cls)
-    bpy.types.TIME_MT_editor_menus.append(key_manager.ui.draw_key_manager)
+    if bpy.app.version < (5, 0, 0):
+        bpy.types.TIME_MT_editor_menus.append(key_manager.ui.draw_key_manager)
     bpy.types.DOPESHEET_MT_editor_menus.append(key_manager.ui.draw_key_manager)
     bpy.types.GRAPH_MT_editor_menus.append(key_manager.ui.draw_key_manager)
     key_manager_pref = 'HEADERS'
@@ -43,7 +44,8 @@ def remove_key_manager_header():
     global key_manager_pref
     for cls in key_manager.ui.header_classes:
         bpy.utils.unregister_class(cls)
-    bpy.types.TIME_MT_editor_menus.remove(key_manager.ui.draw_key_manager)
+    if bpy.app.version < (5, 0, 0):
+        bpy.types.TIME_MT_editor_menus.remove(key_manager.ui.draw_key_manager)
     bpy.types.DOPESHEET_MT_editor_menus.remove(key_manager.ui.draw_key_manager)
     bpy.types.GRAPH_MT_editor_menus.remove(key_manager.ui.draw_key_manager)
     key_manager_pref = ''
@@ -79,7 +81,8 @@ def remove_anim_offset_panel():
 
 def add_anim_offset_header():
     global anim_offset_pref
-    bpy.types.TIME_MT_editor_menus.append(anim_offset.ui.draw_anim_offset)
+    if bpy.app.version < (5, 0, 0):
+        bpy.types.TIME_MT_editor_menus.append(anim_offset.ui.draw_anim_offset)
     bpy.types.DOPESHEET_MT_editor_menus.append(anim_offset.ui.draw_anim_offset_mask)
     bpy.types.GRAPH_MT_editor_menus.append(anim_offset.ui.draw_anim_offset_mask)
     anim_offset_pref = 'HEADERS'
@@ -87,7 +90,8 @@ def add_anim_offset_header():
 
 def remove_anim_offset_header():
     global anim_offset_pref
-    bpy.types.TIME_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset)
+    if bpy.app.version < (5, 0, 0):
+        bpy.types.TIME_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset)
     bpy.types.GRAPH_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset_mask)
     bpy.types.DOPESHEET_MT_editor_menus.remove(anim_offset.ui.draw_anim_offset_mask)
     anim_offset_pref = ''
