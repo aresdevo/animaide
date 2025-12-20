@@ -208,7 +208,11 @@ def set_bar_color():
         graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
         nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
 
-    h = bpy.context.preferences.themes[0].graph_editor.preview_range
+    # preview_range was removed in Blender 5.0, use space header color instead
+    if bpy.app.version < (5, 0, 0):
+        h = bpy.context.preferences.themes[0].graph_editor.preview_range
+    else:
+        h = bpy.context.preferences.themes[0].graph_editor.space.header
     highlight = (h[0]*.9, h[1]*.9, h[2]*.9, 1)
     bpy.context.preferences.use_preferences_save = False
     bpy.context.preferences.themes[0].dopesheet_editor.space.header = highlight
