@@ -177,9 +177,10 @@ def selected_bounding_box(context, objects, keys_selected=True):
         if not utils.curve.valid_obj(context, obj):
             continue
 
-        fcurves = obj.animation_data.action.fcurves
+        fcurves = utils.curve.get_fcurves_for_action(obj.animation_data.action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-        for fcurve in fcurves:
+        for fcurve in fcurves_list:
             if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
             if keys_selected:
