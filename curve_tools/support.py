@@ -251,34 +251,44 @@ def is_fcurve_locked(obj, fcurve):
     if fcurve.data_path.startswith("pose.bones"):
         bone_name = fcurve.data_path.split('"')[1]  # Extract the bone name
         bone = obj.pose.bones.get(bone_name)
+        
+        if not bone:
+            return False
 
         # Determine the specific property (location, rotation, scale)
         if "location" in fcurve.data_path:
-            return bone.lock_location[fcurve.array_index]
+            if fcurve.array_index < len(bone.lock_location):
+                return bone.lock_location[fcurve.array_index]
         elif "rotation_quaternion" in fcurve.data_path:
             if fcurve.array_index == 0:
                 return bone.lock_rotation_w  # Quaternion W component
-            else:
+            elif fcurve.array_index - 1 < len(bone.lock_rotation):
                 return bone.lock_rotation[fcurve.array_index - 1]  # Quaternion X, Y, Z components
         elif "rotation_euler" in fcurve.data_path:
-            return bone.lock_rotation[fcurve.array_index]  # Euler X, Y, Z components
+            if fcurve.array_index < len(bone.lock_rotation):
+                return bone.lock_rotation[fcurve.array_index]  # Euler X, Y, Z components
         elif "scale" in fcurve.data_path:
-            return bone.lock_scale[fcurve.array_index]
+            if fcurve.array_index < len(bone.lock_scale):
+                return bone.lock_scale[fcurve.array_index]
     else:
         # For object level properties
         if fcurve.data_path.startswith("location"):
-            return obj.lock_location[fcurve.array_index]
+            if fcurve.array_index < len(obj.lock_location):
+                return obj.lock_location[fcurve.array_index]
         elif "rotation_quaternion" in fcurve.data_path:
             if fcurve.array_index == 0:
                 return obj.lock_rotation_w  # Quaternion W component
-            else:
+            elif fcurve.array_index - 1 < len(obj.lock_rotation):
                 return obj.lock_rotation[fcurve.array_index - 1]  # Quaternion X, Y, Z components
         elif "rotation_euler" in fcurve.data_path:
-            return obj.lock_rotation[fcurve.array_index]  # Euler X, Y, Z components
+            if fcurve.array_index < len(obj.lock_rotation):
+                return obj.lock_rotation[fcurve.array_index]  # Euler X, Y, Z components
         elif fcurve.data_path.startswith("scale"):
-            return obj.lock_scale[fcurve.array_index]
+            if fcurve.array_index < len(obj.lock_scale):
+                return obj.lock_scale[fcurve.array_index]
     
     return False
+
 
 
 def get_globals(context):
