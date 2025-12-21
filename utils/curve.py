@@ -498,7 +498,7 @@ def valid_fcurve(context, obj, fcurve, action_type='transfrom_action', check_ui=
             if bone.hide:
                 return False
 
-            if bpy.app.version >= (5, 0, 0):
+            if bpy.app.version[0] >= 5:
                 # Blender 5.0+: use pose bone selection state
                 pose_bone = obj.pose.bones.get(bone_name) if bone else None
                 bone_selected = pose_bone.select if pose_bone else False
