@@ -101,6 +101,14 @@ def get_first_fcurve(fcurves_collection):
         return fcurves_list[0] if fcurves_list else None
 
 
+def new_fcurve(fcurves, data_path, index, group_name_value):
+    """Create new fcurve with correct parameter name for Blender version"""
+    if bpy.app.version < (5, 0, 0):
+        return fcurves.new(data_path=data_path, index=index, action_group=group_name_value)
+    else:
+        return fcurves.new(data_path=data_path, index=index, group_name=group_name_value)
+
+
 def add_curve3d(context, name, key_amount=0):
     curve_data = bpy.data.curves.new(name, 'CURVE')
     spline = curve_data.splines.new('BEZIER')
@@ -118,7 +126,7 @@ def new(action_group_name, keys_to_add, key_interp='AUTO_CLAMPED', color=(1, 1, 
     if fcurves is None:
         return None
 
-    blends_curve = fcurves.new(data_path=group_name, index=0, action_group=action_group_name)
+    blends_curve = new_fcurve(fcurves, data_path=group_name, index=0, group_name_value=action_group_name)
     blends_curve.color_mode = 'CUSTOM'
     blends_curve.color = color
 
@@ -271,7 +279,7 @@ def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=Fals
 
     clone_name = '%s.%d.clone' % (fcurve.data_path, fcurve.array_index)
 
-    dup = fcurves.new(data_path=clone_name, index=index, action_group=group_name)
+    dup = new_fcurve(fcurves, data_path=clone_name, index=index, group_name_value=group_name)
     dup.keyframe_points.add(len(selected_keys))
     dup.color_mode = 'CUSTOM'
     dup.color = (0, 0, 0)
@@ -279,8 +287,12 @@ def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=Fals
     dup.lock = lock
     dup.select = False
 
-    action.groups[group_name].lock = lock
-    action.groups[group_name].color_set = 'THEME10'
+    # Blender < 5.0 has action groups; Blender 5.0+ uses slots/layers system
+    if bpy.app.version < (5, 0, 0):
+        action = fcurve.id_data
+        if hasattr(action, 'groups') and group_name in action.groups:
+            action.groups[group_name].lock = lock
+            action.groups[group_name].color_set = 'THEME10'
 
     for i, (index, key) in enumerate(selected_keys):
         dup.keyframe_points[i].co = key.co
@@ -300,7 +312,7 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
     every_key = global_fcurve['every_key']
     original_keys = global_fcurve['original_keys']
 
-    dup = fcurves.new(data_path=new_data_path, index=index, action_group=group_name)
+    dup = new_fcurve(fcurves, data_path=new_data_path, index=index, group_name_value=group_name)
     dup.keyframe_points.add(len(every_key))
     dup.color_mode = 'CUSTOM'
     dup.color = (0, 0, 0)
@@ -308,9 +320,12 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
     dup.lock = lock
     dup.select = False
 
-    action = fcurves.id_data
-    action.groups[group_name].lock = lock
-    action.groups[group_name].color_set = 'THEME10'
+    # Blender < 5.0 has action groups; Blender 5.0+ uses slots/layers system
+    if bpy.app.version < (5, 0, 0):
+        action = fcurves.id_data
+        if hasattr(action, 'groups') and group_name in action.groups:
+            action.groups[group_name].lock = lock
+            action.groups[group_name].color_set = 'THEME10'
 
     i = 0
 
