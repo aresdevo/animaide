@@ -498,12 +498,20 @@ def valid_fcurve(context, obj, fcurve, action_type='transfrom_action', check_ui=
             if bone.hide:
                 return False
 
+            if bpy.app.version >= (5, 0, 0):
+                # Blender 5.0+: use pose bone selection state
+                pose_bone = obj.pose.bones.get(bone_name) if bone else None
+                bone_selected = pose_bone.select if pose_bone else False
+            else:
+                # Blender < 5.0: data-bone had selection properties
+                bone_selected = bone.select
+
             if context.area.type == 'VIEW_3D':
-                if not bone.select:
+                if not bone_selected:
                     return False
             else:
                 only_selected = context.space_data.dopesheet.show_only_selected
-                if only_selected and not bone.select:
+                if only_selected and not bone_selected:
                     return False
 
     # if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
