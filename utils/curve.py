@@ -32,9 +32,9 @@ def _get_or_create_default_slot_layer_strip(action):
         return None
 
     if len(action.slots) == 0:
-        return None
-
-    slot = action.slots[0]
+        slot = action.slots.new(id_type='OBJECT', name='animaide')
+    else:
+        slot = action.slots[0]
 
     if not hasattr(action, 'layers') or len(action.layers) == 0:
         layer = action.layers.new()
@@ -455,8 +455,9 @@ def valid_fcurve(context, obj, fcurve, action_type='transfrom_action', check_ui=
     if not fcurve:
         return False
 
-    if not are_frames_selected_in_fcurve(fcurve):
-        return False
+    if context.area.type == 'GRAPH_EDITOR':
+        if not are_frames_selected_in_fcurve(fcurve):
+            return False
 
     try:
         if action_type == 'transfrom_action':
