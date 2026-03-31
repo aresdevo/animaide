@@ -421,17 +421,19 @@ def delete_by_type(context, key_type):
         if not utils.curve.valid_obj(context, obj):
             continue
 
-        action = obj.animation_data.action
+        action = getattr(obj.animation_data, 'action', None)
+        if not action:
+            continue
 
-        for fcurve in action.fcurves:
+        fcurves = utils.curve.get_fcurves_for_action(action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
+
+        for fcurve in fcurves_list:
             if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
             selected_keys = utils.key.get_selected_index(fcurve)
             cursor_index = utils.key.on_current_frame(fcurve)
-
-            # if not utils.curve.valid_fcurve(context, fcurve):
-            #     continue
 
             keys = fcurve.keyframe_points
 
@@ -441,14 +443,11 @@ def delete_by_type(context, key_type):
                     continue
 
                 while key.type == key_type and key.select_control_point:
-                    print('fcurve.data_path: ', fcurve.data_path)
-                    print('fcurve.array_index: ', fcurve.array_index)
-                    print('key.co_ui.x: ', key.co_ui.x)
-                    print('fcurve.group.name: ', fcurve.group.name)
+                    group_name_val = getattr(fcurve.group, 'name', '')
                     obj.keyframe_delete(fcurve.data_path,
                                         index=fcurve.array_index,
                                         frame=key.co_ui.x,
-                                        group=fcurve.group.name)
+                                        group=group_name_val)
 
             fcurve.keyframe_points.sort()
             fcurve.keyframe_points.handles_recalc()

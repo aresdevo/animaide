@@ -78,12 +78,15 @@ def deselect_keys(fcurve):
 
 
 def some_selected_key(context, obj):
-    fcurves = utils.curve.valid_anim(obj)
-
     if not utils.curve.valid_obj(context, obj):
-        return
+        return False
 
-    for fcurve in fcurves:
+    action = getattr(obj.animation_data, 'action', None)
+    fcurves = utils.curve.get_fcurves_for_action(action)
+    if not fcurves:
+        return False
+
+    for fcurve in utils.curve.get_fcurves_list(fcurves):
         if not utils.curve.valid_fcurve(context, obj, fcurve):
             continue
         keys = fcurve.keyframe_points
