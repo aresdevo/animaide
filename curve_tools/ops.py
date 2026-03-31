@@ -946,7 +946,7 @@ class ANIMAIDE_OT_randomize(Operator, ANIMAIDE_OT):
             tool = context.scene.animaide.tool
             factor = utils.clamp(self.factor, self.min_value, self.max_value)
 
-            if factor > 0:
+            if factor != 0:
                 clone = utils.curve.duplicate_from_data(self.fcurves,
                                                         self.global_fcurve,
                                                         'animaide')
