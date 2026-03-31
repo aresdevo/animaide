@@ -470,9 +470,9 @@ def set_ref_marker(context):
         left = 0
         right = 0
         for marker in markers:
-            if marker.get('side') == 'L':
+            if marker.name == 'L':
                 left = marker.frame
-            elif marker.get('side') == 'R':
+            elif marker.name == 'R':
                 right = marker.frame
     else:
         left = tool.left_ref_frame

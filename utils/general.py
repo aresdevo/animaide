@@ -130,7 +130,6 @@ def add_marker(name, side, frame=0, overwrite=True):
     if overwrite:
         remove_marker(side)
     marker = markers.new(name=name, frame=frame)
-    marker['side'] = side
     return marker
 
 
@@ -148,7 +147,7 @@ def remove_marker(side):
     markers = bpy.context.scene.timeline_markers
 
     for marker in markers:
-        if marker.get('side') == side:
+        if marker.name == side:
             markers.remove(marker)
     return
 
