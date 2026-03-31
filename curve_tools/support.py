@@ -110,7 +110,7 @@ def shear(self, direction):
         k.co_ui.y = self.original_keys[index]['y'] + shear_curve.evaluate(k.co.x) * factor
 
     if shear_curves_list:
-        shear_curves_list[0].remove(shear_curve)
+        shear_curves.remove(shear_curve)
 
 
 def set_min_max_values(self, context):
@@ -456,6 +456,11 @@ def get_globals(context):
         if global_action_type:
             obj_actions[obj.name] = {'actions': global_action_type,
                                      'keys_are_selected': keys_are_selected}
+    # Propagate global selection state: if ANY object had selected keys,
+    # mark all objects so cursor-fallback doesn't fire for unselected objects.
+    if keys_are_selected:
+        for obj_name in obj_actions:
+            obj_actions[obj_name]['keys_are_selected'] = True
     global_values = {'objects': obj_actions}
     return
 
