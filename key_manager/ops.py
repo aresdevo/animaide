@@ -373,8 +373,10 @@ class ANIMAIDE_OT_modifier(Operator):
         objects = context.selected_objects
         for obj in objects:
             action = obj.animation_data.action
+            fcurves = utils.curve.get_fcurves_for_action(action)
+            fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-            for curve in action.fcurves:
+            for curve in fcurves_list:
                 if curve.select is not True:
                     continue
                 noise = curve.modifiers.new('NOISE')
@@ -398,7 +400,7 @@ class ANIMAIDE_OT_path(Operator):
 
     def execute(self, context):
         obj = context.object
-        fcurves = obj.animation_data.action.fcurves
+        fcurves = utils.curve.get_fcurves_for_action(obj.animation_data.action)
         utils.curve.create_path(context, fcurves)
 
 

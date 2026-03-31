@@ -47,9 +47,10 @@ def set_type(context, key_type):
 
             some_selected_key = utils.key.some_selected_key(context, obj)
 
-            fcurves = obj.animation_data.action.fcurves
+            fcurves = utils.curve.get_fcurves_for_action(obj.animation_data.action)
+            fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-            for fcurve in fcurves:
+            for fcurve in fcurves_list:
                 if not utils.curve.valid_fcurve(context, obj, fcurve):
                     continue
 
@@ -133,9 +134,10 @@ def change_frame(context, amount, direction='RIGHT'):
         if not utils.curve.valid_obj(context, obj):
             continue
 
-        fcurves = obj.animation_data.action.fcurves
+        fcurves = utils.curve.get_fcurves_for_action(obj.animation_data.action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-        for fcurve in fcurves:
+        for fcurve in fcurves_list:
             if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
@@ -215,9 +217,10 @@ def insert_frames(context, amount):
 
         some_selected_key = utils.key.some_selected_key(context, obj)
 
-        fcurves = obj.animation_data.action.fcurves
+        fcurves = utils.curve.get_fcurves_for_action(obj.animation_data.action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-        for fcurve in fcurves:
+        for fcurve in fcurves_list:
             if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
@@ -252,8 +255,10 @@ def set_handles_type(context, act_on='SELECTION', handle_type='NONE', check_ui=T
             continue
 
         action = obj.animation_data.action
+        fcurves = utils.curve.get_fcurves_for_action(action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-        for fcurve in action.fcurves:
+        for fcurve in fcurves_list:
             if not utils.curve.valid_fcurve(context, obj, fcurve, check_ui=check_ui):
                 continue
 
@@ -277,7 +282,7 @@ def set_handles_type(context, act_on='SELECTION', handle_type='NONE', check_ui=T
                                           handle_type=handle_type)
 
             elif act_on == 'ALL':
-                for index, key in fcurve.keyframe_points.items():
+                for key in fcurve.keyframe_points:
                     # set_handles_interp(context, interp=key_tweak.interp)
                     handle_type_asignment(key, **kwargs)
             elif act_on == 'FIRST':
@@ -305,9 +310,10 @@ def select_key_parts(context,  left=False, right=False, point=False):
         if not utils.curve.valid_obj(context, obj):
             continue
 
-        fcurves = obj.animation_data.action.fcurves
+        fcurves = utils.curve.get_fcurves_for_action(obj.animation_data.action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-        for fcurve_index, fcurve in fcurves.items():
+        for fcurve in fcurves_list:
             if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
@@ -359,8 +365,10 @@ def set_handles_interp(context, act_on='SELECTION', interp='NONE', easing='NONE'
             continue
 
         action = obj.animation_data.action
+        fcurves = utils.curve.get_fcurves_for_action(action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-        for fcurve in action.fcurves:
+        for fcurve in fcurves_list:
             if not utils.curve.valid_fcurve(context, obj, fcurve, check_ui=check_ui):
                 continue
 
@@ -372,7 +380,7 @@ def set_handles_interp(context, act_on='SELECTION', interp='NONE', easing='NONE'
                     assign_interp(key, interp, easing, strength)
 
             if act_on == 'ALL':
-                for index, key in fcurve.keyframe_points.items():
+                for key in fcurve.keyframe_points:
                     assign_interp(key, interp, easing, strength)
 
             fcurve.keyframe_points.sort()
@@ -413,17 +421,19 @@ def delete_by_type(context, key_type):
         if not utils.curve.valid_obj(context, obj):
             continue
 
-        action = obj.animation_data.action
+        action = getattr(obj.animation_data, 'action', None)
+        if not action:
+            continue
 
-        for fcurve in action.fcurves:
+        fcurves = utils.curve.get_fcurves_for_action(action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
+
+        for fcurve in fcurves_list:
             if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
             selected_keys = utils.key.get_selected_index(fcurve)
             cursor_index = utils.key.on_current_frame(fcurve)
-
-            # if not utils.curve.valid_fcurve(context, fcurve):
-            #     continue
 
             keys = fcurve.keyframe_points
 
@@ -433,14 +443,11 @@ def delete_by_type(context, key_type):
                     continue
 
                 while key.type == key_type and key.select_control_point:
-                    print('fcurve.data_path: ', fcurve.data_path)
-                    print('fcurve.array_index: ', fcurve.array_index)
-                    print('key.co_ui.x: ', key.co_ui.x)
-                    print('fcurve.group.name: ', fcurve.group.name)
+                    group_name_val = getattr(fcurve.group, 'name', '')
                     obj.keyframe_delete(fcurve.data_path,
                                         index=fcurve.array_index,
                                         frame=key.co_ui.x,
-                                        group=fcurve.group.name)
+                                        group=group_name_val)
 
             fcurve.keyframe_points.sort()
             fcurve.keyframe_points.handles_recalc()
@@ -472,8 +479,10 @@ def select_by_type(context, kind, selection=True):
             continue
 
         action = obj.animation_data.action
+        fcurves = utils.curve.get_fcurves_for_action(action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-        for fcurve in action.fcurves:
+        for fcurve in fcurves_list:
             if not utils.curve.valid_fcurve(context, obj, fcurve):
                 continue
 
@@ -482,7 +491,7 @@ def select_by_type(context, kind, selection=True):
 
             keys = fcurve.keyframe_points
 
-            for index, key in keys.items():
+            for key in keys:
                 if key.type == kind:
                     # key.select_control_point = selection
                     handle_buttons(context, key, selection, selection, selection)

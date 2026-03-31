@@ -22,6 +22,7 @@ Created by Ares Deveaux
 import bpy
 import os
 import math
+import random
 
 # import utils.general
 # import utils.key
@@ -928,6 +929,52 @@ class ANIMAIDE_OT_wave_noise(Operator, ANIMAIDE_OT):
         return support.to_execute(self, context, self.tool, context)
 
 
+class ANIMAIDE_OT_randomize(Operator, ANIMAIDE_OT):
+    """Apply random value offsets to selected keys."""
+
+    bl_idname = "anim.aide_randomize"
+    bl_label = "Randomize"
+
+    tool_type = 'RANDOMIZE'
+
+    def tool(self, context):
+
+        if self.selected_keys:
+            if self.op_context == 'INVOKE_DEFAULT':
+                context.window.workspace.status_text_set(self.display_info)
+
+            tool = context.scene.animaide.tool
+            factor = utils.clamp(self.factor, self.min_value, self.max_value)
+
+            if factor != 0:
+                clone = utils.curve.duplicate_from_data(self.fcurves,
+                                                        self.global_fcurve,
+                                                        'animaide')
+
+                phase = self.animaide.tool.noise_phase + self.noise_steps
+                scale = self.animaide.tool.noise_scale
+
+                # Randomize phase per execution for varied results
+                phase = phase * random.uniform(-1, 1)
+
+                support.add_noise(clone, strength=1, scale=scale, phase=phase)
+
+                for index in self.selected_keys:
+                    k = self.fcurve.keyframe_points[index]
+
+                    delta = clone.evaluate(k.co.x) - self.original_keys[index]['y']
+                    new_value = self.original_keys[index]['y'] + delta * factor
+                    if tool.sticky_handles and context.area.type == 'GRAPH_EDITOR':
+                        k.co.y = new_value
+                    else:
+                        k.co_ui.y = new_value
+
+                self.fcurves.remove(clone)
+
+    def execute(self, context):
+        return support.to_execute(self, context, self.tool, context)
+
+
 class ANIMAIDE_OT_scale_left(Operator, ANIMAIDE_OT):
     """Increase or decrease the value of selected or current keys \n""" \
     """in relationship to the left neighboring one."""
@@ -1275,6 +1322,7 @@ classes = (
     ANIMAIDE_OT_scale_right,
     ANIMAIDE_OT_smooth,
     ANIMAIDE_OT_wave_noise,
+    ANIMAIDE_OT_randomize,
     ANIMAIDE_OT_time_offset,
     ANIMAIDE_OT_shear_left,
     ANIMAIDE_OT_shear_right,

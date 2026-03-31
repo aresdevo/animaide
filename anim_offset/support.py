@@ -84,10 +84,12 @@ def magnet_handlers(scene):
 
     for obj in selected_objects:
         action = getattr(obj.animation_data, 'action', None)
+        fcurves = utils.curve.get_fcurves_for_action(action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-        for fcurve in getattr(action, 'fcurves', list()):
+        for fcurve in fcurves_list:
             if fcurve.data_path.endswith("rotation_mode"):
-                continue   #added exception
+                continue
             magnet(context, obj, fcurve)
 
     return
@@ -103,10 +105,10 @@ def magnet(context, obj, fcurve):
         return
 
     if getattr(fcurve.group, 'name', None) == 'animaide':
-        return  # we don't want to select keys on reference fcurves
+        return
 
     blends_action = bpy.data.actions.get('animaide')
-    blends_curves = getattr(blends_action, 'fcurves', None)
+    blends_curves = utils.curve.get_fcurves_for_action(blends_action)
 
     delta_y = get_delta(context, obj, fcurve)
 
@@ -116,9 +118,12 @@ def magnet(context, obj, fcurve):
             factor = 1
         elif scene.frame_start <= k.co.x <= scene.frame_end:
             factor = 1
-        elif blends_curves is not None and len(blends_curves) > 0:
-            blends_curve = blends_curves[0]
-            factor = blends_curve.evaluate(k.co.x)
+        elif utils.curve.get_fcurve_count(blends_curves) > 0:
+            blends_curve = utils.curve.get_first_fcurve(blends_curves)
+            if blends_curve:
+                factor = blends_curve.evaluate(k.co.x)
+            else:
+                factor = 0
         else:
             factor = 0
 
@@ -162,11 +167,12 @@ def get_delta(context, obj, fcurve):
 def add_blends():
     """Add a curve with 4 control pints to an action called 'animaide' that would act as a mask for anim_offset"""
     action = utils.set_animaide_action()
-    fcurves = getattr(action, 'fcurves', None)
-    if len(fcurves) == 0:
+    fcurves = utils.curve.get_fcurves_for_action(action)
+    if utils.curve.get_fcurve_count(fcurves) == 0:
         return utils.curve.new('Magnet', 4)
     else:
-        return action.fcurves[0]
+        first = utils.curve.get_first_fcurve(fcurves)
+        return first if first else utils.curve.new('Magnet', 4)
 
 
 def remove_mask(context):
@@ -174,11 +180,13 @@ def remove_mask(context):
 
     anim_offset = context.scene.animaide.anim_offset
     blends_action = bpy.data.actions.get('animaide')
-    blends_curves = getattr(blends_action, 'fcurves', None)
+    blends_curves = utils.curve.get_fcurves_for_action(blends_action)
 
     anim_offset.mask_in_use = False
-    if blends_curves is not None and len(blends_curves) > 0:
-        blends_curves.remove(blends_curves[0])
+    if blends_curves is not None and utils.curve.get_fcurve_count(blends_curves) > 0:
+        first = utils.curve.get_first_fcurve(blends_curves)
+        if first and blends_curves:
+            blends_curves.remove(first)
         # reset_timeline_mask(context)
 
     return
@@ -189,10 +197,12 @@ def set_blend_values(context):
 
     scene = context.scene
     blends_action = bpy.data.actions.get('animaide')
-    blends_curves = getattr(blends_action, 'fcurves', None)
+    blends_curves = utils.curve.get_fcurves_for_action(blends_action)
 
-    if blends_curves is not None:
-        blend_curve = blends_curves[0]
+    if blends_curves is not None and utils.curve.get_fcurve_count(blends_curves) > 0:
+        blend_curve = utils.curve.get_first_fcurve(blends_curves)
+        if blend_curve is None:
+            return
         keys = blend_curve.keyframe_points
 
         left_blend = scene.frame_preview_start
@@ -239,8 +249,10 @@ def add_keys(context):
 
     for obj in selected_objects:
         action = getattr(obj.animation_data, 'action', None)
+        fcurves = utils.curve.get_fcurves_for_action(action)
+        fcurves_list = utils.curve.get_fcurves_list(fcurves) if fcurves else []
 
-        for fcurve in getattr(action, 'fcurves', list()):
+        for fcurve in fcurves_list:
 
             if fcurve.lock:
                 return
@@ -327,19 +339,18 @@ def poll(context):
 
 
 def get_anim_offset_globals(context, obj):
-    """Get global values for the anim_offset"""
-
     anim = obj.animation_data
     if anim is None:
         return
-    if anim.action.fcurves is None:
+    
+    fcurves = utils.curve.get_fcurves_for_action(anim.action)
+    if fcurves is None:
         return
 
-    fcurves = obj.animation_data.action.fcurves
-
     curves = {}
+    fcurves_list = utils.curve.get_fcurves_list(fcurves)
 
-    for fcurve_index, fcurve in fcurves.items():
+    for fcurve in fcurves_list:
 
         if fcurve.lock is True:
             continue
@@ -349,8 +360,6 @@ def get_anim_offset_globals(context, obj):
 
         values = {'x': cur_frame, 'y': cur_frame_y}
 
-        curves[fcurve_index]['current_frame'] = values
+        curves[fcurve.data_path] = {'current_frame': values}
 
     global_values[obj.name] = curves
-
-

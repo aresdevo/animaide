@@ -24,8 +24,8 @@ bl_info = {
     "name": "AnimAide",
     "description": "Helpful tools to manipulate keys on f-curves",
     "author": "Ares Deveaux",
-    "version": (1, 0, 38),
-    "blender": (2, 93, 0),
+    "version": (1, 1, 0),
+    "blender": (5, 1, 0),
     "location": "Graph Editor - Dope Sheet - Timeline - 3D View - sidebar and menu bar",
     "warning": "This addon is still in development.",
     "category": "Animation",
@@ -63,7 +63,6 @@ def load_post_handler(scene):
     # if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
     #     bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
     utils.remove_message()
-    print('init')
 
 
 def register():

@@ -27,6 +27,88 @@ user_preview_range = {}
 user_scene_range = {}
 
 
+def _get_or_create_default_slot_layer_strip(action):
+    if not hasattr(action, 'slots'):
+        return None
+
+    if len(action.slots) == 0:
+        slot = action.slots.new(id_type='OBJECT', name='animaide')
+    else:
+        slot = action.slots[0]
+
+    if not hasattr(action, 'layers') or len(action.layers) == 0:
+        layer = action.layers.new(name='Layer')
+    else:
+        layer = action.layers[0]
+
+    if not hasattr(layer, 'strips') or len(layer.strips) == 0:
+        strip = layer.strips.new(type='KEYFRAME')
+    else:
+        strip = layer.strips[0]
+
+    return slot, strip
+
+
+def get_fcurves_for_action(action):
+    if action is None:
+        return None
+
+    fcurves = getattr(action, 'fcurves', None)
+    if fcurves is not None:
+        return fcurves
+
+    if bpy.app.version[0] >= 5:
+        result = _get_or_create_default_slot_layer_strip(action)
+        if result:
+            slot, strip = result
+            channelbag = strip.channelbag(slot, ensure=True)
+            return channelbag.fcurves if channelbag else None
+
+    return None
+
+
+def get_fcurves_list(fcurves_collection):
+    if fcurves_collection is None:
+        return []
+
+    try:
+        return list(fcurves_collection)
+    except TypeError:
+        try:
+            return [f for _, f in fcurves_collection.items()]
+        except (TypeError, AttributeError):
+            return []
+
+
+def get_fcurve_count(fcurves_collection):
+    if fcurves_collection is None:
+        return 0
+
+    try:
+        return len(fcurves_collection)
+    except TypeError:
+        return len(get_fcurves_list(fcurves_collection))
+
+
+def get_first_fcurve(fcurves_collection):
+    if fcurves_collection is None:
+        return None
+
+    try:
+        return fcurves_collection[0]
+    except (TypeError, KeyError, IndexError):
+        fcurves_list = get_fcurves_list(fcurves_collection)
+        return fcurves_list[0] if fcurves_list else None
+
+
+def new_fcurve(fcurves, data_path, index, group_name_value):
+    """Create new fcurve with correct parameter name for Blender version"""
+    if bpy.app.version < (5, 0, 0):
+        return fcurves.new(data_path=data_path, index=index, action_group=group_name_value)
+    else:
+        return fcurves.new(data_path=data_path, index=index, group_name=group_name_value)
+
+
 def add_curve3d(context, name, key_amount=0):
     curve_data = bpy.data.curves.new(name, 'CURVE')
     spline = curve_data.splines.new('BEZIER')
@@ -38,11 +120,13 @@ def add_curve3d(context, name, key_amount=0):
 
 
 def new(action_group_name, keys_to_add, key_interp='AUTO_CLAMPED', color=(1, 1, 1)):
-    """Adds and fcuve in the 'animaide' action"""
-
     action = utils.set_animaide_action()
+    fcurves = get_fcurves_for_action(action)
 
-    blends_curve = action.fcurves.new(data_path=group_name, index=0, action_group=action_group_name)
+    if fcurves is None:
+        return None
+
+    blends_curve = new_fcurve(fcurves, data_path=group_name, index=0, group_name_value=action_group_name)
     blends_curve.color_mode = 'CUSTOM'
     blends_curve.color = color
 
@@ -53,13 +137,10 @@ def new(action_group_name, keys_to_add, key_interp='AUTO_CLAMPED', color=(1, 1, 
         k.handle_left_type = key_interp
         k.handle_right_type = key_interp
 
-    # bpy.ops.transform.translate(value=(0, 0, 0))
-
     blends_curve.lock = True
     blends_curve.select = True
     blends_curve.keyframe_points.sort()
     blends_curve.keyframe_points.handles_recalc()
-    # utils.key.update_keyframe_points(context)
 
     return blends_curve
 
@@ -89,13 +170,8 @@ def create_path(context, fcurves):
                     z['curve'] = fcurve
                     z[f] = k.co.y
     frames.sort()
-    print(f'frames: {frames}')
-    print(f'x: {x}')
-    print(f'y: {y}')
-    print(f'z: {z}')
     points = curve_obj.data.splines[0].bezier_points
     points.add(len(frames))
-    print(f'amount of frames: {len(frames)}')
     n = 0
     for f in frames:
         if x.get(f) is None:
@@ -115,10 +191,6 @@ def create_path(context, fcurves):
 
         points[n].handle_left_type = 'AUTO'
         points[n].handle_right_type = 'AUTO'
-
-        print(f'frame: {f}')
-        print(f'point coordinate: {points[n].co}')
-        print(f'n: {n}')
 
         n += 1
 
@@ -140,40 +212,40 @@ def get_selected(fcurves):
 
 def get_all_fcurves(obj):
     trans_action = obj.animation_data.action
-    trans_fcurves = getattr(trans_action, 'fcurves', None)
-    if trans_fcurves:
-        trans_fcurves = trans_fcurves.items()
-    else:
-        trans_fcurves = []
+    trans_fcurves = get_fcurves_for_action(trans_action)
+    trans_fcurves = list(trans_fcurves) if trans_fcurves else []
 
     if obj.type != 'ARMATURE':
-        shapes_action = obj.data.shape_keys.animation_data.action
-        shapes_fcurves = getattr(shapes_action, 'fcurves', None)
-        if shapes_fcurves:
-            shapes_fcurves = shapes_fcurves.items()
-        else:
-            shapes_fcurves = []
+        sk = getattr(obj.data, 'shape_keys', None)
+        sk_anim = getattr(sk, 'animation_data', None)
+        shapes_action = getattr(sk_anim, 'action', None)
+        shapes_fcurves = get_fcurves_for_action(shapes_action)
+        shapes_fcurves = list(shapes_fcurves) if shapes_fcurves else []
         return trans_fcurves + shapes_fcurves
     else:
         return trans_fcurves
 
 
 def remove_helpers(objects):
-    """Remove the all the helper curves that have been added to an object action"""
-
     for obj in objects:
         action = obj.animation_data.action
+        fcurves = get_fcurves_for_action(action)
 
-        for fcurve in action.fcurves:     # delete the first of the clones left
+        if fcurves is None:
+            continue
+
+        fcurves_list = get_fcurves_list(fcurves)
+        for fcurve in fcurves_list:
             if getattr(fcurve.group, 'name', None) == group_name:
-                action.fcurves.remove(fcurve)
+                fcurves.remove(fcurve)
 
 
 def get_slope(fcurve):
     """Gets the slope of a curve at a specific range"""
     selected_keys = utils.key.get_selected_index(fcurve)
     first_key, last_key = utils.key.first_and_last_selected(fcurve, selected_keys)
-    slope = (first_key.co.y**2 - last_key.co.y**2) / (first_key.co.x**2 - last_key.co.x**2)
+    slope = (first_key.co.y**2 - last_key.co.y**2) / \
+        (first_key.co.x**2 - last_key.co.x**2)
     return slope
 
 
@@ -186,10 +258,12 @@ def add_cycle(fcurve, before='MIRROR', after='MIRROR'):
 
 
 def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=False):
-    """Duploicates an fcurve"""
-
     action = fcurve.id_data
-    index = len(action.fcurves)
+    fcurves = get_fcurves_for_action(action)
+    if fcurves is None:
+        return None
+
+    index = get_fcurve_count(fcurves)
 
     if selected_keys:
         selected_keys = get_selected(fcurve)
@@ -198,7 +272,7 @@ def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=Fals
 
     clone_name = '%s.%d.clone' % (fcurve.data_path, fcurve.array_index)
 
-    dup = action.fcurves.new(data_path=clone_name, index=index, action_group=group_name)
+    dup = new_fcurve(fcurves, data_path=clone_name, index=index, group_name_value=group_name)
     dup.keyframe_points.add(len(selected_keys))
     dup.color_mode = 'CUSTOM'
     dup.color = (0, 0, 0)
@@ -206,8 +280,12 @@ def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=Fals
     dup.lock = lock
     dup.select = False
 
-    action.groups[group_name].lock = lock
-    action.groups[group_name].color_set = 'THEME10'
+    # Blender < 5.0 has action groups; Blender 5.0+ uses slots/layers system
+    if bpy.app.version < (5, 0, 0):
+        action = fcurve.id_data
+        if hasattr(action, 'groups') and group_name in action.groups:
+            action.groups[group_name].lock = lock
+            action.groups[group_name].color_set = 'THEME10'
 
     for i, (index, key) in enumerate(selected_keys):
         dup.keyframe_points[i].co = key.co
@@ -216,7 +294,6 @@ def duplicate(fcurve, selected_keys=True, before='NONE', after='NONE', lock=Fals
 
     dup.keyframe_points.sort()
     dup.keyframe_points.handles_recalc()
-    
 
     return dup
 
@@ -228,7 +305,7 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
     every_key = global_fcurve['every_key']
     original_keys = global_fcurve['original_keys']
 
-    dup = fcurves.new(data_path=new_data_path, index=index, action_group=group_name)
+    dup = new_fcurve(fcurves, data_path=new_data_path, index=index, group_name_value=group_name)
     dup.keyframe_points.add(len(every_key))
     dup.color_mode = 'CUSTOM'
     dup.color = (0, 0, 0)
@@ -236,9 +313,12 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
     dup.lock = lock
     dup.select = False
 
-    action = fcurves.id_data
-    action.groups[group_name].lock = lock
-    action.groups[group_name].color_set = 'THEME10'
+    # Blender < 5.0 has action groups; Blender 5.0+ uses slots/layers system
+    if bpy.app.version < (5, 0, 0):
+        action = fcurves.id_data
+        if hasattr(action, 'groups') and group_name in action.groups:
+            action.groups[group_name].lock = lock
+            action.groups[group_name].color_set = 'THEME10'
 
     i = 0
 
@@ -257,14 +337,17 @@ def duplicate_from_data(fcurves, global_fcurve, new_data_path, before='NONE', af
 
 
 def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=False):
-    """Create an fcurve clone"""
-
     for obj in objects:
-        fcurves = obj.animation_data.action.fcurves
+        action = obj.animation_data.action
+        fcurves = get_fcurves_for_action(action)
 
-        for fcurve in fcurves:
+        if fcurves is None:
+            continue
+
+        fcurves_list = get_fcurves_list(fcurves)
+        for fcurve in fcurves_list:
             if getattr(fcurve.group, 'name', None) == group_name:
-                continue  # we don't want to add to the list the helper curves we have created
+                continue
 
             if fcurve.hide or not fcurve.select:
                 continue
@@ -276,59 +359,66 @@ def add_clone(objects, cycle_before='NONE', cycle_after="NONE", selected_keys=Fa
 
 
 def remove_clone(objects):
-    """Removes an fcurve clone"""
-
     for obj in objects:
         action = obj.animation_data.action
+        fcurves = get_fcurves_for_action(action)
+
+        if fcurves is None:
+            continue
 
         animaide = bpy.context.scene.animaide
         aclones = animaide.clone_data.clones
         clones_n = len(aclones)
-        blender_n = len(action.fcurves) - clones_n
+        fcurves_list = get_fcurves_list(fcurves)
+        blender_n = len(fcurves_list) - clones_n
 
         for n in range(clones_n):
-            maybe_clone = action.fcurves[blender_n]     # delete the first of the clones left
-            if 'clone' in maybe_clone.data_path:
-                clone = maybe_clone
-                action.fcurves.remove(clone)
-                aclones.remove(0)
+            if blender_n + n < len(fcurves_list):
+                maybe_clone = fcurves_list[blender_n + n]
+                if 'clone' in maybe_clone.data_path:
+                    fcurves.remove(maybe_clone)
+                    aclones.remove(0)
 
 
 def move_clone(objects):
-    """Moves clone fcurve in time"""
-
     for obj in objects:
         action = obj.animation_data.action
+        fcurves = get_fcurves_for_action(action)
+
+        if fcurves is None:
+            continue
+
+        fcurves_list = get_fcurves_list(fcurves)
 
         animaide = bpy.context.scene.animaide
         aclone_data = animaide.clone_data
         aclones = aclone_data.clones
         move_factor = aclone_data.move_factor
+
         for aclone in aclones:
-            clone = action.fcurves[aclone.fcurve.index]
-            fcurve = action.fcurves[aclone.original_fcurve.index]
-            selected_keys = utils.key.get_selected_index(fcurve)
-            key1, key2 = utils.key.first_and_last_selected(fcurve, selected_keys)
-            amount = abs(key2.co.x - key1.co.x)
-            for key in clone.keyframe_points:
-                key.co.x = key.co.x + (amount * move_factor)
+            if aclone.fcurve.index < len(fcurves_list) and aclone.original_fcurve.index < len(fcurves_list):
+                clone = fcurves_list[aclone.fcurve.index]
+                fcurve = fcurves_list[aclone.original_fcurve.index]
+                selected_keys = utils.key.get_selected_index(fcurve)
+                key1, key2 = utils.key.first_and_last_selected(fcurve, selected_keys)
+                amount = abs(key2.co.x - key1.co.x)
+                for key in clone.keyframe_points:
+                    key.co.x = key.co.x + (amount * move_factor)
 
-            clone.keyframe_points.sort()
-            clone.keyframe_points.handles_recalc()
+                clone.keyframe_points.sort()
+                clone.keyframe_points.handles_recalc()
 
-            utils.key.attach_selection_to_fcurve(fcurve, clone, is_gradual=False)
+                utils.key.attach_selection_to_fcurve(
+                    fcurve, clone, is_gradual=False)
 
-            fcurve.keyframe_points.sort()
-            fcurve.keyframe_points.handles_recalc()
+                fcurve.keyframe_points.sort()
+                fcurve.keyframe_points.handles_recalc()
 
 
 def valid_anim(obj):
-
     anim = obj.animation_data
     action = getattr(anim, 'action', None)
-    fcurves = getattr(action, 'fcurves', None)
-
-    return fcurves
+    return get_fcurves_for_action(action) is not None
 
 
 def valid_obj(context, obj, check_ui=True):
@@ -346,10 +436,21 @@ def valid_obj(context, obj, check_ui=True):
     return True
 
 
+def are_frames_selected_in_fcurve(fcurve):
+    for keyframe in fcurve.keyframe_points:
+        if keyframe.select_control_point:
+            return True
+    return False
+
+
 def valid_fcurve(context, obj, fcurve, action_type='transfrom_action', check_ui=True):
 
     if not fcurve:
         return False
+
+    if context.area.type == 'GRAPH_EDITOR':
+        if not are_frames_selected_in_fcurve(fcurve):
+            return False
 
     try:
         if action_type == 'transfrom_action':
@@ -406,12 +507,20 @@ def valid_fcurve(context, obj, fcurve, action_type='transfrom_action', check_ui=
             if bone.hide:
                 return False
 
+            if bpy.app.version[0] >= 5:
+                # Blender 5.0+: use pose bone selection state
+                pose_bone = obj.pose.bones.get(bone_name) if bone else None
+                bone_selected = pose_bone.select if pose_bone else False
+            else:
+                # Blender < 5.0: data-bone had selection properties
+                bone_selected = bone.select
+
             if context.area.type == 'VIEW_3D':
-                if not bone.select:
+                if not bone_selected:
                     return False
             else:
                 only_selected = context.space_data.dopesheet.show_only_selected
-                if only_selected and not bone.select:
+                if only_selected and not bone_selected:
                     return False
 
     # if getattr(fcurve.group, 'name', None) == utils.curve.group_name:
