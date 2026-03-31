@@ -146,9 +146,9 @@ def remove_marker(side):
 
     markers = bpy.context.scene.timeline_markers
 
-    for marker in markers:
-        if marker.name == side:
-            markers.remove(marker)
+    to_remove = [m for m in markers if m.name == side]
+    for marker in to_remove:
+        markers.remove(marker)
     return
 
 
