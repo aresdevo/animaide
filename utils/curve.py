@@ -37,7 +37,7 @@ def _get_or_create_default_slot_layer_strip(action):
         slot = action.slots[0]
 
     if not hasattr(action, 'layers') or len(action.layers) == 0:
-        layer = action.layers.new()
+        layer = action.layers.new(name='Layer')
     else:
         layer = action.layers[0]
 
