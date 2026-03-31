@@ -63,7 +63,6 @@ def load_post_handler(scene):
     # if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
     #     bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
     utils.remove_message()
-    print('init')
 
 
 def register():

@@ -170,13 +170,8 @@ def create_path(context, fcurves):
                     z['curve'] = fcurve
                     z[f] = k.co.y
     frames.sort()
-    print(f'frames: {frames}')
-    print(f'x: {x}')
-    print(f'y: {y}')
-    print(f'z: {z}')
     points = curve_obj.data.splines[0].bezier_points
     points.add(len(frames))
-    print(f'amount of frames: {len(frames)}')
     n = 0
     for f in frames:
         if x.get(f) is None:
@@ -196,10 +191,6 @@ def create_path(context, fcurves):
 
         points[n].handle_left_type = 'AUTO'
         points[n].handle_right_type = 'AUTO'
-
-        print(f'frame: {f}')
-        print(f'point coordinate: {points[n].co}')
-        print(f'n: {n}')
 
         n += 1
 
@@ -225,7 +216,9 @@ def get_all_fcurves(obj):
     trans_fcurves = list(trans_fcurves) if trans_fcurves else []
 
     if obj.type != 'ARMATURE':
-        shapes_action = obj.data.shape_keys.animation_data.action
+        sk = getattr(obj.data, 'shape_keys', None)
+        sk_anim = getattr(sk, 'animation_data', None)
+        shapes_action = getattr(sk_anim, 'action', None)
         shapes_fcurves = get_fcurves_for_action(shapes_action)
         shapes_fcurves = list(shapes_fcurves) if shapes_fcurves else []
         return trans_fcurves + shapes_fcurves

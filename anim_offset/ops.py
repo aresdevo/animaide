@@ -46,23 +46,20 @@ class ANIMAIDE_OT_modal_test(Operator):
                 self.leftmouse = True
             elif event.value == 'RELEASE':
                 self.leftmouse = False
-            print('LEFTMOUSE')
 
         if event.type == 'MOUSEMOVE':
-            print('LEFTMOUSE: ', self.leftmouse)
-            print('MOUSEMOVE')
 
             if self.leftmouse:
-                print('leftmouse')
+                pass
 
             if event.shift and self.leftmouse:
-                print('shift')
+                pass
 
             elif event.alt and self.leftmouse:
-                print('alt')
+                pass
 
             elif event.ctrl and self.leftmouse:
-                print('ctrl')
+                pass
 
         elif event.type in {'RIGHTMOUSE', 'ESC'}:
             return {'CANCELLED'}
