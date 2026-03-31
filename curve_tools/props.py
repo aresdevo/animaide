@@ -49,7 +49,8 @@ menu_items = [('BLEND_EASE', 'Blend Ease', 'From current to C shape', '', 1),
               ('TWEEN', 'Tween', 'Sets key value using neighbors as reference', '', 16),
 
               ('SMOOTH', 'Smooth', 'Smooths out fcurve keys', '', 17),
-              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 18)]
+              ('WAVE_NOISE', 'Wave-Noise', 'add wave or random values to keys', '', 18),
+              ('RANDOMIZE', 'Randomize', 'Apply random value offsets to selected keys', '', 19)]
 
 
 menu_items_3d = [('BLEND_FRAME', 'Blend Frame', 'From current to set frames', '', 1),

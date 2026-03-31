@@ -242,6 +242,8 @@ class ANIMAIDE_PT_curve_tools:
                 tool_button(context, col, 'smooth')
             if context.area.type != 'VIEW_3D':
                 tool_button(context, col, 'wave_noise')
+            if context.area.type != 'VIEW_3D':
+                tool_button(context, col, 'randomize')
 
         steps(context, box, tool, expand)
 
@@ -362,6 +364,8 @@ class ANIMAIDE_MT_curve_tools(Menu):
         layout.operator('anim.aide_tween')
         if context.area.type != 'VIEW_3D':
             layout.operator('anim.aide_wave_noise')
+        if context.area.type != 'VIEW_3D':
+            layout.operator('anim.aide_randomize')
 
 
 class ANIMAIDE_MT_tweak(Menu):
@@ -425,6 +429,7 @@ class ANIMAIDE_MT_pie_curve_tools_b(Menu):
         pie.operator("anim.aide_scale_left")
         pie.operator("anim.aide_scale_right")
         pie.operator("anim.aide_wave_noise")
+        pie.operator("anim.aide_randomize")
         pie.operator("anim.aide_smooth")
         pie.operator("anim.aide_blend_offset")
         pie.operator("anim.aide_time_offset")

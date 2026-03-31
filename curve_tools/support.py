@@ -245,7 +245,6 @@ def is_fcurve_locked(obj, fcurve):
         return True
     if not obj:
         return False
-    print(fcurve.data_path)
 
     # Check if the fcurve is related to a pose bone
     if fcurve.data_path.startswith("pose.bones"):
